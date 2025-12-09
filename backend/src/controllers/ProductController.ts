@@ -3,21 +3,21 @@ import { AppDataSource } from '../config/database'
 import { Product } from '../entities/Product'
 import { ProductCategory } from '../entities/ProductCategory'
 
-// 获取Repository
+// Lấy Repository
 const getProductRepository = () => AppDataSource.getRepository(Product)
 const getCategoryRepository = () => AppDataSource.getRepository(ProductCategory)
 
-// 生成唯一ID
+// Tạo ID duy nhất
 function generateId(prefix: string = ''): string {
   return `${prefix}${Date.now().toString()}_${Math.random().toString(36).slice(2, 8)}`
 }
 
-// 辅助函数：构建分类树
+// Hàm hỗ trợ: Xây dựng cây phân loại
 function buildCategoryTree(categories: ProductCategory[]): any[] {
   const categoryMap = new Map<string, any>()
   const rootCategories: any[] = []
 
-  // 创建分类映射
+  // Tạo ánh xạ phân loại
   categories.forEach(category => {
     categoryMap.set(category.id, {
       ...category,
@@ -26,7 +26,7 @@ function buildCategoryTree(categories: ProductCategory[]): any[] {
     })
   })
 
-  // 构建树形结构
+  // Xây dựng cấu trúc cây
   categories.forEach(category => {
     const categoryNode = categoryMap.get(category.id)!
     if (category.parentId) {
@@ -35,7 +35,7 @@ function buildCategoryTree(categories: ProductCategory[]): any[] {
         parent.children = parent.children || []
         parent.children.push(categoryNode)
       } else {
-        // 父分类不存在，作为根分类
+        // Phân loại cha không tồn tại, đặt làm phân loại gốc
         rootCategories.push(categoryNode)
       }
     } else {
@@ -48,7 +48,7 @@ function buildCategoryTree(categories: ProductCategory[]): any[] {
 
 export class ProductController {
   /**
-   * 获取产品分类列表（扁平结构）
+   * Lấy danh sách phân loại sản phẩm (cấu trúc phẳng)
    */
   static async getCategories(req: Request, res: Response) {
     try {
@@ -60,20 +60,20 @@ export class ProductController {
       res.json({
         success: true,
         data: categories,
-        message: '获取分类列表成功'
+        message: 'Lấy danh sách phân loại thành công'
       })
     } catch (error) {
-      console.error('获取分类列表失败:', error)
+      console.error('Lấy danh sách phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取分类列表失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy danh sách phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 获取产品分类树形结构
+   * Lấy cấu trúc cây phân loại sản phẩm
    */
   static async getCategoryTree(req: Request, res: Response) {
     try {
@@ -87,20 +87,20 @@ export class ProductController {
       res.json({
         success: true,
         data: tree,
-        message: '获取分类树成功'
+        message: 'Lấy cây phân loại thành công'
       })
     } catch (error) {
-      console.error('获取分类树失败:', error)
+      console.error('Lấy cây phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取分类树失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy cây phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 获取分类详情
+   * Lấy chi tiết phân loại
    */
   static async getCategoryDetail(req: Request, res: Response): Promise<void> {
     try {
@@ -111,7 +111,7 @@ export class ProductController {
       if (!category) {
         res.status(404).json({
           success: false,
-          message: '分类不存在'
+          message: 'Phân loại không tồn tại'
         })
         return
       }
@@ -119,39 +119,39 @@ export class ProductController {
       res.json({
         success: true,
         data: category,
-        message: '获取分类详情成功'
+        message: 'Lấy chi tiết phân loại thành công'
       })
     } catch (error) {
-      console.error('获取分类详情失败:', error)
+      console.error('Lấy chi tiết phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取分类详情失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy chi tiết phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 创建产品分类
+   * Tạo phân loại sản phẩm
    */
   static async createCategory(req: Request, res: Response): Promise<void> {
     try {
       const { name, parentId, sortOrder, status, description } = req.body
       const categoryRepo = getCategoryRepository()
 
-      // 验证必填字段
+      // Xác minh trường bắt buộc
       if (!name) {
         res.status(400).json({
           success: false,
-          message: '分类名称不能为空'
+          message: 'Tên phân loại không được để trống'
         })
         return
       }
 
-      // 生成分类ID
+      // Tạo ID phân loại
       const categoryId = generateId('cat_')
 
-      // 创建新分类
+      // Tạo phân loại mới
       const newCategory = categoryRepo.create({
         id: categoryId,
         name,
@@ -162,25 +162,25 @@ export class ProductController {
       })
 
       await categoryRepo.save(newCategory)
-      console.log('[ProductController] 创建分类成功:', newCategory.name, 'ID:', newCategory.id)
+      console.log('[ProductController] Tạo phân loại thành công:', newCategory.name, 'ID:', newCategory.id)
 
       res.status(201).json({
         success: true,
         data: newCategory,
-        message: '创建分类成功'
+        message: 'Tạo phân loại thành công'
       })
     } catch (error) {
-      console.error('创建分类失败:', error)
+      console.error('Tạo phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '创建分类失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Tạo phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 更新产品分类
+   * Cập nhật phân loại sản phẩm
    */
   static async updateCategory(req: Request, res: Response): Promise<void> {
     try {
@@ -192,12 +192,12 @@ export class ProductController {
       if (!category) {
         res.status(404).json({
           success: false,
-          message: '分类不存在'
+          message: 'Phân loại không tồn tại'
         })
         return
       }
 
-      // 更新分类信息
+      // Cập nhật thông tin phân loại
       if (name !== undefined) category.name = name
       if (parentId !== undefined) category.parentId = parentId || undefined
       if (sortOrder !== undefined) category.sortOrder = sortOrder
@@ -209,20 +209,20 @@ export class ProductController {
       res.json({
         success: true,
         data: category,
-        message: '更新分类成功'
+        message: 'Cập nhật phân loại thành công'
       })
     } catch (error) {
-      console.error('更新分类失败:', error)
+      console.error('Cập nhật phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '更新分类失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Cập nhật phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 删除产品分类
+   * Xóa phân loại sản phẩm
    */
   static async deleteCategory(req: Request, res: Response): Promise<void> {
     try {
@@ -234,27 +234,27 @@ export class ProductController {
       if (!category) {
         res.status(404).json({
           success: false,
-          message: '分类不存在'
+          message: 'Phân loại không tồn tại'
         })
         return
       }
 
-      // 检查是否有子分类
+      // Kiểm tra xem có phân loại con không
       const childCategories = await categoryRepo.find({ where: { parentId: id } })
       if (childCategories.length > 0) {
         res.status(400).json({
           success: false,
-          message: '该分类下还有子分类，无法删除'
+          message: 'Phân loại này vẫn còn phân loại con, không thể xóa'
         })
         return
       }
 
-      // 检查是否有关联产品
+      // Kiểm tra xem có sản phẩm liên quan không
       const products = await productRepo.find({ where: { categoryId: id } })
       if (products.length > 0) {
         res.status(400).json({
           success: false,
-          message: '该分类下还有产品，无法删除'
+          message: 'Phân loại này vẫn còn sản phẩm, không thể xóa'
         })
         return
       }
@@ -263,21 +263,21 @@ export class ProductController {
 
       res.json({
         success: true,
-        message: '删除分类成功'
+        message: 'Xóa phân loại thành công'
       })
     } catch (error) {
-      console.error('删除分类失败:', error)
+      console.error('Xóa phân loại thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '删除分类失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Xóa phân loại thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
 
   /**
-   * 获取产品列表
+   * Lấy danh sách sản phẩm
    */
   static async getProducts(req: Request, res: Response): Promise<void> {
     try {
@@ -294,7 +294,7 @@ export class ProductController {
       const queryBuilder = productRepo.createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
 
-      // 关键词搜索
+      // Tìm kiếm theo từ khóa
       if (keyword) {
         queryBuilder.andWhere(
           '(product.name LIKE :keyword OR product.code LIKE :keyword)',
@@ -302,32 +302,32 @@ export class ProductController {
         )
       }
 
-      // 分类筛选
+      // Lọc theo phân loại
       if (categoryId) {
         queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId })
       }
 
-      // 状态筛选
+      // Lọc theo trạng thái
       if (status) {
         queryBuilder.andWhere('product.status = :status', { status })
       }
 
-      // 低库存筛选
+      // Lọc theo tồn kho thấp
       if (lowStock === 'true') {
         queryBuilder.andWhere('product.stock <= product.minStock')
       }
 
-      // 获取总数
+      // Lấy tổng số
       const total = await queryBuilder.getCount()
 
-      // 分页
+      // Phân trang
       const skip = (Number(page) - 1) * Number(pageSize)
       queryBuilder.skip(skip).take(Number(pageSize))
       queryBuilder.orderBy('product.createdAt', 'DESC')
 
       const products = await queryBuilder.getMany()
 
-      // 转换数据格式以匹配前端期望
+      // Chuyển đổi định dạng dữ liệu để khớp với mong đợi của frontend
       const list = products.map(p => ({
         id: p.id,
         code: p.code,
@@ -336,7 +336,7 @@ export class ProductController {
         categoryName: p.categoryName || p.category?.name || '',
         brand: '',
         specification: '',
-        unit: p.unit || '件',
+        unit: p.unit || 'cái',
         weight: 0,
         dimensions: '',
         description: p.description || '',
@@ -367,17 +367,17 @@ export class ProductController {
         }
       })
     } catch (error) {
-      console.error('获取产品列表失败:', error)
+      console.error('Lấy danh sách sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取产品列表失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy danh sách sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 获取产品详情
+   * Lấy chi tiết sản phẩm
    */
   static async getProductDetail(req: Request, res: Response): Promise<void> {
     try {
@@ -391,7 +391,7 @@ export class ProductController {
       if (!product) {
         res.status(404).json({
           success: false,
-          message: '产品不存在'
+          message: 'Sản phẩm không tồn tại'
         })
         return
       }
@@ -409,7 +409,7 @@ export class ProductController {
           costPrice: Number(product.costPrice) || 0,
           stock: product.stock,
           minStock: product.minStock || 0,
-          unit: product.unit || '件',
+          unit: product.unit || 'cái',
           status: product.status,
           image: product.images?.[0] || '',
           images: product.images || [],
@@ -420,17 +420,17 @@ export class ProductController {
         }
       })
     } catch (error) {
-      console.error('获取产品详情失败:', error)
+      console.error('Lấy chi tiết sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取产品详情失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy chi tiết sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 创建产品
+   * Tạo sản phẩm
    */
   static async createProduct(req: Request, res: Response): Promise<void> {
     try {
@@ -438,30 +438,30 @@ export class ProductController {
       const productRepo = getProductRepository()
       const categoryRepo = getCategoryRepository()
 
-      // 验证必填字段
+      // Xác minh trường bắt buộc
       if (!productData.name) {
         res.status(400).json({
           success: false,
-          message: '产品名称不能为空'
+          message: 'Tên sản phẩm không được để trống'
         })
         return
       }
 
-      // 生成产品ID和编码
+      // Tạo ID và mã sản phẩm
       const productId = generateId('prod_')
       const productCode = productData.code || `P${Date.now().toString().slice(-8)}`
 
-      // 检查编码是否已存在
+      // Kiểm tra mã đã tồn tại chưa
       const existingProduct = await productRepo.findOne({ where: { code: productCode } })
       if (existingProduct) {
         res.status(400).json({
           success: false,
-          message: '产品编码已存在'
+          message: 'Mã sản phẩm đã tồn tại'
         })
         return
       }
 
-      // 获取分类名称
+      // Lấy tên phân loại
       let categoryName = productData.categoryName || ''
       if (productData.categoryId && !categoryName) {
         const category = await categoryRepo.findOne({ where: { id: productData.categoryId } })
@@ -470,10 +470,10 @@ export class ProductController {
         }
       }
 
-      // 获取当前用户ID（从请求中获取）
+      // Lấy ID người dùng hiện tại (từ yêu cầu)
       const createdBy = (req as any).user?.id || 'system'
 
-      // 创建新产品
+      // Tạo sản phẩm mới
       const newProduct = productRepo.create({
         id: productId,
         code: productCode,
@@ -485,14 +485,14 @@ export class ProductController {
         costPrice: Number(productData.costPrice) || 0,
         stock: Number(productData.stock) || 0,
         minStock: Number(productData.minStock) || 0,
-        unit: productData.unit || '件',
+        unit: productData.unit || 'cái',
         images: productData.images || (productData.image ? [productData.image] : []),
         status: productData.status || 'active',
         createdBy
       })
 
       await productRepo.save(newProduct)
-      console.log('[ProductController] 创建产品成功:', newProduct.name, 'ID:', newProduct.id)
+      console.log('[ProductController] Tạo sản phẩm thành công:', newProduct.name, 'ID:', newProduct.id)
 
       res.status(201).json({
         success: true,
@@ -507,7 +507,7 @@ export class ProductController {
           costPrice: Number(newProduct.costPrice) || 0,
           stock: newProduct.stock,
           minStock: newProduct.minStock || 0,
-          unit: newProduct.unit || '件',
+          unit: newProduct.unit || 'cái',
           status: newProduct.status,
           image: newProduct.images?.[0] || '',
           images: newProduct.images || [],
@@ -516,20 +516,20 @@ export class ProductController {
           createTime: newProduct.createdAt?.toISOString() || '',
           updateTime: newProduct.updatedAt?.toISOString() || ''
         },
-        message: '创建产品成功'
+        message: 'Tạo sản phẩm thành công'
       })
     } catch (error) {
-      console.error('创建产品失败:', error)
+      console.error('Tạo sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '创建产品失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Tạo sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 更新产品
+   * Cập nhật sản phẩm
    */
   static async updateProduct(req: Request, res: Response): Promise<void> {
     try {
@@ -541,12 +541,12 @@ export class ProductController {
       if (!product) {
         res.status(404).json({
           success: false,
-          message: '产品不存在'
+          message: 'Sản phẩm không tồn tại'
         })
         return
       }
 
-      // 更新产品信息
+      // Cập nhật thông tin sản phẩm
       if (updates.name !== undefined) product.name = updates.name
       if (updates.code !== undefined) product.code = updates.code
       if (updates.categoryId !== undefined) product.categoryId = updates.categoryId
@@ -564,7 +564,7 @@ export class ProductController {
       }
 
       await productRepo.save(product)
-      console.log('[ProductController] 更新产品成功:', product.name, 'ID:', id)
+      console.log('[ProductController] Cập nhật sản phẩm thành công:', product.name, 'ID:', id)
 
       res.json({
         success: true,
@@ -579,7 +579,7 @@ export class ProductController {
           costPrice: Number(product.costPrice) || 0,
           stock: product.stock,
           minStock: product.minStock || 0,
-          unit: product.unit || '件',
+          unit: product.unit || 'cái',
           status: product.status,
           image: product.images?.[0] || '',
           images: product.images || [],
@@ -588,20 +588,20 @@ export class ProductController {
           createTime: product.createdAt?.toISOString() || '',
           updateTime: product.updatedAt?.toISOString() || ''
         },
-        message: '更新产品成功'
+        message: 'Cập nhật sản phẩm thành công'
       })
     } catch (error) {
-      console.error('更新产品失败:', error)
+      console.error('Cập nhật sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '更新产品失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Cập nhật sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 删除产品
+   * Xóa sản phẩm
    */
   static async deleteProduct(req: Request, res: Response): Promise<void> {
     try {
@@ -612,30 +612,30 @@ export class ProductController {
       if (!product) {
         res.status(404).json({
           success: false,
-          message: '产品不存在'
+          message: 'Sản phẩm không tồn tại'
         })
         return
       }
 
       await productRepo.remove(product)
-      console.log('[ProductController] 删除产品成功:', product.name, 'ID:', id)
+      console.log('[ProductController] Xóa sản phẩm thành công:', product.name, 'ID:', id)
 
       res.json({
         success: true,
-        message: '删除产品成功'
+        message: 'Xóa sản phẩm thành công'
       })
     } catch (error) {
-      console.error('删除产品失败:', error)
+      console.error('Xóa sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '删除产品失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Xóa sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 库存调整
+   * Điều chỉnh tồn kho
    */
   static async adjustStock(req: Request, res: Response): Promise<void> {
     try {
@@ -645,7 +645,7 @@ export class ProductController {
       if (!productId || !type || quantity === undefined || !reason) {
         res.status(400).json({
           success: false,
-          message: '产品ID、调整类型、数量和原因不能为空'
+          message: 'ID sản phẩm, loại điều chỉnh, số lượng và lý do không được để trống'
         })
         return
       }
@@ -654,7 +654,7 @@ export class ProductController {
       if (!product) {
         res.status(404).json({
           success: false,
-          message: '产品不存在'
+          message: 'Sản phẩm không tồn tại'
         })
         return
       }
@@ -671,7 +671,7 @@ export class ProductController {
           if (afterStock < 0) {
             res.status(400).json({
               success: false,
-              message: '库存不足'
+              message: 'Tồn kho không đủ'
             })
             return
           }
@@ -682,7 +682,7 @@ export class ProductController {
         default:
           res.status(400).json({
             success: false,
-            message: '无效的调整类型'
+            message: 'Loại điều chỉnh không hợp lệ'
           })
           return
       }
@@ -696,26 +696,26 @@ export class ProductController {
           product: { id: product.id, name: product.name, stock: product.stock },
           adjustment: { type, quantity: Number(quantity), beforeStock, afterStock, reason }
         },
-        message: '库存调整成功'
+        message: 'Điều chỉnh tồn kho thành công'
       })
     } catch (error) {
-      console.error('库存调整失败:', error)
+      console.error('Điều chỉnh tồn kho thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '库存调整失败'
+        message: 'Điều chỉnh tồn kho thất bại'
       })
     }
   }
 
   /**
-   * 获取库存调整记录
+   * Lấy lịch sử điều chỉnh tồn kho
    */
   static async getStockAdjustments(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: { list: [], total: 0, page: 1, pageSize: 10 } })
   }
 
   /**
-   * 批量导入产品
+   * Nhập sản phẩm hàng loạt
    */
   static async batchImportProducts(req: Request, res: Response): Promise<void> {
     try {
@@ -723,7 +723,7 @@ export class ProductController {
       const productRepo = getProductRepository()
 
       if (!Array.isArray(importProducts) || importProducts.length === 0) {
-        res.status(400).json({ success: false, message: '导入数据不能为空' })
+        res.status(400).json({ success: false, message: 'Dữ liệu nhập không được để trống' })
         return
       }
 
@@ -734,7 +734,7 @@ export class ProductController {
         try {
           if (!productData.name) {
             results.failed++
-            results.errors.push(`产品 ${productData.code || '未知'}: 名称不能为空`)
+            results.errors.push(`Sản phẩm ${productData.code || 'không xác định'}: Tên không được để trống`)
             continue
           }
 
@@ -756,23 +756,23 @@ export class ProductController {
           results.success++
         } catch (error) {
           results.failed++
-          results.errors.push(`产品 ${productData.code || '未知'}: ${error instanceof Error ? error.message : '未知错误'}`)
+          results.errors.push(`Sản phẩm ${productData.code || 'không xác định'}: ${error instanceof Error ? error.message : 'Lỗi không xác định'}`)
         }
       }
 
       res.json({
         success: true,
         data: results,
-        message: `批量导入完成，成功 ${results.success} 个，失败 ${results.failed} 个`
+        message: `Nhập hàng loạt hoàn tất, thành công ${results.success} sản phẩm, thất bại ${results.failed} sản phẩm`
       })
     } catch (error) {
-      console.error('批量导入产品失败:', error)
-      res.status(500).json({ success: false, message: '批量导入产品失败' })
+      console.error('Nhập sản phẩm hàng loạt thất bại:', error)
+      res.status(500).json({ success: false, message: 'Nhập sản phẩm hàng loạt thất bại' })
     }
   }
 
   /**
-   * 导出产品数据
+   * Xuất dữ liệu sản phẩm
    */
   static async exportProducts(req: Request, res: Response): Promise<void> {
     try {
@@ -801,13 +801,13 @@ export class ProductController {
         exportTime: new Date().toISOString()
       })
     } catch (error) {
-      console.error('导出产品数据失败:', error)
-      res.status(500).json({ success: false, message: '导出产品数据失败' })
+      console.error('Xuất dữ liệu sản phẩm thất bại:', error)
+      res.status(500).json({ success: false, message: 'Xuất dữ liệu sản phẩm thất bại' })
     }
   }
 
   /**
-   * 获取商品相关统计数据（根据用户角色权限过滤）
+   * Lấy thống kê liên quan đến sản phẩm (lọc theo quyền vai trò người dùng)
    */
   static async getProductStats(req: Request, res: Response): Promise<void> {
     try {
@@ -817,38 +817,38 @@ export class ProductController {
       if (!id) {
         res.status(400).json({
           success: false,
-          message: '商品ID不能为空'
+          message: 'ID sản phẩm không được để trống'
         })
         return
       }
 
-      // 验证商品是否存在
+      // Xác minh sản phẩm có tồn tại không
       const productRepo = getProductRepository()
       const product = await productRepo.findOne({ where: { id } })
 
       if (!product) {
         res.status(404).json({
           success: false,
-          message: '商品不存在'
+          message: 'Sản phẩm không tồn tại'
         })
         return
       }
 
-      // 获取订单数据（需要根据用户角色过滤）
+      // Lấy dữ liệu đơn hàng (cần lọc theo vai trò người dùng)
       const orderRepository = AppDataSource.getRepository('Order')
       let queryBuilder = orderRepository.createQueryBuilder('order')
         .leftJoinAndSelect('order.items', 'items')
         .where('items.productId = :productId', { productId: id })
 
-      // 根据用户角色应用数据范围过滤
+      // Áp dụng lọc phạm vi dữ liệu theo vai trò người dùng
       const userRole = currentUser?.role || ''
       const userId = currentUser?.id
       const departmentId = currentUser?.departmentId
 
       if (userRole === 'super_admin' || userRole === 'admin') {
-        // 管理员：查看全部数据，不添加额外过滤条件
+        // Quản trị viên: Xem toàn bộ dữ liệu, không thêm điều kiện lọc bổ sung
       } else if (userRole === 'department_head' || userRole === 'manager') {
-        // 部门经理/负责人：查看本部门数据
+        // Trưởng phòng/Quản lý: Xem dữ liệu phòng ban của mình
         if (departmentId) {
           queryBuilder = queryBuilder.andWhere(
             '(order.salesPersonDepartmentId = :departmentId OR order.customerServiceDepartmentId = :departmentId)',
@@ -856,41 +856,41 @@ export class ProductController {
           )
         }
       } else if (userRole === 'sales') {
-        // 销售员：只看自己的订单
+        // Nhân viên bán hàng: Chỉ xem đơn hàng của mình
         queryBuilder = queryBuilder.andWhere('order.salesPersonId = :userId', { userId })
       } else if (userRole === 'customer_service') {
-        // 客服：只看自己负责的订单
+        // Nhân viên dịch vụ khách hàng: Chỉ xem đơn hàng mình phụ trách
         queryBuilder = queryBuilder.andWhere('order.customerServiceId = :userId', { userId })
       } else {
-        // 其他角色：只看自己相关的订单
+        // Vai trò khác: Chỉ xem đơn hàng liên quan đến mình
         queryBuilder = queryBuilder.andWhere(
           '(order.salesPersonId = :userId OR order.customerServiceId = :userId)',
           { userId }
         )
       }
 
-      // 由于订单表结构可能不同，这里使用模拟数据
-      // 实际项目中应该根据真实的订单表结构来查询
+      // Do cấu trúc bảng đơn hàng có thể khác nhau, ở đây sử dụng dữ liệu mô phỏng
+      // Trong dự án thực tế nên truy vấn theo cấu trúc bảng đơn hàng thực tế
       let orders: any[] = []
       try {
         orders = await queryBuilder.getMany()
       } catch (error) {
-        // 如果查询失败（可能是表结构不匹配），使用空数组
-        console.log('订单查询失败，使用模拟数据:', error)
+        // Nếu truy vấn thất bại (có thể do cấu trúc bảng không khớp), sử dụng mảng trống
+        console.log('Truy vấn đơn hàng thất bại, sử dụng dữ liệu mô phỏng:', error)
         orders = []
       }
 
-      // 计算统计数据
+      // Tính toán dữ liệu thống kê
       const now = new Date()
       const currentMonth = now.getMonth()
       const currentYear = now.getFullYear()
 
-      // 待处理订单（待审核、待发货状态）
+      // Đơn hàng chờ xử lý (trạng thái chờ phê duyệt, chờ giao hàng)
       const pendingOrders = orders.filter(order =>
         ['pending_audit', 'pending_shipment', 'pending'].includes(order.status)
       ).length
 
-      // 本月销量
+      // Doanh số tháng này
       const monthlySales = orders.filter(order => {
         const orderDate = new Date(order.createdAt || order.createTime)
         return orderDate.getMonth() === currentMonth &&
@@ -901,32 +901,32 @@ export class ProductController {
         return sum + (item?.quantity || 1)
       }, 0)
 
-      // 库存周转率（简化计算：月销量 / 平均库存 * 100）
+      // Tỷ lệ vòng quay tồn kho (tính toán đơn giản: doanh số tháng / tồn kho trung bình * 100)
       const avgStock = product.stock > 0 ? product.stock : 1
       const turnoverRate = avgStock > 0 ? (monthlySales / avgStock * 100) : 0
 
-      // 平均评分（基于订单完成情况模拟）
+      // Đánh giá trung bình (mô phỏng dựa trên tình trạng hoàn thành đơn hàng)
       const completedOrders = orders.filter(order =>
         ['delivered', 'completed'].includes(order.status)
       )
       const avgRating = completedOrders.length > 0 ?
-        (4.2 + Math.random() * 0.6) : 0 // 模拟4.2-4.8的评分
+        (4.2 + Math.random() * 0.6) : 0 // Mô phỏng đánh giá từ 4.2-4.8
 
-      // 退货率
+      // Tỷ lệ trả hàng
       const returnedOrders = orders.filter(order =>
         ['rejected', 'rejected_returned', 'logistics_returned', 'returned'].includes(order.status)
       ).length
       const returnRate = orders.length > 0 ?
         (returnedOrders / orders.length * 100) : 0
 
-      // 返回统计数据
+      // Trả về dữ liệu thống kê
       const stats = {
         pendingOrders,
         monthlySales,
         turnoverRate: Number(turnoverRate.toFixed(1)),
         avgRating: Number(avgRating.toFixed(1)),
         returnRate: Number(returnRate.toFixed(1)),
-        // 额外信息：数据范围标识
+        // Thông tin bổ sung: Nhận dạng phạm vi dữ liệu
         dataScope: userRole === 'super_admin' || userRole === 'admin' ? 'all' :
                    userRole === 'department_head' || userRole === 'manager' ? 'department' : 'personal'
       }
@@ -934,20 +934,20 @@ export class ProductController {
       res.json({
         success: true,
         data: stats,
-        message: '获取商品统计数据成功'
+        message: 'Lấy thống kê sản phẩm thành công'
       })
     } catch (error) {
-      console.error('获取商品统计数据失败:', error)
+      console.error('Lấy thống kê sản phẩm thất bại:', error)
       res.status(500).json({
         success: false,
-        message: '获取商品统计数据失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy thống kê sản phẩm thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       })
     }
   }
 
   /**
-   * 获取库存统计信息
+   * Lấy thông tin thống kê tồn kho
    */
   static async getStockStatistics(req: Request, res: Response): Promise<void> {
     try {
@@ -965,8 +965,8 @@ export class ProductController {
         data: { totalProducts, totalStock, totalValue, lowStockCount, outOfStockCount }
       })
     } catch (error) {
-      console.error('获取库存统计信息失败:', error)
-      res.status(500).json({ success: false, message: '获取库存统计信息失败' })
+      console.error('Lấy thông tin thống kê tồn kho thất bại:', error)
+      res.status(500).json({ success: false, message: 'Lấy thông tin thống kê tồn kho thất bại' })
     }
   }
 }

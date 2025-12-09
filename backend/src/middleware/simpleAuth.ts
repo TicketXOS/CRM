@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { JwtConfig, JwtPayload } from '../config/jwt';
 import { logger } from '../config/logger';
 
-// 扩展Request接口
+// Mở rộng interface Request
 declare global {
   namespace Express {
     interface Request {
@@ -12,8 +12,8 @@ declare global {
 }
 
 /**
- * 简化的JWT认证中间件 - 不依赖数据库
- * 用于替代连接功能等不需要完整用户信息的场景
+ * Middleware xác thực JWT đơn giản - không phụ thuộc cơ sở dữ liệu
+ * Dùng cho các chức năng kết nối thay thế không cần thông tin người dùng đầy đủ
  */
 export const authenticateTokenSimple = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
@@ -23,41 +23,41 @@ export const authenticateTokenSimple = async (req: Request, res: Response, next:
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: '访问令牌缺失',
+        message: 'Thiếu mã truy cập',
         code: 'TOKEN_MISSING'
       });
     }
 
-    // 验证令牌
+    // Xác minh mã thông báo
     const payload = JwtConfig.verifyAccessToken(token);
     req.user = payload;
 
-    // 简单验证：只检查token是否有效，不查询数据库
+    // Xác minh đơn giản: chỉ kiểm tra token có hợp lệ không, không truy vấn cơ sở dữ liệu
     if (!payload.userId || !payload.username) {
       return res.status(401).json({
         success: false,
-        message: '无效的访问令牌',
+        message: 'Mã truy cập không hợp lệ',
         code: 'INVALID_TOKEN'
       });
     }
 
     next();
   } catch (error) {
-    logger.error('JWT认证失败:', error);
-    
+    logger.error('Xác thực JWT thất bại:', error);
+
     if (error instanceof Error) {
       if (error.message.includes('expired')) {
         return res.status(401).json({
           success: false,
-          message: '访问令牌已过期',
+          message: 'Mã truy cập đã hết hạn',
           code: 'TOKEN_EXPIRED'
         });
       }
-      
+
       if (error.message.includes('invalid')) {
         return res.status(401).json({
           success: false,
-          message: '无效的访问令牌',
+          message: 'Mã truy cập không hợp lệ',
           code: 'INVALID_TOKEN'
         });
       }
@@ -65,15 +65,15 @@ export const authenticateTokenSimple = async (req: Request, res: Response, next:
 
     return res.status(401).json({
       success: false,
-      message: '认证失败',
+      message: 'Xác thực thất bại',
       code: 'AUTHENTICATION_FAILED'
     });
   }
 };
 
 /**
- * 可选的认证中间件 - 如果有token则验证，没有则跳过
- * 用于某些可以匿名访问但有token时需要验证的场景
+ * Middleware xác thực tùy chọn - nếu có token thì xác minh, không có thì bỏ qua
+ * Dùng cho các trường hợp có thể truy cập ẩn danh nhưng khi có token cần xác minh
  */
 export const authenticateTokenOptional = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -81,19 +81,19 @@ export const authenticateTokenOptional = async (req: Request, res: Response, nex
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      // 没有token，跳过认证
+      // Không có token, bỏ qua xác thực
       next();
       return;
     }
 
-    // 有token，进行验证
+    // Có token, tiến hành xác minh
     const payload = JwtConfig.verifyAccessToken(token);
     req.user = payload;
-    
+
     next();
   } catch (error) {
-    logger.warn('可选认证失败，继续处理请求:', error);
-    // 认证失败但不阻止请求继续
+    logger.warn('Xác thực tùy chọn thất bại, tiếp tục xử lý yêu cầu:', error);
+    // Xác thực thất bại nhưng không chặn yêu cầu tiếp tục
     next();
   }
 };

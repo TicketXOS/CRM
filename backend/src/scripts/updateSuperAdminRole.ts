@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-// 加载环境变量
+// Tải biến môi trường
 dotenv.config();
 
 import { getDataSource } from '../config/database';
@@ -8,62 +8,62 @@ import { Role } from '../entities/Role';
 
 async function updateSuperAdminRole() {
   try {
-    console.log('正在初始化数据库连接...');
+    console.log('Đang khởi tạo kết nối cơ sở dữ liệu...');
     const dataSource = getDataSource();
     if (!dataSource) {
-      throw new Error('无法获取数据源');
+      throw new Error('Không thể lấy nguồn dữ liệu');
     }
     await dataSource.initialize();
-    
+
     const userRepository = dataSource.getRepository(User);
     const roleRepository = dataSource.getRepository(Role);
 
-    // 查找超级管理员用户
+    // Tìm người dùng siêu quản trị viên
     const superAdminUser = await userRepository.findOne({
       where: { username: 'superadmin' },
       relations: ['roles']
     });
 
     if (!superAdminUser) {
-      console.log('❌ 未找到超级管理员账号: superadmin');
+      console.log('❌ Không tìm thấy tài khoản siêu quản trị viên: superadmin');
       process.exit(1);
     }
 
-    // 查找超级管理员角色
+    // Tìm vai trò siêu quản trị viên
     const superAdminRole = await roleRepository.findOne({
       where: { code: 'super_admin' }
     });
 
     if (!superAdminRole) {
-      console.log('❌ 未找到超级管理员角色: super_admin');
-      console.log('请先运行角色权限初始化脚本: npm run init:roles');
+      console.log('❌ Không tìm thấy vai trò siêu quản trị viên: super_admin');
+      console.log('Vui lòng chạy script khởi tạo vai trò và quyền hạn trước: npm run init:roles');
       process.exit(1);
     }
 
-    // 检查是否已经关联了超级管理员角色
+    // Kiểm tra xem đã liên kết vai trò siêu quản trị viên chưa
     const hasRole = superAdminUser.roles?.some(role => role.code === 'super_admin');
-    
+
     if (hasRole) {
-      console.log('✅ 超级管理员账号已经正确关联了超级管理员角色');
+      console.log('✅ Tài khoản siêu quản trị viên đã được liên kết đúng với vai trò siêu quản trị viên');
     } else {
-      // 关联超级管理员角色
+      // Liên kết vai trò siêu quản trị viên
       if (!superAdminUser.roles) {
         superAdminUser.roles = [];
       }
       superAdminUser.roles.push(superAdminRole);
       await userRepository.save(superAdminUser);
-      console.log('✅ 已为超级管理员账号关联超级管理员角色');
+      console.log('✅ Đã liên kết vai trò siêu quản trị viên cho tài khoản siêu quản trị viên');
     }
 
     console.log('');
-    console.log('超级管理员账号信息:');
-    console.log('  用户名: superadmin');
-    console.log('  密码: super123456');
-    console.log('  角色: 超级管理员');
-    console.log('  关联角色数量:', superAdminUser.roles.length);
-    
+    console.log('Thông tin tài khoản siêu quản trị viên:');
+    console.log('  Tên người dùng: superadmin');
+    console.log('  Mật khẩu: super123456');
+    console.log('  Vai trò: Siêu quản trị viên');
+    console.log('  Số lượng vai trò đã liên kết:', superAdminUser.roles.length);
+
   } catch (error) {
-    console.error('❌ 更新超级管理员角色失败:', error);
+    console.error('❌ Cập nhật vai trò siêu quản trị viên thất bại:', error);
   } finally {
     process.exit(0);
   }

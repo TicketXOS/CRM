@@ -3,12 +3,12 @@ import { getDataSource } from '../config/database';
 import { MessageSubscription, DepartmentSubscriptionConfig, MessageType, NotificationMethod } from '../entities/MessageSubscription';
 import { Department } from '../entities/Department';
 
-// 内存存储订阅规则数据（模拟数据库）
+// Lưu trữ dữ liệu quy tắc đăng ký trong bộ nhớ (mô phỏng cơ sở dữ liệu)
 const subscriptionRulesStorage: any[] = [
   {
     id: 1,
     departmentId: '1',
-    departmentName: '销售部',
+    departmentName: 'Phòng bán hàng',
     messageTypes: ['order_created', 'payment_reminder'],
     notificationMethods: ['dingtalk', 'email'],
     priority: 'high',
@@ -17,15 +17,15 @@ const subscriptionRulesStorage: any[] = [
     scheduleStart: '',
     scheduleEnd: '',
     excludeWeekends: false,
-    remark: '销售部订单相关通知规则',
-    createdBy: '张三',
+    remark: 'Quy tắc thông báo liên quan đến đơn hàng của phòng bán hàng',
+    createdBy: 'Nguyễn Văn A',
     createdAt: '2024-01-15 10:30:00',
     updatedAt: '2024-01-15 10:30:00'
   },
   {
     id: 2,
     departmentId: '2',
-    departmentName: '客服部',
+    departmentName: 'Phòng dịch vụ khách hàng',
     messageTypes: ['customer_created', 'customer_feedback'],
     notificationMethods: ['wechat_work', 'system_message'],
     priority: 'normal',
@@ -34,15 +34,15 @@ const subscriptionRulesStorage: any[] = [
     scheduleStart: '',
     scheduleEnd: '',
     excludeWeekends: false,
-    remark: '客服部客户相关通知',
-    createdBy: '李四',
+    remark: 'Thông báo liên quan đến khách hàng của phòng dịch vụ khách hàng',
+    createdBy: 'Trần Thị B',
     createdAt: '2024-01-14 14:20:00',
     updatedAt: '2024-01-14 14:20:00'
   },
   {
     id: 3,
     departmentId: '3',
-    departmentName: '技术部',
+    departmentName: 'Phòng kỹ thuật',
     messageTypes: ['system_maintenance', 'system_alert'],
     notificationMethods: ['dingtalk', 'email', 'sms'],
     priority: 'high',
@@ -51,20 +51,20 @@ const subscriptionRulesStorage: any[] = [
     scheduleStart: '',
     scheduleEnd: '',
     excludeWeekends: false,
-    remark: '技术部系统相关通知',
-    createdBy: '王五',
+    remark: 'Thông báo liên quan đến hệ thống của phòng kỹ thuật',
+    createdBy: 'Lê Văn C',
     createdAt: '2024-01-13 09:15:00',
     updatedAt: '2024-01-13 09:15:00'
   }
 ];
 
-// 部门名称映射
+// Ánh xạ tên phòng ban
 const departmentNames: { [key: string]: string } = {
-  '1': '销售部',
-  '2': '客服部',
-  '3': '技术部',
-  '4': '财务部',
-  '5': '人事部'
+  '1': 'Phòng bán hàng',
+  '2': 'Phòng dịch vụ khách hàng',
+  '3': 'Phòng kỹ thuật',
+  '4': 'Phòng tài chính',
+  '5': 'Phòng nhân sự'
 };
 
 export class MessageController {
@@ -73,28 +73,28 @@ export class MessageController {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟数据
+        // Chế độ kiểm thử: trả về dữ liệu mô phỏng
         const mockData = [
           {
             id: 1,
             messageType: MessageType.ORDER_CREATED,
-            name: '订单创建通知',
-            description: '当有新订单创建时发送通知',
-            category: '订单管理',
+            name: 'Thông báo tạo đơn hàng',
+            description: 'Gửi thông báo khi có đơn hàng mới được tạo',
+            category: 'Quản lý đơn hàng',
             isGlobalEnabled: true,
             globalNotificationMethods: [NotificationMethod.DINGTALK, NotificationMethod.EMAIL],
             departmentConfigs: [
               {
                 id: 1,
                 departmentId: 1,
-                departmentName: '销售部',
+                departmentName: 'Phòng bán hàng',
                 isEnabled: true,
                 notificationMethods: [NotificationMethod.DINGTALK]
               },
               {
                 id: 2,
                 departmentId: 2,
-                departmentName: '客服部',
+                departmentName: 'Phòng dịch vụ khách hàng',
                 isEnabled: false,
                 notificationMethods: [NotificationMethod.EMAIL]
               }
@@ -103,16 +103,16 @@ export class MessageController {
           {
             id: 2,
             messageType: MessageType.CUSTOMER_CREATED,
-            name: '客户创建通知',
-            description: '当有新客户注册时发送通知',
-            category: '客户管理',
+            name: 'Thông báo tạo khách hàng',
+            description: 'Gửi thông báo khi có khách hàng mới đăng ký',
+            category: 'Quản lý khách hàng',
             isGlobalEnabled: true,
             globalNotificationMethods: [NotificationMethod.WECHAT_WORK],
             departmentConfigs: [
               {
                 id: 3,
                 departmentId: 1,
-                departmentName: '销售部',
+                departmentName: 'Phòng bán hàng',
                 isEnabled: true,
                 notificationMethods: [NotificationMethod.WECHAT_WORK]
               }
@@ -131,7 +131,7 @@ export class MessageController {
         relations: ['department']
       });
 
-      // 组织数据结构
+      // Tổ chức cấu trúc dữ liệu
       const result = subscriptions.map((subscription: MessageSubscription) => ({
         id: subscription.id,
         messageType: subscription.messageType,
@@ -153,20 +153,20 @@ export class MessageController {
 
       res.json(result);
     } catch (error) {
-      console.error('获取订阅配置失败:', error);
-      res.status(500).json({ error: '获取订阅配置失败' });
+      console.error('Lấy cấu hình đăng ký thất bại:', error);
+      res.status(500).json({ error: 'Lấy cấu hình đăng ký thất bại' });
     }
   }
 
-  // 更新全局消息订阅配置
+  // Cập nhật cấu hình đăng ký tin nhắn toàn cục
   async updateSubscription(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回成功响应
+        // Chế độ kiểm thử: trả về phản hồi thành công
         res.json({
           success: true,
-          message: '订阅配置更新成功（测试模式）'
+          message: 'Cập nhật cấu hình đăng ký thành công (chế độ kiểm thử)'
         });
         return;
       }
@@ -175,13 +175,13 @@ export class MessageController {
 
       const subscriptionRepo = dataSource.getRepository(MessageSubscription);
 
-      // 更新或创建订阅配置
+      // Cập nhật hoặc tạo cấu hình đăng ký
       for (const sub of subscriptions) {
         await subscriptionRepo.save({
           messageType: sub.messageType,
           name: sub.name || sub.messageType,
           description: sub.description || '',
-          category: sub.category || '默认',
+          category: sub.category || 'Mặc định',
           isGlobalEnabled: sub.isEnabled,
           globalNotificationMethods: sub.notificationMethods
         });
@@ -189,25 +189,25 @@ export class MessageController {
 
       res.json({
         success: true,
-        message: '消息订阅配置更新成功'
+        message: 'Cập nhật cấu hình đăng ký tin nhắn thành công'
       });
     } catch (error) {
-      console.error('更新消息订阅配置失败:', error);
+      console.error('Cập nhật cấu hình đăng ký tin nhắn thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新消息订阅配置失败'
+        message: 'Cập nhật cấu hình đăng ký tin nhắn thất bại'
       });
     }
   }
 
-  // 获取部门级别的订阅配置
+  // Lấy cấu hình đăng ký cấp phòng ban
   async getDepartmentSubscriptions(req: Request, res: Response): Promise<void> {
     try {
       const { departmentId } = req.params;
 
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟数据
+        // Chế độ kiểm thử: trả về dữ liệu mô phỏng
         const mockConfigs = [
           {
             id: 1,
@@ -216,7 +216,7 @@ export class MessageController {
             notificationMethods: [NotificationMethod.DINGTALK],
             department: {
               id: 1,
-              name: '销售部'
+              name: 'Phòng bán hàng'
             }
           },
           {
@@ -226,7 +226,7 @@ export class MessageController {
             notificationMethods: [NotificationMethod.EMAIL],
             department: {
               id: 1,
-              name: '销售部'
+              name: 'Phòng bán hàng'
             }
           }
         ];
@@ -243,12 +243,12 @@ export class MessageController {
 
       res.json(configs);
     } catch (error) {
-      console.error('获取部门订阅配置失败:', error);
-      res.status(500).json({ error: '获取部门订阅配置失败' });
+      console.error('Lấy cấu hình đăng ký phòng ban thất bại:', error);
+      res.status(500).json({ error: 'Lấy cấu hình đăng ký phòng ban thất bại' });
     }
   }
 
-  // 更新部门级别的订阅配置
+  // Cập nhật cấu hình đăng ký cấp phòng ban
   async updateDepartmentSubscription(req: Request, res: Response): Promise<void> {
     try {
       const { messageType, departmentId } = req.params;
@@ -256,35 +256,35 @@ export class MessageController {
 
       const dataSource = getDataSource();
       if (!dataSource) {
-        res.status(500).json({ error: '数据库连接未初始化' });
+        res.status(500).json({ error: 'Kết nối cơ sở dữ liệu chưa được khởi tạo' });
         return;
       }
 
       const departmentConfigRepo = dataSource.getRepository(DepartmentSubscriptionConfig);
       const departmentRepo = dataSource.getRepository(Department);
 
-      // 检查部门是否存在
+      // Kiểm tra phòng ban có tồn tại không
       const department = await departmentRepo.findOne({
         where: { id: departmentId }
       });
 
       if (!department) {
-        res.status(404).json({ error: '部门不存在' });
+        res.status(404).json({ error: 'Phòng ban không tồn tại' });
         return;
       }
 
-      // 查找现有配置
+      // Tìm cấu hình hiện có
       let config = await departmentConfigRepo.findOne({
         where: { messageType: messageType as MessageType, department: { id: departmentId } },
         relations: ['department']
       });
 
       if (config) {
-        // 更新现有配置
+        // Cập nhật cấu hình hiện có
         Object.assign(config, updateData);
         await departmentConfigRepo.save(config);
       } else {
-        // 创建新配置
+        // Tạo cấu hình mới
         config = departmentConfigRepo.create({
           messageType: messageType as MessageType,
           department,
@@ -297,19 +297,19 @@ export class MessageController {
 
       res.json(config);
     } catch (error) {
-      console.error('更新部门订阅配置失败:', error);
-      res.status(500).json({ error: '更新部门订阅配置失败' });
+      console.error('Cập nhật cấu hình đăng ký phòng ban thất bại:', error);
+      res.status(500).json({ error: 'Cập nhật cấu hình đăng ký phòng ban thất bại' });
     }
   }
 
-  // 批量更新部门订阅配置
+  // Cập nhật cấu hình đăng ký phòng ban hàng loạt
   async batchUpdateDepartmentSubscriptions(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
         res.status(500).json({
           success: false,
-          message: '数据库连接未初始化'
+          message: 'Kết nối cơ sở dữ liệu chưa được khởi tạo'
         });
         return;
       }
@@ -320,7 +320,7 @@ export class MessageController {
       if (!Array.isArray(configs)) {
         res.status(400).json({
           success: false,
-          message: '配置数据格式错误'
+          message: 'Định dạng dữ liệu cấu hình không đúng'
         });
         return;
       }
@@ -328,10 +328,10 @@ export class MessageController {
       const departmentConfigRepo = dataSource.getRepository(DepartmentSubscriptionConfig);
       const departmentRepo = dataSource.getRepository(Department);
 
-      // 删除现有配置
+      // Xóa cấu hình hiện có
       await departmentConfigRepo.delete({ messageType: messageType as MessageType });
 
-      // 创建新配置
+      // Tạo cấu hình mới
       const newConfigs = [];
       for (const config of configs) {
         const department = await departmentRepo.findOne({
@@ -352,58 +352,58 @@ export class MessageController {
 
       res.json({
         success: true,
-        message: '批量更新部门订阅配置成功'
+        message: 'Cập nhật cấu hình đăng ký phòng ban hàng loạt thành công'
       });
     } catch (error) {
-      console.error('批量更新部门订阅配置失败:', error);
+      console.error('Cập nhật cấu hình đăng ký phòng ban hàng loạt thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '批量更新部门订阅配置失败'
+        message: 'Cập nhật cấu hình đăng ký phòng ban hàng loạt thất bại'
       });
     }
   }
 
-  // 初始化默认消息订阅配置
+  // Khởi tạo cấu hình đăng ký tin nhắn mặc định
   async initializeDefaultSubscriptions(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        res.status(500).json({ error: '数据库连接未初始化' });
+        res.status(500).json({ error: 'Kết nối cơ sở dữ liệu chưa được khởi tạo' });
         return;
       }
 
       const subscriptionRepo = dataSource.getRepository(MessageSubscription);
 
-      // 检查是否已经初始化
+      // Kiểm tra xem đã khởi tạo chưa
       const existingCount = await subscriptionRepo.count();
       if (existingCount > 0) {
-        res.json({ message: '默认订阅配置已存在' });
+        res.json({ message: 'Cấu hình đăng ký mặc định đã tồn tại' });
         return;
       }
 
-      // 创建默认订阅配置
+      // Tạo cấu hình đăng ký mặc định
       const defaultSubscriptions = [
         {
           messageType: MessageType.ORDER_CREATED,
-          name: '订单创建',
-          description: '新订单创建时发送通知',
-          category: '订单管理',
+          name: 'Tạo đơn hàng',
+          description: 'Gửi thông báo khi có đơn hàng mới được tạo',
+          category: 'Quản lý đơn hàng',
           isGlobalEnabled: true,
           globalNotificationMethods: [NotificationMethod.EMAIL, NotificationMethod.SYSTEM_MESSAGE]
         },
         {
           messageType: MessageType.CUSTOMER_CREATED,
-          name: '客户创建',
-          description: '新客户创建时发送通知',
-          category: '客户服务',
+          name: 'Tạo khách hàng',
+          description: 'Gửi thông báo khi có khách hàng mới được tạo',
+          category: 'Dịch vụ khách hàng',
           isGlobalEnabled: true,
           globalNotificationMethods: [NotificationMethod.EMAIL, NotificationMethod.SYSTEM_MESSAGE]
         },
         {
           messageType: MessageType.SYSTEM_MAINTENANCE,
-          name: '系统维护',
-          description: '系统维护通知',
-          category: '系统管理',
+          name: 'Bảo trì hệ thống',
+          description: 'Thông báo bảo trì hệ thống',
+          category: 'Quản lý hệ thống',
           isGlobalEnabled: true,
           globalNotificationMethods: [NotificationMethod.EMAIL, NotificationMethod.ANNOUNCEMENT, NotificationMethod.SYSTEM_MESSAGE]
         }
@@ -412,67 +412,67 @@ export class MessageController {
       await subscriptionRepo.save(defaultSubscriptions);
 
       res.json({
-        message: '默认订阅配置初始化成功',
+        message: 'Khởi tạo cấu hình đăng ký mặc định thành công',
         count: defaultSubscriptions.length
       });
     } catch (error) {
-      console.error('初始化默认订阅配置失败:', error);
-      res.status(500).json({ error: '初始化默认订阅配置失败' });
+      console.error('Khởi tạo cấu hình đăng ký mặc định thất bại:', error);
+      res.status(500).json({ error: 'Khởi tạo cấu hình đăng ký mặc định thất bại' });
     }
   }
 
-  // 公告管理相关方法
+  // Các phương thức quản lý thông báo
   async getAnnouncements(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟公告数据
+        // Chế độ kiểm thử: trả về dữ liệu thông báo mô phỏng
         const mockAnnouncements = [
           {
             id: 1,
-            title: '系统维护通知',
-            content: '系统将于本周六晚上10点进行维护，预计维护时间2小时，期间系统将暂停服务。',
+            title: 'Thông báo bảo trì hệ thống',
+            content: 'Hệ thống sẽ được bảo trì vào tối thứ Bảy tuần này lúc 10 giờ, dự kiến thời gian bảo trì là 2 giờ, trong thời gian này hệ thống sẽ tạm dừng dịch vụ.',
             type: 'company',
             status: 'published',
             isPopup: true,
             isMarquee: true,
             targetDepartments: [],
             publishedAt: '2024-01-15 10:00:00',
-            createdBy: '系统管理员',
+            createdBy: 'Quản trị viên hệ thống',
             createdAt: '2024-01-15 09:30:00',
             updatedAt: '2024-01-15 10:00:00'
           },
           {
             id: 2,
-            title: '销售部门会议通知',
-            content: '销售部门将于明天下午2点召开月度总结会议，请相关人员准时参加。',
+            title: 'Thông báo cuộc họp phòng bán hàng',
+            content: 'Phòng bán hàng sẽ tổ chức cuộc họp tổng kết tháng vào chiều mai lúc 2 giờ, vui lòng các nhân viên liên quan tham gia đúng giờ.',
             type: 'department',
             status: 'published',
             isPopup: false,
             isMarquee: true,
-            targetDepartments: ['销售部'],
+            targetDepartments: ['Phòng bán hàng'],
             publishedAt: '2024-01-14 16:00:00',
-            createdBy: '销售经理',
+            createdBy: 'Quản lý bán hàng',
             createdAt: '2024-01-14 15:30:00',
             updatedAt: '2024-01-14 16:00:00'
           },
           {
             id: 3,
-            title: '新功能上线预告',
-            content: '我们即将上线客户管理新功能，包括智能标签和自动分组等特性。',
+            title: 'Thông báo tính năng mới sắp ra mắt',
+            content: 'Chúng tôi sắp ra mắt tính năng quản lý khách hàng mới, bao gồm nhãn thông minh và tự động nhóm.',
             type: 'company',
             status: 'draft',
             isPopup: true,
             isMarquee: false,
             targetDepartments: [],
             scheduledAt: '2024-01-20 09:00:00',
-            createdBy: '产品经理',
+            createdBy: 'Quản lý sản phẩm',
             createdAt: '2024-01-14 14:00:00',
             updatedAt: '2024-01-14 14:00:00'
           }
         ];
 
-        // 根据筛选条件过滤
+        // Lọc theo điều kiện
         let filteredAnnouncements = mockAnnouncements;
         const { status, type } = req.query;
 
@@ -490,15 +490,15 @@ export class MessageController {
         return;
       }
 
-      // 实际数据库查询逻辑
-      // TODO: 实现真实的数据库查询
+      // Logic truy vấn cơ sở dữ liệu thực tế
+      // TODO: Triển khai truy vấn cơ sở dữ liệu thực tế
       res.json({
         success: true,
         data: []
       });
     } catch (error) {
-      console.error('获取公告列表失败:', error);
-      res.status(500).json({ error: '获取公告列表失败' });
+      console.error('Lấy danh sách thông báo thất bại:', error);
+      res.status(500).json({ error: 'Lấy danh sách thông báo thất bại' });
     }
   }
 
@@ -506,36 +506,36 @@ export class MessageController {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：模拟创建公告
+        // Chế độ kiểm thử: mô phỏng tạo thông báo
         const newAnnouncement = {
           id: Date.now(),
           ...req.body,
-          status: req.body.status || 'draft', // 确保有默认的status字段
-          createdBy: '当前用户',
+          status: req.body.status || 'draft', // Đảm bảo có trường status mặc định
+          createdBy: 'Người dùng hiện tại',
           createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
           updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
         };
 
         res.json({
           success: true,
-          message: '公告创建成功',
+          message: 'Tạo thông báo thành công',
           data: newAnnouncement
         });
         return;
       }
 
-      // 实际数据库创建逻辑
-      // TODO: 实现真实的数据库创建
+      // Logic tạo cơ sở dữ liệu thực tế
+      // TODO: Triển khai tạo cơ sở dữ liệu thực tế
       res.json({
         success: true,
-        message: '公告创建成功',
+        message: 'Tạo thông báo thành công',
         data: req.body
       });
     } catch (error) {
-      console.error('创建公告失败:', error);
+      console.error('Tạo thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '创建公告失败'
+        error: 'Tạo thông báo thất bại'
       });
     }
   }
@@ -546,27 +546,27 @@ export class MessageController {
       const dataSource = getDataSource();
 
       if (!dataSource) {
-        // 测试模式：模拟更新公告
+        // Chế độ kiểm thử: mô phỏng cập nhật thông báo
         res.json({
           success: true,
-          message: '公告更新成功',
+          message: 'Cập nhật thông báo thành công',
           data: { id, ...req.body }
         });
         return;
       }
 
-      // 实际数据库更新逻辑
-      // TODO: 实现真实的数据库更新
+      // Logic cập nhật cơ sở dữ liệu thực tế
+      // TODO: Triển khai cập nhật cơ sở dữ liệu thực tế
       res.json({
         success: true,
-        message: '公告更新成功',
+        message: 'Cập nhật thông báo thành công',
         data: { id, ...req.body }
       });
     } catch (error) {
-      console.error('更新公告失败:', error);
+      console.error('Cập nhật thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '更新公告失败'
+        error: 'Cập nhật thông báo thất bại'
       });
     }
   }
@@ -577,25 +577,25 @@ export class MessageController {
       const dataSource = getDataSource();
 
       if (!dataSource) {
-        // 测试模式：模拟删除公告
+        // Chế độ kiểm thử: mô phỏng xóa thông báo
         res.json({
           success: true,
-          message: '公告删除成功'
+          message: 'Xóa thông báo thành công'
         });
         return;
       }
 
-      // 实际数据库删除逻辑
-      // TODO: 实现真实的数据库删除
+      // Logic xóa cơ sở dữ liệu thực tế
+      // TODO: Triển khai xóa cơ sở dữ liệu thực tế
       res.json({
         success: true,
-        message: '公告删除成功'
+        message: 'Xóa thông báo thành công'
       });
     } catch (error) {
-      console.error('删除公告失败:', error);
+      console.error('Xóa thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '删除公告失败'
+        error: 'Xóa thông báo thất bại'
       });
     }
   }
@@ -606,40 +606,40 @@ export class MessageController {
       const dataSource = getDataSource();
 
       if (!dataSource) {
-        // 测试模式：模拟发布公告
+        // Chế độ kiểm thử: mô phỏng xuất bản thông báo
         res.json({
           success: true,
-          message: '公告发布成功'
+          message: 'Xuất bản thông báo thành công'
         });
         return;
       }
 
-      // 实际数据库发布逻辑
-      // TODO: 实现真实的数据库发布
+      // Logic xuất bản cơ sở dữ liệu thực tế
+      // TODO: Triển khai xuất bản cơ sở dữ liệu thực tế
       res.json({
         success: true,
-        message: '公告发布成功'
+        message: 'Xuất bản thông báo thành công'
       });
     } catch (error) {
-      console.error('发布公告失败:', error);
+      console.error('Xuất bản thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '发布公告失败'
+        error: 'Xuất bản thông báo thất bại'
       });
     }
   }
 
-  // 订阅规则管理
+  // Quản lý quy tắc đăng ký
   async getSubscriptionRules(req: Request, res: Response): Promise<void> {
     try {
-      // 获取查询参数
+      // Lấy tham số truy vấn
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = parseInt(req.query.pageSize as string) || 10;
       const departmentId = req.query.departmentId as string;
       const messageType = req.query.messageType as string;
       const status = req.query.status as string;
 
-      // 过滤数据
+      // Lọc dữ liệu
       let filteredRules = [...subscriptionRulesStorage];
 
       if (departmentId) {
@@ -657,7 +657,7 @@ export class MessageController {
         filteredRules = filteredRules.filter(rule => rule.isEnabled === isEnabled);
       }
 
-      // 分页处理
+      // Xử lý phân trang
       const start = (page - 1) * pageSize;
       const end = start + pageSize;
       const paginatedRules = filteredRules.slice(start, end);
@@ -670,8 +670,8 @@ export class MessageController {
         pageSize
       });
     } catch (error) {
-      console.error('获取订阅规则失败:', error);
-      res.status(500).json({ error: '获取订阅规则失败' });
+      console.error('Lấy quy tắc đăng ký thất bại:', error);
+      res.status(500).json({ error: 'Lấy quy tắc đăng ký thất bại' });
     }
   }
 
@@ -689,11 +689,11 @@ export class MessageController {
         remark
       } = req.body;
 
-      // 验证必填字段
+      // Xác minh trường bắt buộc
       if (!departmentId || !messageTypes || !Array.isArray(messageTypes) || messageTypes.length === 0) {
         res.status(400).json({
           success: false,
-          error: '部门ID和消息类型为必填项'
+          error: 'ID phòng ban và loại tin nhắn là trường bắt buộc'
         });
         return;
       }
@@ -701,18 +701,18 @@ export class MessageController {
       if (!notificationMethods || !Array.isArray(notificationMethods) || notificationMethods.length === 0) {
         res.status(400).json({
           success: false,
-          error: '通知方式为必填项'
+          error: 'Phương thức thông báo là trường bắt buộc'
         });
         return;
       }
 
-      // 生成新的ID
+      // Tạo ID mới
       const newId = Math.max(...subscriptionRulesStorage.map(rule => rule.id), 0) + 1;
 
-      // 获取部门名称
-      const departmentName = departmentNames[departmentId] || `部门${departmentId}`;
+      // Lấy tên phòng ban
+      const departmentName = departmentNames[departmentId] || `Phòng ban ${departmentId}`;
 
-      // 创建新的订阅规则
+      // Tạo quy tắc đăng ký mới
       const newRule = {
         id: newId,
         departmentId,
@@ -726,24 +726,24 @@ export class MessageController {
         scheduleEnd: scheduleEnd || '',
         excludeWeekends: excludeWeekends || false,
         remark: remark || '',
-        createdBy: '当前用户', // TODO: 从认证信息中获取
+        createdBy: 'Người dùng hiện tại', // TODO: Lấy từ thông tin xác thực
         createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
         updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
       };
 
-      // 保存到内存存储
+      // Lưu vào bộ nhớ
       subscriptionRulesStorage.push(newRule);
 
       res.json({
         success: true,
-        message: '订阅规则创建成功',
+        message: 'Tạo quy tắc đăng ký thành công',
         data: newRule
       });
     } catch (error) {
-      console.error('创建订阅规则失败:', error);
+      console.error('Tạo quy tắc đăng ký thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '创建订阅规则失败'
+        error: 'Tạo quy tắc đăng ký thất bại'
       });
     }
   }
@@ -753,12 +753,12 @@ export class MessageController {
       const { id } = req.params;
       const ruleId = parseInt(id);
 
-      // 查找要更新的规则
+      // Tìm quy tắc cần cập nhật
       const ruleIndex = subscriptionRulesStorage.findIndex(rule => rule.id === ruleId);
       if (ruleIndex === -1) {
         res.status(404).json({
           success: false,
-          error: '订阅规则不存在'
+          error: 'Quy tắc đăng ký không tồn tại'
         });
         return;
       }
@@ -775,10 +775,10 @@ export class MessageController {
         remark
       } = req.body;
 
-      // 获取部门名称
+      // Lấy tên phòng ban
       const departmentName = departmentNames[departmentId] || subscriptionRulesStorage[ruleIndex].departmentName;
 
-      // 更新规则
+      // Cập nhật quy tắc
       const updatedRule = {
         ...subscriptionRulesStorage[ruleIndex],
         departmentId: departmentId || subscriptionRulesStorage[ruleIndex].departmentId,
@@ -798,14 +798,14 @@ export class MessageController {
 
       res.json({
         success: true,
-        message: '订阅规则更新成功',
+        message: 'Cập nhật quy tắc đăng ký thành công',
         data: updatedRule
       });
     } catch (error) {
-      console.error('更新订阅规则失败:', error);
+      console.error('Cập nhật quy tắc đăng ký thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '更新订阅规则失败'
+        error: 'Cập nhật quy tắc đăng ký thất bại'
       });
     }
   }
@@ -815,28 +815,28 @@ export class MessageController {
       const { id } = req.params;
       const ruleId = parseInt(id);
 
-      // 查找要删除的规则
+      // Tìm quy tắc cần xóa
       const ruleIndex = subscriptionRulesStorage.findIndex(rule => rule.id === ruleId);
       if (ruleIndex === -1) {
         res.status(404).json({
           success: false,
-          error: '订阅规则不存在'
+          error: 'Quy tắc đăng ký không tồn tại'
         });
         return;
       }
 
-      // 删除规则
+      // Xóa quy tắc
       subscriptionRulesStorage.splice(ruleIndex, 1);
 
       res.json({
         success: true,
-        message: '订阅规则删除成功'
+        message: 'Xóa quy tắc đăng ký thành công'
       });
     } catch (error) {
-      console.error('删除订阅规则失败:', error);
+      console.error('Xóa quy tắc đăng ký thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '删除订阅规则失败'
+        error: 'Xóa quy tắc đăng ký thất bại'
       });
     }
   }
@@ -847,126 +847,126 @@ export class MessageController {
       const { isEnabled } = req.body;
       const ruleId = parseInt(id);
 
-      // 查找要切换状态的规则
+      // Tìm quy tắc cần chuyển đổi trạng thái
       const ruleIndex = subscriptionRulesStorage.findIndex(rule => rule.id === ruleId);
       if (ruleIndex === -1) {
         res.status(404).json({
           success: false,
-          error: '订阅规则不存在'
+          error: 'Quy tắc đăng ký không tồn tại'
         });
         return;
       }
 
-      // 更新状态
+      // Cập nhật trạng thái
       subscriptionRulesStorage[ruleIndex].isEnabled = isEnabled;
       subscriptionRulesStorage[ruleIndex].updatedAt = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
       res.json({
         success: true,
-        message: `订阅规则已${isEnabled ? '启用' : '禁用'}`,
+        message: `Quy tắc đăng ký đã ${isEnabled ? 'được kích hoạt' : 'bị vô hiệu hóa'}`,
         data: subscriptionRulesStorage[ruleIndex]
       });
     } catch (error) {
-      console.error('切换订阅规则状态失败:', error);
+      console.error('Chuyển đổi trạng thái quy tắc đăng ký thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '切换订阅规则状态失败'
+        error: 'Chuyển đổi trạng thái quy tắc đăng ký thất bại'
       });
     }
   }
 
-  // 通知配置管理
+  // Quản lý cấu hình thông báo
   async getNotificationConfigs(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟通知配置数据
+        // Chế độ kiểm thử: trả về dữ liệu cấu hình thông báo mô phỏng
         const mockConfigs = [
           {
             id: 1,
             methodType: 'email',
-            methodName: '邮件通知',
+            methodName: 'Thông báo email',
             isEnabled: true,
             supportedDepartments: [
-              { id: 1, name: '销售部', isEnabled: true },
-              { id: 2, name: '客服部', isEnabled: true },
-              { id: 3, name: '物流部', isEnabled: false }
+              { id: 1, name: 'Phòng bán hàng', isEnabled: true },
+              { id: 2, name: 'Phòng dịch vụ khách hàng', isEnabled: true },
+              { id: 3, name: 'Phòng logistics', isEnabled: false }
             ],
             selectedMembers: [
-              { id: 1, name: '张三', department: '销售部', email: 'zhangsan@company.com' },
-              { id: 2, name: '李四', department: '客服部', email: 'lisi@company.com' }
+              { id: 1, name: 'Nguyễn Văn A', department: 'Phòng bán hàng', email: 'nguyenvana@company.com' },
+              { id: 2, name: 'Trần Thị B', department: 'Phòng dịch vụ khách hàng', email: 'tranthib@company.com' }
             ],
             settings: {
               smtpHost: 'smtp.company.com',
               smtpPort: 587,
               username: 'noreply@company.com',
               password: '******',
-              fromName: 'CRM系统'
+              fromName: 'Hệ thống CRM'
             },
-            createdBy: '系统管理员',
+            createdBy: 'Quản trị viên hệ thống',
             createdAt: '2024-01-10 09:00:00',
             updatedAt: '2024-01-15 14:30:00'
           },
           {
             id: 2,
             methodType: 'dingtalk',
-            methodName: '钉钉通知',
+            methodName: 'Thông báo DingTalk',
             isEnabled: true,
             supportedDepartments: [
-              { id: 1, name: '销售部', isEnabled: true },
-              { id: 2, name: '客服部', isEnabled: false }
+              { id: 1, name: 'Phòng bán hàng', isEnabled: true },
+              { id: 2, name: 'Phòng dịch vụ khách hàng', isEnabled: false }
             ],
             selectedMembers: [
-              { id: 3, name: '王五', department: '销售部', phone: '13800138001' }
+              { id: 3, name: 'Nguyễn Văn C', department: 'Phòng bán hàng', phone: '13800138001' }
             ],
             settings: {
               webhook: 'https://oapi.dingtalk.com/robot/send?access_token=xxx',
               secret: 'SEC***'
             },
-            createdBy: '系统管理员',
+            createdBy: 'Quản trị viên hệ thống',
             createdAt: '2024-01-12 10:15:00',
             updatedAt: '2024-01-14 16:45:00'
           },
           {
             id: 3,
             methodType: 'wechat_work',
-            methodName: '企业微信群机器人',
+            methodName: 'Robot nhóm WeChat Work',
             isEnabled: true,
             supportedDepartments: [
-              { id: 1, name: '销售部', isEnabled: true },
-              { id: 3, name: '技术部', isEnabled: true }
+              { id: 1, name: 'Phòng bán hàng', isEnabled: true },
+              { id: 3, name: 'Phòng kỹ thuật', isEnabled: true }
             ],
             selectedMembers: [
-              { id: 4, name: '赵六', department: '技术部', phone: '13800138004' },
-              { id: 5, name: '钱七', department: '销售部', phone: '13800138005' }
+              { id: 4, name: 'Trần Văn D', department: 'Phòng kỹ thuật', phone: '13800138004' },
+              { id: 5, name: 'Lê Thị E', department: 'Phòng bán hàng', phone: '13800138005' }
             ],
             settings: {
               webhook: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx',
-              groupName: '技术部通知群',
+              groupName: 'Nhóm thông báo phòng kỹ thuật',
               mentionAll: false,
               mentionedList: '13800138004,13800138005'
             },
-            createdBy: '系统管理员',
+            createdBy: 'Quản trị viên hệ thống',
             createdAt: '2024-01-13 11:20:00',
             updatedAt: '2024-01-16 09:15:00'
           },
           {
             id: 4,
             methodType: 'system_message',
-            methodName: '系统消息',
+            methodName: 'Tin nhắn hệ thống',
             isEnabled: true,
             supportedDepartments: [
-              { id: 1, name: '销售部', isEnabled: true },
-              { id: 2, name: '客服部', isEnabled: true },
-              { id: 3, name: '物流部', isEnabled: true },
-              { id: 4, name: '财务部', isEnabled: true }
+              { id: 1, name: 'Phòng bán hàng', isEnabled: true },
+              { id: 2, name: 'Phòng dịch vụ khách hàng', isEnabled: true },
+              { id: 3, name: 'Phòng logistics', isEnabled: true },
+              { id: 4, name: 'Phòng tài chính', isEnabled: true }
             ],
-            selectedMembers: [], // 系统消息支持全员
+            selectedMembers: [], // Tin nhắn hệ thống hỗ trợ toàn bộ nhân viên
             settings: {
               retentionDays: 30,
               allowMarkAsRead: true
             },
-            createdBy: '系统管理员',
+            createdBy: 'Quản trị viên hệ thống',
             createdAt: '2024-01-08 08:00:00',
             updatedAt: '2024-01-08 08:00:00'
           }
@@ -976,12 +976,12 @@ export class MessageController {
         return;
       }
 
-      // 实际数据库查询逻辑
-      // TODO: 实现真实的数据库查询
+      // Logic truy vấn cơ sở dữ liệu thực tế
+      // TODO: Triển khai truy vấn cơ sở dữ liệu thực tế
       res.json({ data: [] });
     } catch (error) {
-      console.error('获取通知配置失败:', error);
-      res.status(500).json({ error: '获取通知配置失败' });
+      console.error('Lấy cấu hình thông báo thất bại:', error);
+      res.status(500).json({ error: 'Lấy cấu hình thông báo thất bại' });
     }
   }
 
@@ -991,27 +991,27 @@ export class MessageController {
       const dataSource = getDataSource();
 
       if (!dataSource) {
-        // 测试模式：模拟更新通知配置
+        // Chế độ kiểm thử: mô phỏng cập nhật cấu hình thông báo
         res.json({
           success: true,
-          message: '通知配置更新成功',
+          message: 'Cập nhật cấu hình thông báo thành công',
           data: { id, ...req.body }
         });
         return;
       }
 
-      // 实际数据库更新逻辑
-      // TODO: 实现真实的数据库更新
+      // Logic cập nhật cơ sở dữ liệu thực tế
+      // TODO: Triển khai cập nhật cơ sở dữ liệu thực tế
       res.json({
         success: true,
-        message: '通知配置更新成功',
+        message: 'Cập nhật cấu hình thông báo thành công',
         data: { id, ...req.body }
       });
     } catch (error) {
-      console.error('更新通知配置失败:', error);
+      console.error('Cập nhật cấu hình thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '更新通知配置失败'
+        error: 'Cập nhật cấu hình thông báo thất bại'
       });
     }
   }
@@ -1022,134 +1022,134 @@ export class MessageController {
       const dataSource = getDataSource();
 
       if (!dataSource) {
-        // 测试模式：模拟测试通知
+        // Chế độ kiểm thử: mô phỏng kiểm tra thông báo
         res.json({
           success: true,
-          message: `${methodType}通知测试成功`,
-          details: `测试消息"${testMessage}"已发送`
+          message: `Kiểm tra thông báo ${methodType} thành công`,
+          details: `Tin nhắn kiểm tra "${testMessage}" đã được gửi`
         });
         return;
       }
 
-      // 实际通知测试逻辑
-      // TODO: 实现真实的通知测试
+      // Logic kiểm tra thông báo thực tế
+      // TODO: Triển khai kiểm tra thông báo thực tế
       res.json({
         success: true,
-        message: `${methodType}通知测试成功`
+        message: `Kiểm tra thông báo ${methodType} thành công`
       });
     } catch (error) {
-      console.error('测试通知失败:', error);
+      console.error('Kiểm tra thông báo thất bại:', error);
       res.status(500).json({
         success: false,
-        error: '测试通知失败'
+        error: 'Kiểm tra thông báo thất bại'
       });
     }
   }
 
-  // 获取部门和成员数据
+  // Lấy dữ liệu phòng ban và thành viên
   async getDepartmentsAndMembers(req: Request, res: Response): Promise<void> {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟部门和成员数据
+        // Chế độ kiểm thử: trả về dữ liệu phòng ban và thành viên mô phỏng
         const mockData = {
           departments: [
-            { id: 1, name: '销售部', memberCount: 8 },
-            { id: 2, name: '客服部', memberCount: 5 },
-            { id: 3, name: '物流部', memberCount: 6 },
-            { id: 4, name: '财务部', memberCount: 4 },
-            { id: 5, name: '技术部', memberCount: 12 }
+            { id: 1, name: 'Phòng bán hàng', memberCount: 8 },
+            { id: 2, name: 'Phòng dịch vụ khách hàng', memberCount: 5 },
+            { id: 3, name: 'Phòng logistics', memberCount: 6 },
+            { id: 4, name: 'Phòng tài chính', memberCount: 4 },
+            { id: 5, name: 'Phòng kỹ thuật', memberCount: 12 }
           ],
           members: [
-            { id: 1, name: '张三', departmentId: 1, department: '销售部', email: 'zhangsan@company.com', phone: '13800138001' },
-            { id: 2, name: '李四', departmentId: 2, department: '客服部', email: 'lisi@company.com', phone: '13800138002' },
-            { id: 3, name: '王五', departmentId: 1, department: '销售部', email: 'wangwu@company.com', phone: '13800138003' },
-            { id: 4, name: '赵六', departmentId: 3, department: '物流部', email: 'zhaoliu@company.com', phone: '13800138004' },
-            { id: 5, name: '钱七', departmentId: 4, department: '财务部', email: 'qianqi@company.com', phone: '13800138005' }
+            { id: 1, name: 'Nguyễn Văn A', departmentId: 1, department: 'Phòng bán hàng', email: 'nguyenvana@company.com', phone: '13800138001' },
+            { id: 2, name: 'Trần Thị B', departmentId: 2, department: 'Phòng dịch vụ khách hàng', email: 'tranthib@company.com', phone: '13800138002' },
+            { id: 3, name: 'Lê Văn C', departmentId: 1, department: 'Phòng bán hàng', email: 'levanc@company.com', phone: '13800138003' },
+            { id: 4, name: 'Phạm Thị D', departmentId: 3, department: 'Phòng logistics', email: 'phamthid@company.com', phone: '13800138004' },
+            { id: 5, name: 'Hoàng Văn E', departmentId: 4, department: 'Phòng tài chính', email: 'hoangvane@company.com', phone: '13800138005' }
           ],
           messageTypes: [
-            // 订单管理
-            { value: 'order_created', label: '新建订单通知', category: '订单管理' },
-            { value: 'order_submitted', label: '订单提交成功', category: '订单管理' },
-            { value: 'order_paid', label: '订单支付成功', category: '订单管理' },
-            { value: 'order_shipped', label: '订单发货通知', category: '订单管理' },
-            { value: 'order_delivered', label: '订单送达通知', category: '订单管理' },
-            { value: 'order_signed', label: '订单签收通知', category: '订单管理' },
-            { value: 'order_cancelled', label: '订单取消通知', category: '订单管理' },
-            { value: 'order_cancel_request', label: '订单取消申请', category: '订单管理' },
-            { value: 'order_cancel_approved', label: '订单取消通过', category: '订单管理' },
-            { value: 'order_modify_approved', label: '订单修改申请通过', category: '订单管理' },
-            { value: 'order_refunded', label: '订单退款通知', category: '订单管理' },
-            { value: 'payment_reminder', label: '付款提醒', category: '订单管理' },
+            // Quản lý đơn hàng
+            { value: 'order_created', label: 'Thông báo tạo đơn hàng mới', category: 'Quản lý đơn hàng' },
+            { value: 'order_submitted', label: 'Gửi đơn hàng thành công', category: 'Quản lý đơn hàng' },
+            { value: 'order_paid', label: 'Thanh toán đơn hàng thành công', category: 'Quản lý đơn hàng' },
+            { value: 'order_shipped', label: 'Thông báo giao hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_delivered', label: 'Thông báo đơn hàng đã giao', category: 'Quản lý đơn hàng' },
+            { value: 'order_signed', label: 'Thông báo ký nhận đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_cancelled', label: 'Thông báo hủy đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_cancel_request', label: 'Yêu cầu hủy đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_cancel_approved', label: 'Duyệt hủy đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_modify_approved', label: 'Duyệt yêu cầu sửa đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'order_refunded', label: 'Thông báo hoàn tiền đơn hàng', category: 'Quản lý đơn hàng' },
+            { value: 'payment_reminder', label: 'Nhắc nhở thanh toán', category: 'Quản lý đơn hàng' },
 
-            // 售后服务
-            { value: 'after_sales_created', label: '新售后申请', category: '售后服务' },
-            { value: 'after_sales_processing', label: '售后处理中', category: '售后服务' },
-            { value: 'after_sales_urgent', label: '紧急售后', category: '售后服务' },
-            { value: 'after_sales_completed', label: '售后完成', category: '售后服务' },
-            { value: 'return_notification', label: '退货通知', category: '售后服务' },
+            // Dịch vụ hậu mãi
+            { value: 'after_sales_created', label: 'Yêu cầu dịch vụ hậu mãi mới', category: 'Dịch vụ hậu mãi' },
+            { value: 'after_sales_processing', label: 'Đang xử lý dịch vụ hậu mãi', category: 'Dịch vụ hậu mãi' },
+            { value: 'after_sales_urgent', label: 'Dịch vụ hậu mãi khẩn cấp', category: 'Dịch vụ hậu mãi' },
+            { value: 'after_sales_completed', label: 'Hoàn thành dịch vụ hậu mãi', category: 'Dịch vụ hậu mãi' },
+            { value: 'return_notification', label: 'Thông báo trả hàng', category: 'Dịch vụ hậu mãi' },
 
-            // 客户管理
-            { value: 'customer_created', label: '新建客户通知', category: '客户管理' },
-            { value: 'customer_updated', label: '客户信息更新', category: '客户管理' },
-            { value: 'customer_call', label: '客户来电', category: '客户管理' },
-            { value: 'customer_complaint', label: '客户投诉', category: '客户管理' },
-            { value: 'customer_rejected', label: '客户拒收', category: '客户管理' },
-            { value: 'customer_sharing', label: '客户分享通知', category: '客户管理' },
-            { value: 'customer_feedback', label: '客户反馈', category: '客户管理' },
+            // Quản lý khách hàng
+            { value: 'customer_created', label: 'Thông báo tạo khách hàng mới', category: 'Quản lý khách hàng' },
+            { value: 'customer_updated', label: 'Cập nhật thông tin khách hàng', category: 'Quản lý khách hàng' },
+            { value: 'customer_call', label: 'Khách hàng gọi đến', category: 'Quản lý khách hàng' },
+            { value: 'customer_complaint', label: 'Khiếu nại khách hàng', category: 'Quản lý khách hàng' },
+            { value: 'customer_rejected', label: 'Khách hàng từ chối', category: 'Quản lý khách hàng' },
+            { value: 'customer_sharing', label: 'Thông báo chia sẻ khách hàng', category: 'Quản lý khách hàng' },
+            { value: 'customer_feedback', label: 'Phản hồi khách hàng', category: 'Quản lý khách hàng' },
 
-            // 商品管理
-            { value: 'product_created', label: '商品添加成功', category: '商品管理' },
-            { value: 'product_updated', label: '商品信息更新', category: '商品管理' },
-            { value: 'product_out_of_stock', label: '商品缺货', category: '商品管理' },
-            { value: 'product_price_changed', label: '商品价格变更', category: '商品管理' },
+            // Quản lý sản phẩm
+            { value: 'product_created', label: 'Thêm sản phẩm thành công', category: 'Quản lý sản phẩm' },
+            { value: 'product_updated', label: 'Cập nhật thông tin sản phẩm', category: 'Quản lý sản phẩm' },
+            { value: 'product_out_of_stock', label: 'Sản phẩm hết hàng', category: 'Quản lý sản phẩm' },
+            { value: 'product_price_changed', label: 'Thay đổi giá sản phẩm', category: 'Quản lý sản phẩm' },
 
-            // 物流管理
-            { value: 'shipping_notification', label: '发货通知', category: '物流管理' },
-            { value: 'delivery_confirmation', label: '签收通知', category: '物流管理' },
-            { value: 'logistics_pickup', label: '物流揽件', category: '物流管理' },
-            { value: 'logistics_in_transit', label: '物流运输中', category: '物流管理' },
-            { value: 'logistics_delivered', label: '物流已送达', category: '物流管理' },
-            { value: 'package_anomaly', label: '包裹异常', category: '物流管理' },
+            // Quản lý logistics
+            { value: 'shipping_notification', label: 'Thông báo giao hàng', category: 'Quản lý logistics' },
+            { value: 'delivery_confirmation', label: 'Thông báo ký nhận', category: 'Quản lý logistics' },
+            { value: 'logistics_pickup', label: 'Logistics đã nhận hàng', category: 'Quản lý logistics' },
+            { value: 'logistics_in_transit', label: 'Logistics đang vận chuyển', category: 'Quản lý logistics' },
+            { value: 'logistics_delivered', label: 'Logistics đã giao hàng', category: 'Quản lý logistics' },
+            { value: 'package_anomaly', label: 'Bưu kiện bất thường', category: 'Quản lý logistics' },
 
-            // 财务管理
-            { value: 'payment_notification', label: '付款通知', category: '财务管理' },
-            { value: 'payment_received', label: '收款确认', category: '财务管理' },
-            { value: 'invoice_generated', label: '发票生成', category: '财务管理' },
-            { value: 'refund_processed', label: '退款处理', category: '财务管理' },
+            // Quản lý tài chính
+            { value: 'payment_notification', label: 'Thông báo thanh toán', category: 'Quản lý tài chính' },
+            { value: 'payment_received', label: 'Xác nhận nhận thanh toán', category: 'Quản lý tài chính' },
+            { value: 'invoice_generated', label: 'Tạo hóa đơn', category: 'Quản lý tài chính' },
+            { value: 'refund_processed', label: 'Xử lý hoàn tiền', category: 'Quản lý tài chính' },
 
-            // 审批流程
-            { value: 'audit_notification', label: '审核通知', category: '审批流程' },
-            { value: 'audit_pending', label: '待审核', category: '审批流程' },
-            { value: 'audit_approved', label: '审核通过', category: '审批流程' },
-            { value: 'audit_rejected', label: '审核拒绝', category: '审批流程' },
+            // Quy trình phê duyệt
+            { value: 'audit_notification', label: 'Thông báo phê duyệt', category: 'Quy trình phê duyệt' },
+            { value: 'audit_pending', label: 'Chờ phê duyệt', category: 'Quy trình phê duyệt' },
+            { value: 'audit_approved', label: 'Phê duyệt thành công', category: 'Quy trình phê duyệt' },
+            { value: 'audit_rejected', label: 'Từ chối phê duyệt', category: 'Quy trình phê duyệt' },
 
-            // 业绩分享
-            { value: 'performance_share_created', label: '业绩分享创建', category: '业绩分享' },
-            { value: 'performance_share_received', label: '收到业绩分享', category: '业绩分享' },
-            { value: 'performance_share_confirmed', label: '业绩分享确认', category: '业绩分享' },
-            { value: 'performance_share_rejected', label: '业绩分享拒绝', category: '业绩分享' },
-            { value: 'performance_share_cancelled', label: '业绩分享取消', category: '业绩分享' },
+            // Chia sẻ thành tích
+            { value: 'performance_share_created', label: 'Tạo chia sẻ thành tích', category: 'Chia sẻ thành tích' },
+            { value: 'performance_share_received', label: 'Nhận chia sẻ thành tích', category: 'Chia sẻ thành tích' },
+            { value: 'performance_share_confirmed', label: 'Xác nhận chia sẻ thành tích', category: 'Chia sẻ thành tích' },
+            { value: 'performance_share_rejected', label: 'Từ chối chia sẻ thành tích', category: 'Chia sẻ thành tích' },
+            { value: 'performance_share_cancelled', label: 'Hủy chia sẻ thành tích', category: 'Chia sẻ thành tích' },
 
-            // 短信管理
-            { value: 'sms_template_applied', label: '短信模板申请', category: '短信管理' },
-            { value: 'sms_template_approved', label: '短信模板审核通过', category: '短信管理' },
-            { value: 'sms_template_rejected', label: '短信模板审核拒绝', category: '短信管理' },
-            { value: 'sms_send_applied', label: '短信发送申请', category: '短信管理' },
-            { value: 'sms_send_approved', label: '短信发送审核通过', category: '短信管理' },
-            { value: 'sms_send_rejected', label: '短信发送审核拒绝', category: '短信管理' },
-            { value: 'sms_send_success', label: '短信发送成功', category: '短信管理' },
-            { value: 'sms_send_failed', label: '短信发送失败', category: '短信管理' },
+            // Quản lý SMS
+            { value: 'sms_template_applied', label: 'Yêu cầu mẫu SMS', category: 'Quản lý SMS' },
+            { value: 'sms_template_approved', label: 'Duyệt mẫu SMS thành công', category: 'Quản lý SMS' },
+            { value: 'sms_template_rejected', label: 'Từ chối mẫu SMS', category: 'Quản lý SMS' },
+            { value: 'sms_send_applied', label: 'Yêu cầu gửi SMS', category: 'Quản lý SMS' },
+            { value: 'sms_send_approved', label: 'Duyệt gửi SMS thành công', category: 'Quản lý SMS' },
+            { value: 'sms_send_rejected', label: 'Từ chối gửi SMS', category: 'Quản lý SMS' },
+            { value: 'sms_send_success', label: 'Gửi SMS thành công', category: 'Quản lý SMS' },
+            { value: 'sms_send_failed', label: 'Gửi SMS thất bại', category: 'Quản lý SMS' },
 
-            // 系统管理
-            { value: 'system_maintenance', label: '系统维护通知', category: '系统管理' },
-            { value: 'system_update', label: '系统更新', category: '系统管理' },
-            { value: 'user_login', label: '用户登录', category: '系统管理' },
-            { value: 'user_created', label: '系统用户添加成功', category: '系统管理' },
-            { value: 'permission_configured', label: '权限配置成功', category: '系统管理' },
-            { value: 'data_export_success', label: '导出成功', category: '系统管理' },
-            { value: 'data_import_completed', label: '导入完成', category: '系统管理' },
-            { value: 'system_alert', label: '系统告警', category: '系统管理' }
+            // Quản lý hệ thống
+            { value: 'system_maintenance', label: 'Thông báo bảo trì hệ thống', category: 'Quản lý hệ thống' },
+            { value: 'system_update', label: 'Cập nhật hệ thống', category: 'Quản lý hệ thống' },
+            { value: 'user_login', label: 'Đăng nhập người dùng', category: 'Quản lý hệ thống' },
+            { value: 'user_created', label: 'Thêm người dùng hệ thống thành công', category: 'Quản lý hệ thống' },
+            { value: 'permission_configured', label: 'Cấu hình quyền thành công', category: 'Quản lý hệ thống' },
+            { value: 'data_export_success', label: 'Xuất dữ liệu thành công', category: 'Quản lý hệ thống' },
+            { value: 'data_import_completed', label: 'Nhập dữ liệu hoàn tất', category: 'Quản lý hệ thống' },
+            { value: 'system_alert', label: 'Cảnh báo hệ thống', category: 'Quản lý hệ thống' }
           ]
         };
 
@@ -1157,16 +1157,16 @@ export class MessageController {
         return;
       }
 
-      // 实际数据库查询逻辑
-      // TODO: 实现真实的数据库查询
+      // Logic truy vấn cơ sở dữ liệu thực tế
+      // TODO: Triển khai truy vấn cơ sở dữ liệu thực tế
       res.json({
         departments: [],
         members: [],
         messageTypes: []
       });
     } catch (error) {
-      console.error('获取部门和成员数据失败:', error);
-      res.status(500).json({ error: '获取部门和成员数据失败' });
+      console.error('Lấy dữ liệu phòng ban và thành viên thất bại:', error);
+      res.status(500).json({ error: 'Lấy dữ liệu phòng ban và thành viên thất bại' });
     }
   }
 
@@ -1174,7 +1174,7 @@ export class MessageController {
     try {
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 测试模式：返回模拟统计数据
+        // Chế độ kiểm thử: trả về dữ liệu thống kê mô phỏng
         const mockStats = {
           totalSubscriptions: 8,
           activeSubscriptions: 6,
@@ -1190,7 +1190,7 @@ export class MessageController {
         return;
       }
 
-      // 实际数据库查询逻辑
+      // Logic truy vấn cơ sở dữ liệu thực tế
       const subscriptionRepo = dataSource.getRepository(MessageSubscription);
 
       const totalSubscriptions = await subscriptionRepo.count();
@@ -1198,29 +1198,29 @@ export class MessageController {
         where: { isGlobalEnabled: true }
       });
 
-      // 这里可以添加更多统计查询
+      // Có thể thêm nhiều truy vấn thống kê hơn ở đây
       const stats = {
         totalSubscriptions,
         activeSubscriptions,
-        totalAnnouncements: 0, // TODO: 实现公告统计
-        publishedAnnouncements: 0, // TODO: 实现已发布公告统计
-        unreadMessages: 0, // TODO: 实现未读消息统计
-        totalMessages: 0, // TODO: 实现总消息统计
-        configuredChannels: 0, // TODO: 实现已配置渠道统计
-        totalChannels: 6 // 总渠道数
+        totalAnnouncements: 0, // TODO: Triển khai thống kê thông báo
+        publishedAnnouncements: 0, // TODO: Triển khai thống kê thông báo đã xuất bản
+        unreadMessages: 0, // TODO: Triển khai thống kê tin nhắn chưa đọc
+        totalMessages: 0, // TODO: Triển khai thống kê tổng số tin nhắn
+        configuredChannels: 0, // TODO: Triển khai thống kê kênh đã cấu hình
+        totalChannels: 6 // Tổng số kênh
       };
 
       res.json(stats);
     } catch (error) {
-      console.error('获取消息统计失败:', error);
-      res.status(500).json({ error: '获取消息统计失败' });
+      console.error('Lấy thống kê tin nhắn thất bại:', error);
+      res.status(500).json({ error: 'Lấy thống kê tin nhắn thất bại' });
     }
   }
 
-  // 系统消息相关方法
+  // Các phương thức liên quan đến tin nhắn hệ thống
   async getSystemMessages(req: Request, res: Response): Promise<void> {
     try {
-      // 返回空的系统消息列表，不再使用硬编码的模拟数据
+      // Trả về danh sách tin nhắn hệ thống trống, không còn sử dụng dữ liệu mô phỏng được mã hóa cứng
       const messages: any[] = []
 
       res.json({
@@ -1231,8 +1231,8 @@ export class MessageController {
         }
       })
     } catch (error) {
-      console.error('获取系统消息失败:', error)
-      res.status(500).json({ error: '获取系统消息失败' })
+      console.error('Lấy tin nhắn hệ thống thất bại:', error)
+      res.status(500).json({ error: 'Lấy tin nhắn hệ thống thất bại' })
     }
   }
 
@@ -1240,31 +1240,31 @@ export class MessageController {
     try {
       const { id } = req.params
 
-      // 这里应该实现标记消息为已读的逻辑
-      // 由于目前没有真实的消息数据，直接返回成功
+      // Ở đây nên triển khai logic đánh dấu tin nhắn là đã đọc
+      // Do hiện tại không có dữ liệu tin nhắn thực tế, trả về thành công trực tiếp
 
       res.json({
         success: true,
-        message: '消息已标记为已读'
+        message: 'Tin nhắn đã được đánh dấu là đã đọc'
       })
     } catch (error) {
-      console.error('标记消息为已读失败:', error)
-      res.status(500).json({ error: '标记消息为已读失败' })
+      console.error('Đánh dấu tin nhắn là đã đọc thất bại:', error)
+      res.status(500).json({ error: 'Đánh dấu tin nhắn là đã đọc thất bại' })
     }
   }
 
   async markAllMessagesAsRead(req: Request, res: Response): Promise<void> {
     try {
-      // 这里应该实现标记所有消息为已读的逻辑
-      // 由于目前没有真实的消息数据，直接返回成功
+      // Ở đây nên triển khai logic đánh dấu tất cả tin nhắn là đã đọc
+      // Do hiện tại không có dữ liệu tin nhắn thực tế, trả về thành công trực tiếp
 
       res.json({
         success: true,
-        message: '所有消息已标记为已读'
+        message: 'Tất cả tin nhắn đã được đánh dấu là đã đọc'
       })
     } catch (error) {
-      console.error('标记所有消息为已读失败:', error)
-      res.status(500).json({ error: '标记所有消息为已读失败' })
+      console.error('Đánh dấu tất cả tin nhắn là đã đọc thất bại:', error)
+      res.status(500).json({ error: 'Đánh dấu tất cả tin nhắn là đã đọc thất bại' })
     }
   }
 }

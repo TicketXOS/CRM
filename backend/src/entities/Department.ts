@@ -38,6 +38,6 @@ export class Department {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // 关联关系（可选）
+  // Quan hệ liên kết (tùy chọn)
   users?: any[];
 }

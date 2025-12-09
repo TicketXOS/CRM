@@ -1,27 +1,27 @@
-# 登录秒退问题 - 完整解决方案
+# Giải Pháp Hoàn Chỉnh Vấn Đề Đăng Nhập Thoát Ngay
 
-## 问题根源分析
+## Phân Tích Nguyên Nhân Gốc Rễ
 
-经过深入分析，登录秒退的根本原因是：
+Sau khi phân tích sâu，nguyên nhân gốc rễ của việc đăng nhập thoát ngay là：
 
-1. **后端 JWT Token 验证失败** - 生成的 token 无法通过自己的验证
-2. **前端多处清除 token 的逻辑** - 401 错误、initUser 失败等都会清除 token
-3. **环境变量未正确加载** - PM2 进程没有读取到 .env 文件
+1. **Xác thực JWT Token backend thất bại** - Token được tạo không thể tự xác thực
+2. **Logic xóa token ở nhiều nơi frontend** - Lỗi 401、initUser thất bại đều sẽ xóa token
+3. **Biến môi trường chưa được load đúng** - Process PM2 không đọc được file .env
 
-## 完整解决方案
+## Giải Pháp Hoàn Chỉnh
 
-### 步骤 1：修复后端 JWT 配置
+### Bước 1：Sửa cấu hình JWT backend
 
-确保后端能正确生成和验证 token。
+Đảm bảo backend có thể tạo và xác thực token đúng.
 
-### 步骤 2：简化前端登录逻辑
+### Bước 2：Đơn giản hóa logic đăng nhập frontend
 
-移除所有会清除 token 的逻辑，确保登录状态持久化。
+Loại bỏ tất cả logic sẽ xóa token，đảm bảo trạng thái đăng nhập được duy trì.
 
-### 步骤 3：禁用 token 验证
+### Bước 3：Vô hiệu hóa xác thực token
 
-在生产环境中，暂时禁用 token 验证，直接信任 localStorage 中的 token。
+Trong môi trường production，tạm thời vô hiệu hóa xác thực token，tin tưởng trực tiếp token trong localStorage.
 
-## 实施步骤
+## Các Bước Thực Hiện
 
-见下方代码修改...
+Xem phần sửa đổi code bên dưới...

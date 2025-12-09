@@ -45,26 +45,26 @@ export class ExpressAPIService {
     url: string;
   };
 
-  // 支持的快递公司列表
+  // Danh sách công ty vận chuyển được hỗ trợ
   private readonly supportedCompanies: ExpressCompany[] = [
-    { code: 'shentong', name: '申通快递', phone: '95543' },
+    { code: 'shentong', name: 'Shentong Express', phone: '95543' },
     { code: 'ems', name: 'EMS', phone: '11183' },
-    { code: 'shunfeng', name: '顺丰速运', phone: '95338' },
-    { code: 'yuantong', name: '圆通速递', phone: '95554' },
-    { code: 'yunda', name: '韵达速递', phone: '95546' },
-    { code: 'zhongtong', name: '中通快递', phone: '95311' },
-    { code: 'huitongkuaidi', name: '百世快递', phone: '95320' },
-    { code: 'tiantian', name: '天天快递', phone: '400-188-8888' },
-    { code: 'jingdong', name: '京东快递', phone: '950616' },
-    { code: 'youzhengguonei', name: '邮政快递包裹', phone: '11183' },
-    { code: 'debangwuliu', name: '德邦快递', phone: '95353' },
-    { code: 'zhaijisong', name: '宅急送', phone: '400-6789-000' },
-    { code: 'kuaijiesudi', name: '快捷速递', phone: '400-833-3666' }
+    { code: 'shunfeng', name: 'SF Express', phone: '95338' },
+    { code: 'yuantong', name: 'YTO Express', phone: '95554' },
+    { code: 'yunda', name: 'Yunda Express', phone: '95546' },
+    { code: 'zhongtong', name: 'ZTO Express', phone: '95311' },
+    { code: 'huitongkuaidi', name: 'Best Express', phone: '95320' },
+    { code: 'tiantian', name: 'TTK Express', phone: '400-188-8888' },
+    { code: 'jingdong', name: 'JD Express', phone: '950616' },
+    { code: 'youzhengguonei', name: 'China Post', phone: '11183' },
+    { code: 'debangwuliu', name: 'Deppon Express', phone: '95353' },
+    { code: 'zhaijisong', name: 'ZJS Express', phone: '400-6789-000' },
+    { code: 'kuaijiesudi', name: 'Fast Express', phone: '400-833-3666' }
   ];
 
   private constructor() {
     this.timeout = parseInt(process.env.EXPRESS_API_TIMEOUT || '10000');
-    
+
     this.kuaidi100Config = {
       customer: process.env.EXPRESS_API_CUSTOMER || '',
       key: process.env.EXPRESS_API_KEY || '',
@@ -86,39 +86,39 @@ export class ExpressAPIService {
   }
 
   /**
-   * 查询物流信息
+   * Truy vấn thông tin logistics
    */
   async queryExpress(trackingNo: string, companyCode: string): Promise<ExpressQueryResult> {
     try {
-      // 优先使用快递100 API
+      // Ưu tiên sử dụng API Kuaidi100
       if (this.kuaidi100Config.customer && this.kuaidi100Config.key) {
         const result = await this.queryByKuaidi100(trackingNo, companyCode);
         if (result.success) {
           return result;
         }
-        logger.warn(`快递100查询失败，尝试快递鸟API: ${result.error}`);
+        logger.warn(`Truy vấn Kuaidi100 thất bại, thử API KDNiao: ${result.error}`);
       }
 
-      // 备用快递鸟API
+      // API dự phòng KDNiao
       if (this.kdniaoConfig.customerId && this.kdniaoConfig.apiKey) {
         const result = await this.queryByKdniao(trackingNo, companyCode);
         if (result.success) {
           return result;
         }
-        logger.warn(`快递鸟查询失败: ${result.error}`);
+        logger.warn(`Truy vấn KDNiao thất bại: ${result.error}`);
       }
 
-      // 如果都失败，返回模拟数据
-      logger.info(`API查询失败，返回模拟数据: ${trackingNo}`);
+      // Nếu đều thất bại, trả về dữ liệu mô phỏng
+      logger.info(`Truy vấn API thất bại, trả về dữ liệu mô phỏng: ${trackingNo}`);
       return this.generateMockData(trackingNo, companyCode);
     } catch (error) {
-      logger.error('查询物流信息失败:', error);
+      logger.error('Truy vấn thông tin logistics thất bại:', error);
       return this.generateMockData(trackingNo, companyCode, error instanceof Error ? error.message : String(error));
     }
   }
 
   /**
-   * 使用快递100 API查询
+   * Sử dụng API Kuaidi100 để truy vấn
    */
   private async queryByKuaidi100(trackingNo: string, companyCode: string): Promise<ExpressQueryResult> {
     try {
@@ -180,20 +180,20 @@ export class ExpressAPIService {
           companyCode,
           companyName: this.getCompanyName(companyCode),
           status: 'unknown',
-          statusDescription: '查询失败',
+          statusDescription: 'Truy vấn thất bại',
           traces: [],
-          error: response.data.message || '快递100 API调用失败'
+          error: response.data.message || 'Gọi API Kuaidi100 thất bại'
         };
       }
     } catch (error) {
-      logger.error('快递100 API调用失败:', error);
+      logger.error('Gọi API Kuaidi100 thất bại:', error);
       return {
         success: false,
         trackingNo,
         companyCode,
         companyName: this.getCompanyName(companyCode),
         status: 'unknown',
-        statusDescription: '查询失败',
+        statusDescription: 'Truy vấn thất bại',
         traces: [],
         error: error instanceof Error ? error.message : String(error)
       };
@@ -201,7 +201,7 @@ export class ExpressAPIService {
   }
 
   /**
-   * 使用快递鸟API查询
+   * Sử dụng API KDNiao để truy vấn
    */
   private async queryByKdniao(trackingNo: string, companyCode: string): Promise<ExpressQueryResult> {
     try {
@@ -261,20 +261,20 @@ export class ExpressAPIService {
           companyCode,
           companyName: this.getCompanyName(companyCode),
           status: 'unknown',
-          statusDescription: '查询失败',
+          statusDescription: 'Truy vấn thất bại',
           traces: [],
-          error: response.data.Reason || '快递鸟API调用失败'
+          error: response.data.Reason || 'Gọi API KDNiao thất bại'
         };
       }
     } catch (error) {
-      logger.error('快递鸟API调用失败:', error);
+      logger.error('Gọi API KDNiao thất bại:', error);
       return {
         success: false,
         trackingNo,
         companyCode,
         companyName: this.getCompanyName(companyCode),
         status: 'unknown',
-        statusDescription: '查询失败',
+        statusDescription: 'Truy vấn thất bại',
         traces: [],
         error: error instanceof Error ? error.message : String(error)
       };
@@ -282,33 +282,33 @@ export class ExpressAPIService {
   }
 
   /**
-   * 生成模拟数据
+   * Tạo dữ liệu mô phỏng
    */
   private generateMockData(trackingNo: string, companyCode: string, error?: string): ExpressQueryResult {
     const now = new Date();
     const traces: ExpressTraceItem[] = [
       {
         time: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
-        location: '深圳市',
-        description: '快件已在深圳分拣中心完成分拣，准备发往下一站',
+        location: 'Thành phố Thâm Quyến',
+        description: 'Bưu kiện đã hoàn thành phân loại tại trung tâm phân loại Thâm Quyến, chuẩn bị gửi đến trạm tiếp theo',
         status: 'in_transit',
-        operator: '张三',
+        operator: 'Nguyễn Văn A',
         phone: '13800138000'
       },
       {
         time: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
-        location: '广州市',
-        description: '快件已到达广州转运中心',
+        location: 'Thành phố Quảng Châu',
+        description: 'Bưu kiện đã đến trung tâm vận chuyển Quảng Châu',
         status: 'in_transit',
-        operator: '李四',
+        operator: 'Trần Văn B',
         phone: '13800138001'
       },
       {
         time: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
-        location: '北京市',
-        description: '快件已到达北京分拣中心，正在派送中',
+        location: 'Thành phố Bắc Kinh',
+        description: 'Bưu kiện đã đến trung tâm phân loại Bắc Kinh, đang giao hàng',
         status: 'out_for_delivery',
-        operator: '王五',
+        operator: 'Lê Văn C',
         phone: '13800138002'
       }
     ];
@@ -319,71 +319,71 @@ export class ExpressAPIService {
       companyCode,
       companyName: this.getCompanyName(companyCode),
       status: 'out_for_delivery',
-      statusDescription: '派送中（模拟数据）',
-      currentLocation: '北京市',
+      statusDescription: 'Đang giao hàng (dữ liệu mô phỏng)',
+      currentLocation: 'Thành phố Bắc Kinh',
       traces,
-      error: error ? `API调用失败，使用模拟数据: ${error}` : '使用模拟数据'
+      error: error ? `Gọi API thất bại, sử dụng dữ liệu mô phỏng: ${error}` : 'Sử dụng dữ liệu mô phỏng'
     };
   }
 
   /**
-   * 映射快递100状态
+   * Ánh xạ trạng thái Kuaidi100
    */
   private mapKuaidi100Status(state: string): string {
     const statusMap: Record<string, string> = {
-      '0': 'in_transit',      // 在途
-      '1': 'picked_up',       // 揽件
-      '2': 'exception',       // 疑难
-      '3': 'delivered',       // 签收
-      '4': 'returned',        // 退签
-      '5': 'out_for_delivery', // 派件
-      '6': 'returned'         // 退回
+      '0': 'in_transit',      // Đang vận chuyển
+      '1': 'picked_up',       // Đã nhận hàng
+      '2': 'exception',       // Vấn đề
+      '3': 'delivered',       // Đã ký nhận
+      '4': 'returned',        // Từ chối nhận
+      '5': 'out_for_delivery', // Đang giao hàng
+      '6': 'returned'         // Đã trả lại
     };
     return statusMap[state] || 'pending';
   }
 
   /**
-   * 映射快递鸟状态
+   * Ánh xạ trạng thái KDNiao
    */
   private mapKdniaoStatus(state: string): string {
     const statusMap: Record<string, string> = {
-      '2': 'in_transit',      // 在途中
-      '3': 'delivered',       // 已签收
-      '4': 'exception'        // 问题件
+      '2': 'in_transit',      // Đang vận chuyển
+      '3': 'delivered',       // Đã ký nhận
+      '4': 'exception'        // Vấn đề
     };
     return statusMap[state] || 'pending';
   }
 
   /**
-   * 获取状态描述
+   * Lấy mô tả trạng thái
    */
   private getStatusDescription(state: string): string {
     const descriptions: Record<string, string> = {
-      '0': '运输中',
-      '1': '已揽件',
-      '2': '包裹异常',
-      '3': '已签收',
-      '4': '拒收',
-      '5': '派送中',
-      '6': '退回'
+      '0': 'Đang vận chuyển',
+      '1': 'Đã nhận hàng',
+      '2': 'Bưu kiện bất thường',
+      '3': 'Đã ký nhận',
+      '4': 'Từ chối nhận',
+      '5': 'Đang giao hàng',
+      '6': 'Đã trả lại'
     };
-    return descriptions[state] || '待发货';
+    return descriptions[state] || 'Chờ phát hàng';
   }
 
   /**
-   * 获取快递鸟状态描述
+   * Lấy mô tả trạng thái KDNiao
    */
   private getKdniaoStatusDescription(state: string): string {
     const descriptions: Record<string, string> = {
-      '2': '运输中',
-      '3': '已签收',
-      '4': '问题件'
+      '2': 'Đang vận chuyển',
+      '3': 'Đã ký nhận',
+      '4': 'Vấn đề'
     };
-    return descriptions[state] || '待发货';
+    return descriptions[state] || 'Chờ phát hàng';
   }
 
   /**
-   * 获取快递公司名称
+   * Lấy tên công ty vận chuyển
    */
   public getCompanyName(companyCode: string): string {
     const company = this.supportedCompanies.find(c => c.code === companyCode);
@@ -391,14 +391,14 @@ export class ExpressAPIService {
   }
 
   /**
-   * 获取支持的快递公司列表
+   * Lấy danh sách công ty vận chuyển được hỗ trợ
    */
   public getSupportedCompanies(): ExpressCompany[] {
     return this.supportedCompanies;
   }
 
   /**
-   * 检查API配置是否有效
+   * Kiểm tra xem cấu hình API có hiệu lực không
    */
   public isConfigured(): boolean {
     return !!(
@@ -408,7 +408,7 @@ export class ExpressAPIService {
   }
 
   /**
-   * 获取配置状态
+   * Lấy trạng thái cấu hình
    */
   public getConfigStatus(): {
     kuaidi100: boolean;

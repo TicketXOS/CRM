@@ -1,135 +1,135 @@
-# 部门管理与角色权限操作指南
+# Hướng Dẫn Thao Tác Quản Lý Phòng Ban Và Quyền Vai Trò
 
-## 📋 概述
+## 📋 Tổng Quan
 
-本指南将帮助您理解和使用CRM系统中的部门管理和角色权限功能，确保您能够高效地管理组织架构和权限分配。
+Hướng dẫn này sẽ giúp bạn hiểu và sử dụng chức năng quản lý phòng ban và quyền vai trò trong hệ thống CRM，đảm bảo bạn có thể quản lý cấu trúc tổ chức và phân bổ quyền một cách hiệu quả.
 
-## 🏢 部门管理
+## 🏢 Quản Lý Phòng Ban
 
-### 基本概念
-- **部门**：组织的基本单位，用于划分不同的业务领域
-- **层级结构**：支持多级部门嵌套，形成完整的组织架构
-- **部门负责人**：每个部门可以指定一名或多名负责人
+### Khái Niệm Cơ Bản
+- **Phòng ban**：Đơn vị cơ bản của tổ chức，dùng để phân chia các lĩnh vực nghiệp vụ khác nhau
+- **Cấu trúc phân cấp**：Hỗ trợ lồng ghép phòng ban đa cấp，tạo thành cấu trúc tổ chức hoàn chỉnh
+- **Người phụ trách phòng ban**：Mỗi phòng ban có thể chỉ định một hoặc nhiều người phụ trách
 
-### 主要功能
+### Chức Năng Chính
 
-#### 1. 查看部门列表
-- **卡片视图**：以卡片形式展示部门信息，包括部门名称、编码、状态、负责人等
-- **表格视图**：以表格形式展示详细的部门数据，支持排序和筛选
-- **搜索功能**：支持按部门名称、编码进行快速搜索
+#### 1. Xem Danh Sách Phòng Ban
+- **Chế độ xem card**：Hiển thị thông tin phòng ban dưới dạng card，bao gồm tên phòng ban、mã、trạng thái、người phụ trách v.v.
+- **Chế độ xem bảng**：Hiển thị dữ liệu phòng ban chi tiết dưới dạng bảng，hỗ trợ sắp xếp và lọc
+- **Chức năng tìm kiếm**：Hỗ trợ tìm kiếm nhanh theo tên phòng ban、mã
 
-#### 2. 部门操作
-- **新建部门**：创建新的部门，设置基本信息和层级关系
-- **编辑部门**：修改部门信息，包括名称、编码、负责人等
-- **查看详情**：点击"详情"按钮查看部门的完整信息
-- **删除部门**：删除不再需要的部门（需要先处理部门下的成员）
+#### 2. Thao Tác Phòng Ban
+- **Tạo phòng ban mới**：Tạo phòng ban mới，thiết lập thông tin cơ bản và quan hệ phân cấp
+- **Sửa phòng ban**：Sửa thông tin phòng ban，bao gồm tên、mã、người phụ trách v.v.
+- **Xem chi tiết**：Click nút "Chi tiết" để xem thông tin đầy đủ của phòng ban
+- **Xóa phòng ban**：Xóa phòng ban không cần thiết（cần xử lý thành viên trong phòng ban trước）
 
-#### 3. 部门状态管理
-- **启用/禁用**：通过状态开关控制部门的活跃状态
-- **状态筛选**：可以按部门状态进行筛选查看
+#### 3. Quản Lý Trạng Thái Phòng Ban
+- **Bật/Tắt**：Thông qua công tắc trạng thái kiểm soát trạng thái hoạt động của phòng ban
+- **Lọc trạng thái**：Có thể lọc xem theo trạng thái phòng ban
 
-## 👥 角色权限管理
+## 👥 Quản Lý Quyền Vai Trò
 
-### 基本概念
-- **角色**：一组权限的集合，用于定义用户能够执行的操作
-- **权限**：具体的功能访问权限，如查看、编辑、删除等
-- **权限继承**：下级部门可以继承上级部门的权限设置
+### Khái Niệm Cơ Bản
+- **Vai trò**：Tập hợp các quyền，dùng để định nghĩa các thao tác người dùng có thể thực hiện
+- **Quyền**：Quyền truy cập chức năng cụ thể，như xem、sửa、xóa v.v.
+- **Kế thừa quyền**：Phòng ban cấp dưới có thể kế thừa cài đặt quyền của phòng ban cấp trên
 
-### 权限类型
+### Loại Quyền
 
-#### 1. 功能权限
-- **客户管理**：客户信息的增删改查权限
-- **订单管理**：订单处理和状态更新权限
-- **产品管理**：产品信息维护权限
-- **数据分析**：报表和统计数据查看权限
+#### 1. Quyền Chức Năng
+- **Quản lý khách hàng**：Quyền thêm sửa xóa tra cứu thông tin khách hàng
+- **Quản lý đơn hàng**：Quyền xử lý đơn hàng và cập nhật trạng thái
+- **Quản lý sản phẩm**：Quyền bảo trì thông tin sản phẩm
+- **Phân tích dữ liệu**：Quyền xem báo cáo và dữ liệu thống kê
 
-#### 2. 数据权限
-- **全部数据**：可以查看所有数据
-- **部门数据**：只能查看本部门及下级部门数据
-- **个人数据**：只能查看自己创建的数据
+#### 2. Quyền Dữ Liệu
+- **Tất cả dữ liệu**：Có thể xem tất cả dữ liệu
+- **Dữ liệu phòng ban**：Chỉ có thể xem dữ liệu phòng ban và phòng ban cấp dưới
+- **Dữ liệu cá nhân**：Chỉ có thể xem dữ liệu do mình tạo
 
-#### 3. 操作权限
-- **查看权限**：只能查看数据，不能修改
-- **编辑权限**：可以修改数据
-- **删除权限**：可以删除数据
-- **审批权限**：可以审批相关业务流程
+#### 3. Quyền Thao Tác
+- **Quyền xem**：Chỉ có thể xem dữ liệu，không thể sửa
+- **Quyền sửa**：Có thể sửa dữ liệu
+- **Quyền xóa**：Có thể xóa dữ liệu
+- **Quyền phê duyệt**：Có thể phê duyệt quy trình nghiệp vụ liên quan
 
-## 🔗 部门与角色的关系
+## 🔗 Mối Quan Hệ Giữa Phòng Ban Và Vai Trò
 
-### 权限分配流程
-1. **创建部门** → 设置部门基本信息
-2. **配置角色** → 为部门分配相应的角色权限
-3. **分配成员** → 将用户分配到相应部门
-4. **权限生效** → 用户自动获得部门角色对应的权限
+### Quy Trình Phân Bổ Quyền
+1. **Tạo phòng ban** → Thiết lập thông tin cơ bản phòng ban
+2. **Cấu hình vai trò** → Phân bổ quyền vai trò tương ứng cho phòng ban
+3. **Phân bổ thành viên** → Phân người dùng vào phòng ban tương ứng
+4. **Quyền có hiệu lực** → Người dùng tự động có quyền tương ứng với vai trò phòng ban
 
-### 权限继承规则
-- 子部门默认继承父部门的基础权限
-- 可以为子部门单独配置额外权限
-- 权限只能增加，不能减少父部门已有权限
+### Quy Tắc Kế Thừa Quyền
+- Phòng ban con mặc định kế thừa quyền cơ bản của phòng ban cha
+- Có thể cấu hình quyền bổ sung riêng cho phòng ban con
+- Quyền chỉ có thể tăng，không thể giảm quyền đã có của phòng ban cha
 
-## 📝 操作步骤
+## 📝 Các Bước Thao Tác
 
-### 新建部门
-1. 点击"新建部门"按钮
-2. 填写部门基本信息（名称、编码、描述等）
-3. 选择上级部门（如果是子部门）
-4. 指定部门负责人
-5. 保存部门信息
+### Tạo Phòng Ban Mới
+1. Click nút "Tạo phòng ban mới"
+2. Điền thông tin cơ bản phòng ban（Tên、Mã、Mô tả v.v.）
+3. Chọn phòng ban cấp trên（nếu là phòng ban con）
+4. Chỉ định người phụ trách phòng ban
+5. Lưu thông tin phòng ban
 
-### 配置部门权限
-1. 在部门列表中找到目标部门
-2. 点击"权限"按钮
-3. 选择要分配的角色
-4. 配置具体的功能权限
-5. 设置数据访问范围
-6. 保存权限配置
+### Cấu Hình Quyền Phòng Ban
+1. Tìm phòng ban mục tiêu trong danh sách phòng ban
+2. Click nút "Quyền"
+3. Chọn vai trò cần phân bổ
+4. Cấu hình quyền chức năng cụ thể
+5. Thiết lập phạm vi truy cập dữ liệu
+6. Lưu cấu hình quyền
 
-### 管理部门成员
-1. 点击部门的"成员"按钮
-2. 查看当前部门成员列表
-3. 添加新成员或移除现有成员
-4. 为成员分配具体角色
-5. 确认成员权限设置
+### Quản Lý Thành Viên Phòng Ban
+1. Click nút "Thành viên" của phòng ban
+2. Xem danh sách thành viên phòng ban hiện tại
+3. Thêm thành viên mới hoặc loại bỏ thành viên hiện có
+4. Phân vai trò cụ thể cho thành viên
+5. Xác nhận cài đặt quyền thành viên
 
-### 查看部门详情
-1. 点击部门的"详情"按钮
-2. 查看部门的完整信息
-3. 查看部门的权限配置
-4. 查看部门成员列表
-5. 查看部门的业务数据统计
+### Xem Chi Tiết Phòng Ban
+1. Click nút "Chi tiết" của phòng ban
+2. Xem thông tin đầy đủ của phòng ban
+3. Xem cấu hình quyền của phòng ban
+4. Xem danh sách thành viên phòng ban
+5. Xem thống kê dữ liệu nghiệp vụ của phòng ban
 
-## ⚠️ 注意事项
+## ⚠️ Lưu Ý
 
-### 权限管理
-- 删除部门前，请确保已妥善处理部门下的所有成员
-- 修改部门权限时，会影响该部门下所有成员的权限
-- 建议定期审查部门权限配置，确保符合业务需求
+### Quản Lý Quyền
+- Trước khi xóa phòng ban，vui lòng đảm bảo đã xử lý đầy đủ tất cả thành viên trong phòng ban
+- Khi sửa quyền phòng ban，sẽ ảnh hưởng đến quyền của tất cả thành viên trong phòng ban
+- Khuyến nghị định kỳ rà soát cấu hình quyền phòng ban，đảm bảo phù hợp với nhu cầu nghiệp vụ
 
-### 数据安全
-- 敏感数据的访问权限应严格控制
-- 定期检查用户权限，及时回收不必要的权限
-- 重要操作建议启用审批流程
+### Bảo Mật Dữ Liệu
+- Quyền truy cập dữ liệu nhạy cảm nên được kiểm soát chặt chẽ
+- Định kỳ kiểm tra quyền người dùng，kịp thời thu hồi quyền không cần thiết
+- Thao tác quan trọng khuyến nghị bật quy trình phê duyệt
 
-### 最佳实践
-- 按业务职能合理划分部门
-- 遵循最小权限原则，只分配必要的权限
-- 建立清晰的部门层级关系
-- 定期培训用户正确使用权限功能
+### Thực Hành Tốt Nhất
+- Phân chia phòng ban hợp lý theo chức năng nghiệp vụ
+- Tuân theo nguyên tắc quyền tối thiểu，chỉ phân bổ quyền cần thiết
+- Xây dựng mối quan hệ phân cấp phòng ban rõ ràng
+- Định kỳ đào tạo người dùng sử dụng đúng chức năng quyền
 
-## 🆘 常见问题
+## 🆘 Câu Hỏi Thường Gặp
 
-### Q: 如何快速找到特定部门？
-A: 使用搜索功能，输入部门名称或编码进行快速定位。
+### Q: Làm thế nào để tìm nhanh phòng ban cụ thể？
+A: Sử dụng chức năng tìm kiếm，nhập tên phòng ban hoặc mã để định vị nhanh.
 
-### Q: 部门权限修改后多久生效？
-A: 权限修改后立即生效，用户下次登录或刷新页面即可看到新权限。
+### Q: Sau khi sửa quyền phòng ban bao lâu thì có hiệu lực？
+A: Sau khi sửa quyền có hiệu lực ngay，người dùng lần sau đăng nhập hoặc làm mới trang sẽ thấy quyền mới.
 
-### Q: 如何批量管理多个部门的权限？
-A: 可以通过上级部门统一配置权限，下级部门会自动继承。
+### Q: Làm thế nào để quản lý quyền hàng loạt nhiều phòng ban？
+A: Có thể cấu hình quyền thống nhất thông qua phòng ban cấp trên，phòng ban cấp dưới sẽ tự động kế thừa.
 
-### Q: 误删部门怎么办？
-A: 请联系系统管理员进行数据恢复，建议删除前做好备份。
+### Q: Xóa nhầm phòng ban phải làm sao？
+A: Vui lòng liên hệ quản trị viên hệ thống để khôi phục dữ liệu，khuyến nghị backup trước khi xóa.
 
 ---
 
-💡 **提示**：如需更多帮助，请联系系统管理员或查看详细的用户手册。
+💡 **Gợi ý**：Nếu cần thêm trợ giúp，vui lòng liên hệ quản trị viên hệ thống hoặc xem sổ tay người dùng chi tiết.

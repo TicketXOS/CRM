@@ -17,6 +17,29 @@ export class UserController {
     return dataSource.getRepository(User);
   }
 
+  /**
+   * Xác thực mật khẩu (hỗ trợ bcrypt hash và mật khẩu dạng văn bản, tương thích ngược)
+   * @param password Mật khẩu nhập vào
+   * @param storedPassword Mật khẩu được lưu trong cơ sở dữ liệu
+   * @returns Có xác thực thành công không
+   */
+  private async verifyPassword(password: string, storedPassword: string): Promise<boolean> {
+    if (!storedPassword) {
+      return false;
+    }
+
+    // Kiểm tra xem có phải là bcrypt hash không (bcrypt hash thường bắt đầu bằng $2a$, $2b$, $2x$, $2y$, độ dài 60)
+    const isBcryptHash = storedPassword.startsWith('$2') && storedPassword.length === 60;
+
+    if (isBcryptHash) {
+      // Sử dụng bcrypt để xác thực mật khẩu hash
+      return await bcrypt.compare(password, storedPassword);
+    } else {
+      // Mật khẩu dạng văn bản: so sánh trực tiếp (tương thích ngược)
+      return password === storedPassword;
+    }
+  }
+
   private get departmentRepository() {
     const dataSource = getDataSource();
     if (!dataSource) {
@@ -26,61 +49,72 @@ export class UserController {
   }
 
   /**
-   * 用户登录
+   * Đăng nhập người dùng
    */
   login = catchAsync(async (req: Request, res: Response) => {
     const { username, password } = req.body;
 
-    // 查找用户
+    // Tìm người dùng
     const user = await this.userRepository.findOne({
       where: { username }
     });
 
-    console.log('[Login Debug] 查询到的用户对象:', user);
-    console.log('[Login Debug] 用户对象的keys:', user ? Object.keys(user) : 'null');
+    console.log('[Login Debug] Đối tượng người dùng đã tìm thấy:', user);
+    console.log('[Login Debug] Các khóa của đối tượng người dùng:', user ? Object.keys(user) : 'null');
 
     if (!user) {
-      // 记录登录失败日志（失败不影响错误返回）
+      // Ghi nhật ký đăng nhập thất bại (thất bại không ảnh hưởng đến việc trả về lỗi)
       try {
         await this.logOperation({
           action: 'login',
           module: 'auth',
-          description: `用户登录失败: 用户名不存在 - ${username}`,
+          description: `Đăng nhập người dùng thất bại: Tên đăng nhập không tồn tại - ${username}`,
           result: 'failed',
           ipAddress: req.ip,
           userAgent: req.get('User-Agent')
         });
       } catch (logError) {
-        console.error('[Login] 记录日志失败:', logError);
+        console.error('[Login] Ghi nhật ký thất bại:', logError);
       }
 
-      throw new BusinessError('用户名或密码错误', 'INVALID_CREDENTIALS');
+      throw new BusinessError('Tên đăng nhập hoặc mật khẩu không đúng', 'INVALID_CREDENTIALS');
     }
 
-    // 检查账户状态
+    // Kiểm tra trạng thái tài khoản
     if (user.status === 'locked') {
-      throw new BusinessError('账户已被锁定，请联系管理员', 'ACCOUNT_LOCKED');
+      throw new BusinessError('Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên', 'ACCOUNT_LOCKED');
     }
 
     if (user.status === 'inactive') {
-      throw new BusinessError('账户已被禁用，请联系管理员', 'ACCOUNT_DISABLED');
+      throw new BusinessError('Tài khoản đã bị vô hiệu hóa, vui lòng liên hệ quản trị viên', 'ACCOUNT_DISABLED');
     }
 
-    // 验证密码
-    console.log('[Login Debug] 开始验证密码');
-    console.log('[Login Debug] 用户名:', username);
-    console.log('[Login Debug] 输入密码:', password);
-    console.log('[Login Debug] 数据库密码哈希:', user.password);
-    console.log('[Login Debug] 密码哈希长度:', user.password?.length);
+    // Xác thực mật khẩu
+    console.log('[Login Debug] Bắt đầu xác thực mật khẩu');
+    console.log('[Login Debug] Tên đăng nhập:', username);
+    console.log('[Login Debug] Mật khẩu nhập vào:', password);
+    console.log('[Login Debug] Mật khẩu hash trong cơ sở dữ liệu:', user.password);
+    console.log('[Login Debug] Độ dài mật khẩu hash:', user.password?.length);
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('[Login Debug] 密码验证结果:', isPasswordValid);
+    // Xác thực mật khẩu: hỗ trợ bcrypt hash và mật khẩu dạng văn bản (tương thích ngược)
+    const storedPassword = user.password || '';
+    let isPasswordValid = await this.verifyPassword(password, storedPassword);
+
+    // Nếu xác thực mật khẩu dạng văn bản thành công, tự động hash và cập nhật vào cơ sở dữ liệu
+    if (isPasswordValid && !storedPassword.startsWith('$2')) {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      user.password = hashedPassword;
+      await this.userRepository.save(user);
+      console.log('[Login] Đã tự động chuyển mật khẩu dạng văn bản sang bcrypt hash');
+    }
+
+    console.log('[Login Debug] Kết quả xác thực mật khẩu:', isPasswordValid);
 
     if (!isPasswordValid) {
-      // 增加登录失败次数
+      // Tăng số lần đăng nhập thất bại
       user.loginFailCount += 1;
 
-      // 如果失败次数超过5次，锁定账户
+      // Nếu số lần thất bại vượt quá 5 lần, khóa tài khoản
       if (user.loginFailCount >= 5) {
         user.status = 'locked';
         user.lockedAt = new Date();
@@ -88,26 +122,26 @@ export class UserController {
 
       await this.userRepository.save(user);
 
-      // 记录登录失败日志（失败不影响错误返回）
+      // Ghi nhật ký đăng nhập thất bại (thất bại không ảnh hưởng đến việc trả về lỗi)
       try {
         await this.logOperation({
           userId: user.id,
           username: user.username,
           action: 'login',
           module: 'auth',
-          description: `用户登录失败: 密码错误 - ${username}`,
+          description: `Đăng nhập người dùng thất bại: Mật khẩu sai - ${username}`,
           result: 'failed',
           ipAddress: req.ip,
           userAgent: req.get('User-Agent')
         });
       } catch (logError) {
-        console.error('[Login] 记录日志失败:', logError);
+        console.error('[Login] Ghi nhật ký thất bại:', logError);
       }
 
-      throw new BusinessError('用户名或密码错误', 'INVALID_CREDENTIALS');
+      throw new BusinessError('Tên đăng nhập hoặc mật khẩu không đúng', 'INVALID_CREDENTIALS');
     }
 
-    // 登录成功，重置失败次数
+    // Đăng nhập thành công, đặt lại số lần thất bại
     try {
       user.loginFailCount = 0;
       user.loginCount = user.loginCount + 1;
@@ -115,10 +149,10 @@ export class UserController {
       user.lastLoginIp = req.ip || '';
       await this.userRepository.save(user);
     } catch (saveError) {
-      console.error('[Login] 保存用户信息失败，但继续登录流程:', saveError);
+      console.error('[Login] Lưu thông tin người dùng thất bại, nhưng tiếp tục quy trình đăng nhập:', saveError);
     }
 
-    // 生成JWT令牌
+    // Tạo JWT token
     const tokenPayload = {
       userId: user.id,
       username: user.username,
@@ -128,28 +162,28 @@ export class UserController {
 
     const tokens = JwtConfig.generateTokenPair(tokenPayload);
 
-    // 记录登录成功日志（失败不影响登录）
+    // Ghi nhật ký đăng nhập thành công (thất bại không ảnh hưởng đến đăng nhập)
     try {
       await this.logOperation({
         userId: user.id,
         username: user.username,
         action: 'login',
         module: 'auth',
-        description: `用户登录成功 - ${username}`,
+        description: `Đăng nhập người dùng thành công - ${username}`,
         result: 'success',
         ipAddress: req.ip,
         userAgent: req.get('User-Agent')
       });
     } catch (logError) {
-      console.error('[Login] 记录日志失败，但继续登录流程:', logError);
+      console.error('[Login] Ghi nhật ký thất bại, nhưng tiếp tục quy trình đăng nhập:', logError);
     }
 
-    // 返回用户信息和令牌
+    // Trả về thông tin người dùng và token
     const { password: _, ...userInfo } = user;
 
     res.json({
       success: true,
-      message: '登录成功',
+      message: 'Đăng nhập thành công',
       data: {
         user: userInfo,
         tokens
@@ -158,28 +192,28 @@ export class UserController {
   });
 
   /**
-   * 刷新令牌
+   * Làm mới token
    */
   refreshToken = catchAsync(async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      throw new ValidationError('刷新令牌不能为空');
+      throw new ValidationError('Token làm mới không được để trống');
     }
 
-    // 验证刷新令牌
+    // Xác thực token làm mới
     const payload = JwtConfig.verifyRefreshToken(refreshToken);
 
-    // 检查用户是否存在且状态正常
+    // Kiểm tra người dùng có tồn tại và trạng thái bình thường không
     const user = await this.userRepository.findOne({
       where: { id: payload.userId }
     });
 
     if (!user || user.status !== 'active') {
-      throw new BusinessError('用户状态异常，请重新登录', 'USER_STATUS_INVALID');
+      throw new BusinessError('Trạng thái người dùng bất thường, vui lòng đăng nhập lại', 'USER_STATUS_INVALID');
     }
 
-    // 生成新的令牌对
+    // Tạo cặp token mới
     const newTokenPayload = {
       userId: user.id,
       username: user.username,
@@ -191,13 +225,13 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '令牌刷新成功',
+      message: 'Làm mới token thành công',
       data: { tokens }
     });
   });
 
   /**
-   * 获取当前用户信息
+   * Lấy thông tin người dùng hiện tại
    */
   getCurrentUser = catchAsync(async (req: Request, res: Response) => {
     const user = req.currentUser!;
@@ -209,7 +243,7 @@ export class UserController {
   });
 
   /**
-   * 更新当前用户信息
+   * Cập nhật thông tin người dùng hiện tại
    */
   updateCurrentUser = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.userId;
@@ -220,21 +254,21 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户');
+      throw new NotFoundError('Người dùng');
     }
 
-    // 检查邮箱是否已被其他用户使用
+    // Kiểm tra email đã được người dùng khác sử dụng chưa
     if (email && email !== user.email) {
       const existingUser = await this.userRepository.findOne({
         where: { email }
       });
 
       if (existingUser && existingUser.id !== userId) {
-        throw new BusinessError('邮箱已被其他用户使用', 'EMAIL_ALREADY_EXISTS');
+        throw new BusinessError('Email đã được người dùng khác sử dụng', 'EMAIL_ALREADY_EXISTS');
       }
     }
 
-    // 更新用户信息
+    // Cập nhật thông tin người dùng
     Object.assign(user, {
       realName: realName || user.realName,
       email: email || user.email,
@@ -244,13 +278,13 @@ export class UserController {
 
     await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user!.userId,
       username: req.user!.username,
       action: 'update',
       module: 'user',
-      description: '更新个人信息',
+      description: 'Cập nhật thông tin cá nhân',
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -258,13 +292,13 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '用户信息更新成功',
+      message: 'Cập nhật thông tin người dùng thành công',
       data: user
     });
   });
 
   /**
-   * 修改密码
+   * Đổi mật khẩu
    */
   changePassword = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user!.userId;
@@ -275,36 +309,36 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户');
+      throw new NotFoundError('Người dùng');
     }
 
-    // 验证当前密码
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    // Xác thực mật khẩu hiện tại
+    const isCurrentPasswordValid = await this.verifyPassword(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
-      throw new BusinessError('当前密码错误', 'INVALID_CURRENT_PASSWORD');
+      throw new BusinessError('Mật khẩu hiện tại không đúng', 'INVALID_CURRENT_PASSWORD');
     }
 
-    // 检查新密码是否与当前密码相同
-    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    // Kiểm tra mật khẩu mới có giống mật khẩu hiện tại không
+    const isSamePassword = await this.verifyPassword(newPassword, user.password);
     if (isSamePassword) {
-      throw new BusinessError('新密码不能与当前密码相同', 'SAME_PASSWORD');
+      throw new BusinessError('Mật khẩu mới không được giống mật khẩu hiện tại', 'SAME_PASSWORD');
     }
 
-    // 加密新密码
+    // Mã hóa mật khẩu mới
     const saltRounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    // 更新密码
+    // Cập nhật mật khẩu
     user.password = hashedPassword;
     await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user!.userId,
       username: req.user!.username,
       action: 'update',
       module: 'user',
-      description: '修改密码',
+      description: 'Đổi mật khẩu',
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -312,69 +346,69 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '密码修改成功'
+      message: 'Đổi mật khẩu thành công'
     });
   });
 
   /**
-   * 创建用户（管理员功能）
+   * Tạo người dùng (chức năng quản trị viên)
    */
   createUser = catchAsync(async (req: Request, res: Response) => {
     const { username, password, realName, email, phone, role, departmentId } = req.body;
 
-    // 验证必填字段
+    // Xác thực các trường bắt buộc
     if (!username || !password || !realName || !role) {
-      throw new ValidationError('用户名、密码、真实姓名和角色为必填项');
+      throw new ValidationError('Tên đăng nhập, mật khẩu, tên thật và vai trò là các trường bắt buộc');
     }
 
-    // 检查用户名是否已存在
+    // Kiểm tra tên đăng nhập đã tồn tại chưa
     const existingUser = await this.userRepository.findOne({
       where: { username }
     });
 
     if (existingUser) {
-      throw new BusinessError('用户名已存在', 'USERNAME_EXISTS');
+      throw new BusinessError('Tên đăng nhập đã tồn tại', 'USERNAME_EXISTS');
     }
 
-    // 检查邮箱是否已存在
+    // Kiểm tra email đã tồn tại chưa
     if (email) {
       const existingEmail = await this.userRepository.findOne({
         where: { email }
       });
 
       if (existingEmail) {
-        throw new BusinessError('邮箱已存在', 'EMAIL_EXISTS');
+        throw new BusinessError('Email đã tồn tại', 'EMAIL_EXISTS');
       }
     }
 
-    // 验证部门是否存在
+    // Xác thực phòng ban có tồn tại không
     if (departmentId) {
       const department = await this.departmentRepository.findOne({
         where: { id: departmentId }
       });
 
       if (!department) {
-        throw new NotFoundError('指定的部门不存在');
+        throw new NotFoundError('Phòng ban được chỉ định không tồn tại');
       }
     }
 
-    // 加密密码
+    // Mã hóa mật khẩu
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 生成用户ID
+    // Tạo ID người dùng
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // 创建用户 - 确保所有必需字段都有值
+    // Tạo người dùng - đảm bảo tất cả các trường bắt buộc đều có giá trị
     const user = this.userRepository.create({
       id: userId,
       username,
       password: hashedPassword,
-      name: realName,  // name 是必需字段
+      name: realName,  // name là trường bắt buộc
       realName,
       email: email || null,
       phone: phone || null,
       role,
-      roleId: role,  // roleId 是必需字段，使用 role 值
+      roleId: role,  // roleId là trường bắt buộc, sử dụng giá trị role
       departmentId: departmentId || null,
       status: 'active',
       loginFailCount: 0,
@@ -383,25 +417,25 @@ export class UserController {
 
     const savedUser = await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: (req as any).user?.id,
       username: (req as any).user?.username,
       action: 'create',
       module: 'user',
-      description: `创建用户: ${username} (${realName})`,
+      description: `Tạo người dùng: ${username} (${realName})`,
       result: 'success',
       details: { userId: savedUser.id, username, realName, role },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
     });
 
-    // 返回用户信息（不包含密码）
+    // Trả về thông tin người dùng (không bao gồm mật khẩu)
     const { password: _, ...userWithoutPassword } = savedUser;
 
     res.status(201).json({
       success: true,
-      message: '用户创建成功',
+      message: 'Tạo người dùng thành công',
       data: {
         user: userWithoutPassword
       }
@@ -409,12 +443,12 @@ export class UserController {
   });
 
   /**
-   * 获取用户列表（管理员功能）
+   * Lấy danh sách người dùng (chức năng quản trị viên)
    */
   getUsers = catchAsync(async (req: Request, res: Response) => {
     const { page = 1, limit = 20, search, departmentId, role, status } = req.query as any;
 
-    // User实体没有department关联，直接查询用户表
+    // Entity User không có liên kết department, truy vấn trực tiếp bảng người dùng
     const queryBuilder = this.userRepository.createQueryBuilder('user')
       .select([
         'user.id',
@@ -436,7 +470,7 @@ export class UserController {
         'user.updatedAt'
       ]);
 
-    // 搜索条件
+    // Điều kiện tìm kiếm
     if (search) {
       queryBuilder.andWhere(
         '(user.username LIKE :search OR user.realName LIKE :search OR user.email LIKE :search)',
@@ -456,11 +490,11 @@ export class UserController {
       queryBuilder.andWhere('user.status = :status', { status });
     }
 
-    // 分页
+    // Phân trang
     const offset = (page - 1) * limit;
     queryBuilder.skip(offset).take(limit);
 
-    // 排序
+    // Sắp xếp
     queryBuilder.orderBy('user.createdAt', 'DESC');
 
     const [users, total] = await queryBuilder.getManyAndCount();
@@ -468,8 +502,8 @@ export class UserController {
     res.json({
       success: true,
       data: {
-        items: users,  // 前端期望 items 字段
-        users,         // 保持兼容
+        items: users,  // Frontend mong đợi trường items
+        users,         // Giữ tương thích
         total,
         page: parseInt(page),
         limit: parseInt(limit),
@@ -479,24 +513,24 @@ export class UserController {
   });
 
   /**
-   * 获取用户统计信息
+   * Lấy thống kê người dùng
    */
   getUserStatistics = catchAsync(async (req: Request, res: Response) => {
-    // 获取总用户数
+    // Lấy tổng số người dùng
     const total = await this.userRepository.count();
 
-    // 获取各状态用户数
+    // Lấy số người dùng theo từng trạng thái
     const active = await this.userRepository.count({ where: { status: 'active' } });
     const inactive = await this.userRepository.count({ where: { status: 'inactive' } });
     const locked = await this.userRepository.count({ where: { status: 'locked' } });
 
-    // 获取各角色用户数
+    // Lấy số người dùng theo từng vai trò
     const adminCount = await this.userRepository.count({ where: { role: 'admin' } });
     const managerCount = await this.userRepository.count({ where: { role: 'manager' } });
     const salesCount = await this.userRepository.count({ where: { role: 'sales' } });
     const serviceCount = await this.userRepository.count({ where: { role: 'service' } });
 
-    // 获取各部门用户数
+    // Lấy số người dùng theo từng phòng ban
     const departmentStats = await this.userRepository
       .createQueryBuilder('user')
       .leftJoin('user.department', 'department')
@@ -523,7 +557,7 @@ export class UserController {
       },
       byDepartment: departmentStats.map(stat => ({
         departmentId: parseInt(stat.departmentId),
-        departmentName: stat.departmentName || '未知部门',
+        departmentName: stat.departmentName || 'Phòng ban không xác định',
         count: parseInt(stat.count)
       }))
     };
@@ -535,7 +569,7 @@ export class UserController {
   });
 
   /**
-   * 获取用户详情
+   * Lấy chi tiết người dùng
    */
   getUserById = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -545,7 +579,7 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
     const { password: _, ...userInfo } = user;
@@ -557,7 +591,7 @@ export class UserController {
   });
 
   /**
-   * 更新用户信息
+   * Cập nhật thông tin người dùng
    */
   updateUser = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -568,16 +602,16 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
-    // 更新字段
+    // Cập nhật các trường
     if (realName !== undefined) user.realName = realName;
     if (name !== undefined) user.name = name || realName;
     if (email !== undefined) user.email = email;
     if (phone !== undefined) user.phone = phone;
     if (role !== undefined) user.role = role;
-    if (roleId !== undefined) user.role = roleId; // roleId 也映射到 role 字段
+    if (roleId !== undefined) user.role = roleId; // roleId cũng được ánh xạ đến trường role
     if (departmentId !== undefined) user.departmentId = departmentId ? String(departmentId) : null;
     if (position !== undefined) user.position = position;
     if (employeeNumber !== undefined) user.employeeNumber = employeeNumber;
@@ -586,13 +620,13 @@ export class UserController {
 
     const updatedUser = await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user?.userId,
       username: req.user?.username,
       action: 'update_user',
       module: 'user',
-      description: `更新用户信息: ${user.username}`,
+      description: `Cập nhật thông tin người dùng: ${user.username}`,
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -602,13 +636,13 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '用户更新成功',
+      message: 'Cập nhật người dùng thành công',
       data: userInfo
     });
   });
 
   /**
-   * 删除用户
+   * Xóa người dùng
    */
   deleteUser = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -618,23 +652,23 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
-    // 不允许删除超级管理员
+    // Không cho phép xóa siêu quản trị viên
     if (user.role === 'super_admin' || user.username === 'superadmin') {
-      throw new BusinessError('不能删除超级管理员账户');
+      throw new BusinessError('Không thể xóa tài khoản siêu quản trị viên');
     }
 
     await this.userRepository.remove(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user?.userId,
       username: req.user?.username,
       action: 'delete_user',
       module: 'user',
-      description: `删除用户: ${user.username}`,
+      description: `Xóa người dùng: ${user.username}`,
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -642,19 +676,19 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '用户删除成功'
+      message: 'Xóa người dùng thành công'
     });
   });
 
   /**
-   * 更新用户状态（启用/禁用/锁定）
+   * Cập nhật trạng thái người dùng (kích hoạt/vô hiệu hóa/khóa)
    */
   updateUserStatus = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
     const { status } = req.body;
 
     if (!['active', 'inactive', 'locked'].includes(status)) {
-      throw new ValidationError('无效的状态值');
+      throw new ValidationError('Giá trị trạng thái không hợp lệ');
     }
 
     const user = await this.userRepository.findOne({
@@ -662,7 +696,7 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
     user.status = status;
@@ -675,13 +709,13 @@ export class UserController {
 
     const updatedUser = await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user?.userId,
       username: req.user?.username,
       action: 'update_user_status',
       module: 'user',
-      description: `更新用户状态: ${user.username} -> ${status}`,
+      description: `Cập nhật trạng thái người dùng: ${user.username} -> ${status}`,
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -691,20 +725,20 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '用户状态更新成功',
+      message: 'Cập nhật trạng thái người dùng thành công',
       data: userInfo
     });
   });
 
   /**
-   * 更新用户在职状态
+   * Cập nhật trạng thái làm việc của người dùng
    */
   updateEmploymentStatus = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
     const { employmentStatus } = req.body;
 
     if (!['active', 'resigned'].includes(employmentStatus)) {
-      throw new ValidationError('无效的在职状态值');
+      throw new ValidationError('Giá trị trạng thái làm việc không hợp lệ');
     }
 
     const user = await this.userRepository.findOne({
@@ -712,7 +746,7 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
     (user as any).employmentStatus = employmentStatus;
@@ -722,13 +756,13 @@ export class UserController {
 
     const updatedUser = await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user?.userId,
       username: req.user?.username,
       action: 'update_employment_status',
       module: 'user',
-      description: `更新用户在职状态: ${user.username} -> ${employmentStatus}`,
+      description: `Cập nhật trạng thái làm việc của người dùng: ${user.username} -> ${employmentStatus}`,
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -738,13 +772,13 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '在职状态更新成功',
+      message: 'Cập nhật trạng thái làm việc thành công',
       data: userInfo
     });
   });
 
   /**
-   * 重置用户密码
+   * Đặt lại mật khẩu người dùng
    */
   resetUserPassword = catchAsync(async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -755,10 +789,10 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundError('用户不存在');
+      throw new NotFoundError('Người dùng không tồn tại');
     }
 
-    // 生成临时密码或使用提供的密码
+    // Tạo mật khẩu tạm thời hoặc sử dụng mật khẩu được cung cấp
     const tempPassword = newPassword || Math.random().toString(36).slice(-8) + 'A1!';
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
 
@@ -772,13 +806,13 @@ export class UserController {
 
     await this.userRepository.save(user);
 
-    // 记录操作日志
+    // Ghi nhật ký thao tác
     await this.logOperation({
       userId: req.user?.userId,
       username: req.user?.username,
       action: 'reset_password',
       module: 'user',
-      description: `重置用户密码: ${user.username}`,
+      description: `Đặt lại mật khẩu người dùng: ${user.username}`,
       result: 'success',
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
@@ -786,7 +820,7 @@ export class UserController {
 
     res.json({
       success: true,
-      message: '密码重置成功',
+      message: 'Đặt lại mật khẩu thành công',
       data: {
         tempPassword: newPassword ? undefined : tempPassword
       }
@@ -794,7 +828,7 @@ export class UserController {
   });
 
   /**
-   * 记录操作日志
+   * Ghi nhật ký thao tác
    */
   private async logOperation(data: {
     userId?: string;
@@ -808,10 +842,10 @@ export class UserController {
     userAgent?: string;
   }) {
     try {
-      // 只记录到文件日志，不写数据库
-      operationLogger.info('操作日志', data);
+      // Chỉ ghi vào nhật ký tệp, không ghi vào cơ sở dữ liệu
+      operationLogger.info('Nhật ký thao tác', data);
     } catch (error) {
-      logger.error('记录操作日志失败:', error);
+      logger.error('Ghi nhật ký thao tác thất bại:', error);
     }
   }
 }

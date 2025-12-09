@@ -7,17 +7,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 
-// 所有订单路由都需要认证
+// Tất cả các route đơn hàng đều cần xác thực
 router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/orders
- * @desc 获取订单列表
+ * @desc Lấy danh sách đơn hàng
  * @access Private
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
-    console.log('📋 [订单列表] 收到请求');
+    console.log('📋 [Danh sách đơn hàng] Nhận yêu cầu');
     const {
       page = 1,
       pageSize = 20,
@@ -28,32 +28,32 @@ router.get('/', async (req: Request, res: Response) => {
       endDate
     } = req.query;
 
-    // 使用原生SQL查询，避免TypeORM字段映射问题
+    // Sử dụng truy vấn SQL thuần để tránh vấn đề ánh xạ trường TypeORM
     let sql = `SELECT o.*, c.name as customer_name_joined, c.phone as customer_phone_joined
                FROM orders o
                LEFT JOIN customers c ON o.customer_id = c.id
                WHERE 1=1`;
     const params: (string | number)[] = [];
 
-    // 状态筛选
+    // Lọc theo trạng thái
     if (status) {
       sql += ` AND o.status = ?`;
       params.push(String(status));
     }
 
-    // 订单号筛选
+    // Lọc theo số đơn hàng
     if (orderNumber) {
       sql += ` AND o.order_number LIKE ?`;
       params.push(`%${orderNumber}%`);
     }
 
-    // 客户名称筛选
+    // Lọc theo tên khách hàng
     if (customerName) {
       sql += ` AND (o.customer_name LIKE ? OR c.name LIKE ?)`;
       params.push(`%${customerName}%`, `%${customerName}%`);
     }
 
-    // 日期范围筛选
+    // Lọc theo phạm vi ngày tháng
     if (startDate) {
       sql += ` AND o.created_at >= ?`;
       params.push(String(startDate));
@@ -63,23 +63,23 @@ router.get('/', async (req: Request, res: Response) => {
       params.push(String(endDate));
     }
 
-    // 获取总数
+    // Lấy tổng số
     const countSql = sql.replace(/SELECT o\.\*, c\.name as customer_name_joined, c\.phone as customer_phone_joined/, 'SELECT COUNT(*) as total');
     const countResult = await AppDataSource.query(countSql, params);
     const total = countResult[0]?.total || 0;
 
-    // 排序和分页
+    // Sắp xếp và phân trang
     sql += ` ORDER BY o.created_at DESC`;
     const skip = (Number(page) - 1) * Number(pageSize);
     sql += ` LIMIT ? OFFSET ?`;
     params.push(Number(pageSize), skip);
 
     const orders = await AppDataSource.query(sql, params);
-    console.log(`📋 [订单列表] 查询到 ${orders.length} 条订单, 总数: ${total}`);
+    console.log(`📋 [Danh sách đơn hàng] Truy vấn được ${orders.length} đơn hàng, tổng số: ${total}`);
 
-    // 转换为前端需要的格式（原生SQL返回的是下划线字段名）
+    // Chuyển đổi sang định dạng frontend cần (SQL thuần trả về tên trường dạng gạch dưới)
     const formattedOrders = orders.map((order: Record<string, unknown>) => {
-      // 解析products JSON字段
+      // Phân tích trường JSON products
       let products: unknown[] = [];
       if (order.products) {
         try {
@@ -116,7 +116,7 @@ router.get('/', async (req: Request, res: Response) => {
       };
     });
 
-    console.log(`📋 [订单列表] 返回 ${formattedOrders.length} 条格式化订单`);
+    console.log(`📋 [Danh sách đơn hàng] Trả về ${formattedOrders.length} đơn hàng đã định dạng`);
     res.json({
       success: true,
       data: {
@@ -127,18 +127,18 @@ router.get('/', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('❌ [订单列表] 获取失败:', error);
+    console.error('❌ [Danh sách đơn hàng] Lấy thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取订单列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy danh sách đơn hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/orders/:id
- * @desc 获取订单详情
+ * @desc Lấy chi tiết đơn hàng
  * @access Private
  */
 router.get('/:id', async (req: Request, res: Response) => {
@@ -152,11 +152,11 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
-    // 解析products JSON字段
+    // Phân tích trường JSON products
     let products: unknown[] = [];
     if (order.products) {
       try {
@@ -165,7 +165,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         products = [];
       }
     }
-    // 如果products为空，尝试从orderItems获取
+    // Nếu products rỗng, thử lấy từ orderItems
     if (products.length === 0 && order.orderItems?.length > 0) {
       products = order.orderItems.map(item => ({
         id: item.id.toString(),
@@ -210,19 +210,19 @@ router.get('/:id', async (req: Request, res: Response) => {
     console.error('获取订单详情失败:', error);
     res.status(500).json({
       success: false,
-      message: '获取订单详情失败'
+      message: 'Lấy chi tiết đơn hàng thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders
- * @desc 创建订单
+ * @desc Tạo đơn hàng
  * @access Private
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    console.log('📝 [订单创建] 收到请求数据:', JSON.stringify(req.body, null, 2));
+    console.log('📝 [Tạo đơn hàng] Nhận dữ liệu yêu cầu:', JSON.stringify(req.body, null, 2));
 
     const _orderRepository = AppDataSource.getRepository(Order);
     const _orderItemRepository = AppDataSource.getRepository(OrderItem);
@@ -233,7 +233,7 @@ router.post('/', async (req: Request, res: Response) => {
       customerPhone,
       products,
       totalAmount,
-      // subtotal, // 暂未使用
+      // subtotal, // Chưa sử dụng
       discount,
       collectAmount,
       depositAmount,
@@ -249,33 +249,33 @@ router.post('/', async (req: Request, res: Response) => {
       orderNumber,
       serviceWechat,
       orderSource
-      // customFields // 暂未使用
+      // customFields // Chưa sử dụng
     } = req.body;
 
-    // 数据验证
+    // Xác thực dữ liệu
     if (!customerId) {
-      console.error('❌ [订单创建] 缺少客户ID');
+      console.error('❌ [Tạo đơn hàng] Thiếu ID khách hàng');
       return res.status(400).json({
         success: false,
-        message: '缺少客户ID'
+        message: 'Thiếu ID khách hàng'
       });
     }
 
     if (!products || !Array.isArray(products) || products.length === 0) {
-      console.error('❌ [订单创建] 缺少商品信息');
+      console.error('❌ [Tạo đơn hàng] Thiếu thông tin sản phẩm');
       return res.status(400).json({
         success: false,
-        message: '缺少商品信息'
+        message: 'Thiếu thông tin sản phẩm'
       });
     }
 
-    // 解析客户ID（支持字符串和数字）
+    // Phân tích ID khách hàng (hỗ trợ chuỗi và số)
     let parsedCustomerId: string = '';
     if (typeof customerId === 'string') {
-      // 如果是类似 "customer_xxx" 的格式，需要查找或创建客户
+      // Nếu là định dạng giống "customer_xxx", cần tìm hoặc tạo khách hàng
       if (customerId.startsWith('customer_') || customerId.startsWith('temp_')) {
-        console.log('📝 [订单创建] 检测到临时客户ID，尝试查找或创建客户');
-        // 尝试通过手机号查找客户
+        console.log('📝 [Tạo đơn hàng] Phát hiện ID khách hàng tạm thời, thử tìm hoặc tạo khách hàng');
+        // Thử tìm khách hàng qua số điện thoại
         if (customerPhone) {
           const existingCustomer = await AppDataSource.query(
             'SELECT id FROM customers WHERE phone = ? LIMIT 1',
@@ -283,25 +283,25 @@ router.post('/', async (req: Request, res: Response) => {
           );
           if (existingCustomer.length > 0) {
             parsedCustomerId = existingCustomer[0].id;
-            console.log('✅ [订单创建] 通过手机号找到客户:', parsedCustomerId);
+            console.log('✅ [Tạo đơn hàng] Tìm thấy khách hàng qua số điện thoại:', parsedCustomerId);
           } else {
-            // 创建新客户 - 使用UUID
+            // Tạo khách hàng mới - sử dụng UUID
             const { v4: uuidv4 } = await import('uuid');
             const newCustomerId = uuidv4();
             const customerCode = `C${Date.now()}`;
             await AppDataSource.query(
               `INSERT INTO customers (id, customer_code, name, phone, sales_person_id, created_by, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-              [newCustomerId, customerCode, customerName || '未知客户', customerPhone, salesPersonId || null, salesPersonId || 'system']
+              [newCustomerId, customerCode, customerName || 'Khách hàng chưa xác định', customerPhone, salesPersonId || null, salesPersonId || 'system']
             );
             parsedCustomerId = newCustomerId;
-            console.log('✅ [订单创建] 创建新客户:', parsedCustomerId);
+            console.log('✅ [Tạo đơn hàng] Tạo khách hàng mới:', parsedCustomerId);
           }
         } else {
-          console.error('❌ [订单创建] 临时客户ID但缺少手机号');
+          console.error('❌ [Tạo đơn hàng] ID khách hàng tạm thời nhưng thiếu số điện thoại');
           return res.status(400).json({
             success: false,
-            message: '缺少客户手机号'
+            message: 'Thiếu số điện thoại khách hàng'
           });
         }
       } else {
@@ -312,29 +312,29 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     if (!parsedCustomerId) {
-      console.error('❌ [订单创建] 无效的客户ID:', customerId);
+      console.error('❌ [Tạo đơn hàng] ID khách hàng không hợp lệ:', customerId);
       return res.status(400).json({
         success: false,
-        message: '无效的客户ID'
+        message: 'ID khách hàng không hợp lệ'
       });
     }
 
-    // 生成订单号（使用前端传的或自动生成）
+    // Tạo số đơn hàng (sử dụng số từ frontend hoặc tự động tạo)
     const generatedOrderNumber = orderNumber || `ORD${Date.now()}`;
 
-    // 计算金额
+    // Tính toán số tiền
     const finalTotalAmount = Number(totalAmount) || 0;
     const finalDepositAmount = Number(depositAmount) || 0;
     const finalAmount = finalTotalAmount - (Number(discount) || 0);
 
-    console.log('📝 [订单创建] 准备创建订单:', {
+    console.log('📝 [Tạo đơn hàng] Chuẩn bị tạo đơn hàng:', {
       orderNumber: generatedOrderNumber,
       customerId: parsedCustomerId,
       totalAmount: finalTotalAmount,
       depositAmount: finalDepositAmount
     });
 
-    // 处理定金截图 - 支持单张和多张
+    // Xử lý ảnh chụp đặt cọc - hỗ trợ một và nhiều ảnh
     let finalDepositScreenshots: string[] = [];
     if (depositScreenshots && Array.isArray(depositScreenshots)) {
       finalDepositScreenshots = depositScreenshots;
@@ -342,11 +342,11 @@ router.post('/', async (req: Request, res: Response) => {
       finalDepositScreenshots = [depositScreenshot];
     }
 
-    // 创建订单 - 使用原生SQL避免TypeORM字段映射问题
+    // Tạo đơn hàng - sử dụng SQL thuần để tránh vấn đề ánh xạ trường TypeORM
     const orderId = uuidv4();
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    // 计算流转时间（正常发货单3分钟后流转）
+    // Tính thời gian chuyển tiếp (đơn hàng giao hàng bình thường chuyển tiếp sau 3 phút)
     const markType = req.body.markType || 'normal';
     const auditTransferTime = markType === 'normal'
       ? new Date(Date.now() + 3 * 60 * 1000).toISOString().slice(0, 19).replace('T', ' ')
@@ -371,7 +371,7 @@ router.post('/', async (req: Request, res: Response) => {
       serviceWechat || '',
       orderSource || '',
       JSON.stringify(products || []),
-      'pending_transfer', // 初始状态为待流转
+      'pending_transfer', // Trạng thái ban đầu là chờ chuyển tiếp
       finalTotalAmount,
       Number(discount) || 0,
       finalAmount,
@@ -386,7 +386,7 @@ router.post('/', async (req: Request, res: Response) => {
       markType,
       'pending', // audit_status
       auditTransferTime, // audit_transfer_time
-      markType === 'normal' ? 0 : 1, // is_audit_transferred (预留单不需要流转)
+      markType === 'normal' ? 0 : 1, // is_audit_transferred (đơn hàng dự trữ không cần chuyển tiếp)
       req.body.customFields ? JSON.stringify(req.body.customFields) : null,
       remark || '',
       salesPersonId || '',
@@ -396,15 +396,15 @@ router.post('/', async (req: Request, res: Response) => {
     ];
 
     await AppDataSource.query(insertSql, insertParams);
-    console.log('✅ [订单创建] 订单保存成功:', orderId);
+    console.log('✅ [Tạo đơn hàng] Đơn hàng đã lưu thành công:', orderId);
 
     const savedOrder = { id: orderId, orderNumber: generatedOrderNumber, customerId: parsedCustomerId };
 
-    // 商品信息已经存储在 orders 表的 products JSON 字段中
-    // 不再单独创建 order_items 记录，避免 TypeORM 字段映射问题
-    console.log('✅ [订单创建] 商品信息已存储在订单的products字段中');
+    // Thông tin sản phẩm đã được lưu trong trường JSON products của bảng orders
+    // Không tạo bản ghi order_items riêng nữa, tránh vấn đề ánh xạ trường TypeORM
+    console.log('✅ [Tạo đơn hàng] Thông tin sản phẩm đã được lưu trong trường products của đơn hàng');
 
-    // 返回完整的订单数据
+    // Trả về dữ liệu đơn hàng đầy đủ
     const responseData = {
       id: savedOrder.id.toString(),
       orderNumber: savedOrder.orderNumber,
@@ -429,16 +429,16 @@ router.post('/', async (req: Request, res: Response) => {
       salesPersonId: salesPersonId || ''
     };
 
-    console.log('✅ [订单创建] 返回数据:', responseData);
+    console.log('✅ [Tạo đơn hàng] Trả về dữ liệu:', responseData);
 
     res.status(201).json({
       success: true,
-      message: '订单创建成功',
+      message: 'Tạo đơn hàng thành công',
       data: responseData
     });
   } catch (error) {
     const err = error as any;
-    console.error('❌ [订单创建] 失败:', {
+    console.error('❌ [Tạo đơn hàng] Thất bại:', {
       message: err?.message,
       stack: err?.stack,
       code: err?.code,
@@ -446,7 +446,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
     res.status(500).json({
       success: false,
-      message: err?.sqlMessage || err?.message || '创建订单失败',
+      message: err?.sqlMessage || err?.message || 'Tạo đơn hàng thất bại',
       error: process.env.NODE_ENV === 'development' ? err?.stack : undefined
     });
   }
@@ -454,7 +454,7 @@ router.post('/', async (req: Request, res: Response) => {
 
 /**
  * @route PUT /api/v1/orders/:id
- * @desc 更新订单
+ * @desc Cập nhật đơn hàng
  * @access Private
  */
 router.put('/:id', async (req: Request, res: Response) => {
@@ -467,13 +467,13 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
     const updateData = req.body;
 
-    // 更新订单字段
+    // Cập nhật trường đơn hàng
     if (updateData.status) order.status = updateData.status;
     if (updateData.receiverName || updateData.shippingName) order.shippingName = updateData.receiverName || updateData.shippingName;
     if (updateData.receiverPhone || updateData.shippingPhone) order.shippingPhone = updateData.receiverPhone || updateData.shippingPhone;
@@ -486,21 +486,21 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: '订单更新成功',
+      message: 'Cập nhật đơn hàng thành công',
       data: order
     });
   } catch (error) {
-    console.error('更新订单失败:', error);
+    console.error('Cập nhật đơn hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '更新订单失败'
+      message: 'Cập nhật đơn hàng thất bại'
     });
   }
 });
 
 /**
  * @route DELETE /api/v1/orders/:id
- * @desc 删除订单
+ * @desc Xóa đơn hàng
  * @access Private
  */
 router.delete('/:id', async (req: Request, res: Response) => {
@@ -513,7 +513,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
@@ -521,20 +521,20 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: '订单删除成功'
+      message: 'Xóa đơn hàng thành công'
     });
   } catch (error) {
-    console.error('删除订单失败:', error);
+    console.error('Xóa đơn hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '删除订单失败'
+      message: 'Xóa đơn hàng thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders/:id/submit-audit
- * @desc 提交订单审核
+ * @desc Gửi đơn hàng để duyệt
  * @access Private
  */
 router.post('/:id/submit-audit', async (req: Request, res: Response) => {
@@ -543,12 +543,12 @@ router.post('/:id/submit-audit', async (req: Request, res: Response) => {
     const { remark } = req.body;
     const idParam = req.params.id;
 
-    // 支持 id 或订单号查找
+    // Hỗ trợ tìm bằng id hoặc số đơn hàng
     let order = await orderRepository.findOne({
       where: { id: idParam }
     });
 
-    // 如果 id 没找到，尝试用订单号查找
+    // Nếu không tìm thấy bằng id, thử tìm bằng số đơn hàng
     if (!order) {
       order = await orderRepository.findOne({
         where: { orderNumber: idParam }
@@ -558,21 +558,21 @@ router.post('/:id/submit-audit', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
-    // 更新订单状态为待审核
-    order.status = 'confirmed'; // 使用 confirmed 表示已提审
+    // Cập nhật trạng thái đơn hàng thành chờ duyệt
+    order.status = 'confirmed'; // Sử dụng confirmed để biểu thị đã gửi duyệt
     if (remark) {
-      order.remark = `${order.remark || ''} | 提审备注: ${remark}`;
+      order.remark = `${order.remark || ''} | Ghi chú gửi duyệt: ${remark}`;
     }
 
     await orderRepository.save(order);
 
     res.json({
       success: true,
-      message: '订单已提交审核',
+      message: 'Đơn hàng đã được gửi để duyệt',
       data: {
         id: order.id.toString(),
         orderNumber: order.orderNumber,
@@ -580,18 +580,18 @@ router.post('/:id/submit-audit', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('提交订单审核失败:', error);
+    console.error('Gửi đơn hàng để duyệt thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '提交订单审核失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Gửi đơn hàng để duyệt thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders/:id/audit
- * @desc 审核订单
+ * @desc Duyệt đơn hàng
  * @access Private
  */
 router.post('/:id/audit', async (req: Request, res: Response) => {
@@ -600,12 +600,12 @@ router.post('/:id/audit', async (req: Request, res: Response) => {
     const { action, remark } = req.body;
     const idParam = req.params.id;
 
-    // 支持 id 或订单号查找
+    // Hỗ trợ tìm bằng id hoặc số đơn hàng
     let order = await orderRepository.findOne({
       where: { id: idParam }
     });
 
-    // 如果 id 没找到，尝试用订单号查找
+    // Nếu không tìm thấy bằng id, thử tìm bằng số đơn hàng
     if (!order) {
       order = await orderRepository.findOne({
         where: { orderNumber: idParam }
@@ -615,23 +615,23 @@ router.post('/:id/audit', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
     if (action === 'approve') {
-      order.status = 'paid'; // 审核通过，进入已支付状态
-      order.remark = `${order.remark || ''} | 审核通过: ${remark || ''}`;
+      order.status = 'paid'; // Duyệt qua, chuyển sang trạng thái đã thanh toán
+      order.remark = `${order.remark || ''} | Duyệt qua: ${remark || ''}`;
     } else {
-      order.status = 'pending'; // 审核拒绝，退回待处理
-      order.remark = `${order.remark || ''} | 审核拒绝: ${remark || ''}`;
+      order.status = 'pending'; // Từ chối duyệt, trả về chờ xử lý
+      order.remark = `${order.remark || ''} | Từ chối duyệt: ${remark || ''}`;
     }
 
     await orderRepository.save(order);
 
     res.json({
       success: true,
-      message: action === 'approve' ? '订单审核通过' : '订单审核拒绝',
+      message: action === 'approve' ? 'Đơn hàng đã được duyệt' : 'Đơn hàng bị từ chối duyệt',
       data: {
         id: order.id.toString(),
         orderNumber: order.orderNumber,
@@ -639,18 +639,18 @@ router.post('/:id/audit', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('审核订单失败:', error);
+    console.error('Duyệt đơn hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '审核订单失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Duyệt đơn hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders/cancel-request
- * @desc 提交取消订单申请
+ * @desc Gửi yêu cầu hủy đơn hàng
  * @access Private
  */
 router.post('/cancel-request', async (req: Request, res: Response) => {
@@ -665,43 +665,43 @@ router.post('/cancel-request', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
-    // 更新订单状态为待取消
-    order.status = 'pending'; // 临时使用pending表示待取消
-    order.remark = `取消原因: ${reason}${description ? ` - ${description}` : ''}`;
+    // Cập nhật trạng thái đơn hàng thành chờ hủy
+    order.status = 'pending'; // Tạm thời sử dụng pending để biểu thị chờ hủy
+    order.remark = `Lý do hủy: ${reason}${description ? ` - ${description}` : ''}`;
 
     await orderRepository.save(order);
 
     res.json({
       success: true,
-      message: '取消申请已提交'
+      message: 'Yêu cầu hủy đã được gửi'
     });
   } catch (error) {
-    console.error('提交取消申请失败:', error);
+    console.error('Gửi yêu cầu hủy thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '提交取消申请失败'
+      message: 'Gửi yêu cầu hủy thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/orders/pending-cancel
- * @desc 获取待审核的取消订单列表
+ * @desc Lấy danh sách đơn hàng hủy chờ duyệt
  * @access Private
  */
 router.get('/pending-cancel', async (req: Request, res: Response) => {
   try {
     const orderRepository = AppDataSource.getRepository(Order);
 
-    // 查询状态为pending且remark包含"取消原因"的订单
+    // Truy vấn đơn hàng có trạng thái pending và remark chứa "Lý do hủy"
     const orders = await orderRepository.createQueryBuilder('order')
       .leftJoinAndSelect('order.customer', 'customer')
       .where('order.status = :status', { status: 'pending' })
-      .andWhere('order.remark LIKE :cancelNote', { cancelNote: '%取消原因%' })
+      .andWhere('order.remark LIKE :cancelNote', { cancelNote: '%Lý do hủy%' })
       .orderBy('order.updatedAt', 'DESC')
       .getMany();
 
@@ -721,17 +721,17 @@ router.get('/pending-cancel', async (req: Request, res: Response) => {
       data: formattedOrders
     });
   } catch (error) {
-    console.error('获取待审核取消订单失败:', error);
+    console.error('Lấy danh sách đơn hàng hủy chờ duyệt thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取待审核取消订单失败'
+      message: 'Lấy danh sách đơn hàng hủy chờ duyệt thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders/:id/cancel-audit
- * @desc 审核取消订单申请
+ * @desc Duyệt yêu cầu hủy đơn hàng
  * @access Private
  */
 router.post('/:id/cancel-audit', async (req: Request, res: Response) => {
@@ -746,36 +746,36 @@ router.post('/:id/cancel-audit', async (req: Request, res: Response) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: '订单不存在'
+        message: 'Đơn hàng không tồn tại'
       });
     }
 
     if (action === 'approve') {
       order.status = 'cancelled';
-      order.remark = `${order.remark || ''} | 审核通过: ${remark || ''}`;
+      order.remark = `${order.remark || ''} | Duyệt qua: ${remark || ''}`;
     } else {
-      order.status = 'confirmed'; // 恢复到确认状态
-      order.remark = `${order.remark || ''} | 审核拒绝: ${remark || ''}`;
+      order.status = 'confirmed'; // Khôi phục về trạng thái đã xác nhận
+      order.remark = `${order.remark || ''} | Từ chối duyệt: ${remark || ''}`;
     }
 
     await orderRepository.save(order);
 
     res.json({
       success: true,
-      message: action === 'approve' ? '取消申请已通过' : '取消申请已拒绝'
+      message: action === 'approve' ? 'Yêu cầu hủy đã được duyệt' : 'Yêu cầu hủy đã bị từ chối'
     });
   } catch (error) {
-    console.error('审核取消申请失败:', error);
+    console.error('Duyệt yêu cầu hủy thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '审核取消申请失败'
+      message: 'Duyệt yêu cầu hủy thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/orders/audited-cancel
- * @desc 获取已审核的取消订单列表
+ * @desc Lấy danh sách đơn hàng hủy đã được duyệt
  * @access Private
  */
 router.get('/audited-cancel', async (req: Request, res: Response) => {
@@ -804,17 +804,17 @@ router.get('/audited-cancel', async (req: Request, res: Response) => {
       data: formattedOrders
     });
   } catch (error) {
-    console.error('获取已审核取消订单失败:', error);
+    console.error('Lấy danh sách đơn hàng hủy đã được duyệt thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取已审核取消订单失败'
+      message: 'Lấy danh sách đơn hàng hủy đã được duyệt thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/orders/statistics
- * @desc 获取订单统计数据
+ * @desc Lấy dữ liệu thống kê đơn hàng
  * @access Private
  */
 router.get('/statistics', async (req: Request, res: Response) => {
@@ -824,17 +824,17 @@ router.get('/statistics', async (req: Request, res: Response) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // 待处理订单数
+    // Số đơn hàng chờ xử lý
     const pendingCount = await orderRepository.count({
       where: { status: 'pending' }
     });
 
-    // 今日订单数
+    // Số đơn hàng hôm nay
     const todayCount = await orderRepository.createQueryBuilder('order')
       .where('order.createdAt >= :today', { today })
       .getCount();
 
-    // 待处理订单金额
+    // Số tiền đơn hàng chờ xử lý
     const pendingAmountResult = await orderRepository.createQueryBuilder('order')
       .select('SUM(order.totalAmount)', 'total')
       .where('order.status = :status', { status: 'pending' })
@@ -850,30 +850,30 @@ router.get('/statistics', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取订单统计失败:', error);
+    console.error('Lấy thống kê đơn hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取订单统计失败'
+      message: 'Lấy thống kê đơn hàng thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/orders/check-transfer
- * @desc 检查并执行订单流转（将到期的待流转订单转为待审核）
+ * @desc Kiểm tra và thực hiện chuyển tiếp đơn hàng (chuyển đơn hàng chờ chuyển tiếp đã đến hạn thành chờ duyệt)
  * @access Private
  */
 router.post('/check-transfer', async (req: Request, res: Response) => {
   try {
-    console.log('🔄 [订单流转] 开始检查待流转订单...');
+    console.log('🔄 [Chuyển tiếp đơn hàng] Bắt đầu kiểm tra đơn hàng chờ chuyển tiếp...');
 
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    // 查找需要流转的订单：
-    // 1. 状态为 pending_transfer
-    // 2. 标记类型为 normal（正常发货单）
-    // 3. 未流转 (is_audit_transferred = 0)
-    // 4. 流转时间已到 (audit_transfer_time <= now)
+    // Tìm đơn hàng cần chuyển tiếp:
+    // 1. Trạng thái là pending_transfer
+    // 2. Loại đánh dấu là normal (đơn hàng giao hàng bình thường)
+    // 3. Chưa chuyển tiếp (is_audit_transferred = 0)
+    // 4. Thời gian chuyển tiếp đã đến (audit_transfer_time <= now)
     const selectSql = `
       SELECT id, order_number, audit_transfer_time
       FROM orders
@@ -885,17 +885,17 @@ router.post('/check-transfer', async (req: Request, res: Response) => {
     `;
 
     const ordersToTransfer = await AppDataSource.query(selectSql, [now]);
-    console.log(`🔄 [订单流转] 找到 ${ordersToTransfer.length} 个待流转订单`);
+    console.log(`🔄 [Chuyển tiếp đơn hàng] Tìm thấy ${ordersToTransfer.length} đơn hàng chờ chuyển tiếp`);
 
     if (ordersToTransfer.length === 0) {
       return res.json({
         success: true,
-        message: '没有需要流转的订单',
+        message: 'Không có đơn hàng nào cần chuyển tiếp',
         data: { transferredCount: 0 }
       });
     }
 
-    // 批量更新订单状态
+    // Cập nhật trạng thái đơn hàng hàng loạt
     const orderIds = ordersToTransfer.map((o: { id: string }) => o.id);
     const updateSql = `
       UPDATE orders
@@ -907,11 +907,11 @@ router.post('/check-transfer', async (req: Request, res: Response) => {
 
     await AppDataSource.query(updateSql, [now, ...orderIds]);
 
-    console.log(`✅ [订单流转] 成功流转 ${ordersToTransfer.length} 个订单`);
+    console.log(`✅ [Chuyển tiếp đơn hàng] Đã chuyển tiếp thành công ${ordersToTransfer.length} đơn hàng`);
 
     res.json({
       success: true,
-      message: `成功流转 ${ordersToTransfer.length} 个订单`,
+      message: `Đã chuyển tiếp thành công ${ordersToTransfer.length} đơn hàng`,
       data: {
         transferredCount: ordersToTransfer.length,
         orders: ordersToTransfer.map((o: { id: string; order_number: string }) => ({
@@ -921,18 +921,18 @@ router.post('/check-transfer', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('❌ [订单流转] 检查流转失败:', error);
+    console.error('❌ [Chuyển tiếp đơn hàng] Kiểm tra chuyển tiếp thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '检查订单流转失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Kiểm tra chuyển tiếp đơn hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route PUT /api/v1/orders/:id/mark-type
- * @desc 更新订单标记类型
+ * @desc Cập nhật loại đánh dấu đơn hàng
  * @access Private
  */
 router.put('/:id/mark-type', async (req: Request, res: Response) => {
@@ -940,11 +940,11 @@ router.put('/:id/mark-type', async (req: Request, res: Response) => {
     const { markType, isAuditTransferred, auditTransferTime, status } = req.body;
     const orderId = req.params.id;
 
-    console.log(`📝 [订单标记] 更新订单 ${orderId} 标记类型为 ${markType}`);
+    console.log(`📝 [Đánh dấu đơn hàng] Cập nhật loại đánh dấu đơn hàng ${orderId} thành ${markType}`);
 
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-    // 构建更新SQL
+    // Xây dựng SQL cập nhật
     const updateFields = ['mark_type = ?', 'updated_at = ?'];
     const updateParams: (string | number | null)[] = [markType, now];
 
@@ -968,19 +968,19 @@ router.put('/:id/mark-type', async (req: Request, res: Response) => {
     const updateSql = `UPDATE orders SET ${updateFields.join(', ')} WHERE id = ?`;
     await AppDataSource.query(updateSql, updateParams);
 
-    console.log(`✅ [订单标记] 订单 ${orderId} 标记更新成功`);
+    console.log(`✅ [Đánh dấu đơn hàng] Đơn hàng ${orderId} đã cập nhật đánh dấu thành công`);
 
     res.json({
       success: true,
-      message: '订单标记更新成功',
+      message: 'Cập nhật đánh dấu đơn hàng thành công',
       data: { id: orderId, markType }
     });
   } catch (error) {
-    console.error('❌ [订单标记] 更新失败:', error);
+    console.error('❌ [Đánh dấu đơn hàng] Cập nhật thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '更新订单标记失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật đánh dấu đơn hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });

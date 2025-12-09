@@ -23,7 +23,7 @@
             </defs>
           </svg>
         </div>
-        <h1 class="system-title">智能销售管理系统</h1>
+        <h1 class="system-title">Hệ thống quản lý bán hàng thông minh</h1>
         <p class="system-subtitle">CRM Customer Relationship Management</p>
       </div>
 
@@ -32,7 +32,7 @@
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
-            placeholder="用户名"
+            placeholder="Tên đăng nhập"
             size="large"
             prefix-icon="User"
             clearable
@@ -43,7 +43,7 @@
           <el-input
             v-model="loginForm.password"
             type="password"
-            placeholder="密码"
+            placeholder="Mật khẩu"
             size="large"
             prefix-icon="Lock"
             show-password
@@ -55,10 +55,10 @@
         <el-form-item class="agreement-item">
           <el-checkbox v-model="agreeToTerms">
             <span class="agreement-text">
-              我已阅读并同意
-              <a href="javascript:void(0)" @click="showAgreementDialog('user')">《用户协议》</a>
-              和
-              <a href="javascript:void(0)" @click="showAgreementDialog('privacy')">《隐私政策》</a>
+              Tôi đã đọc và đồng ý
+              <a href="javascript:void(0)" @click="showAgreementDialog('user')">《Thỏa thuận người dùng》</a>
+              và
+              <a href="javascript:void(0)" @click="showAgreementDialog('privacy')">《Chính sách bảo mật》</a>
             </span>
           </el-checkbox>
         </el-form-item>
@@ -72,14 +72,14 @@
             :disabled="!agreeToTerms"
             @click="handleLogin"
           >
-            {{ loading ? '登录中...' : '登录' }}
+            {{ loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
           </el-button>
         </el-form-item>
       </el-form>
 
       <!-- 底部信息 -->
       <div class="card-footer">
-        <p>© 2025 智能销售管理系统</p>
+        <p>© 2025 Hệ thống quản lý bán hàng thông minh</p>
       </div>
     </div>
 
@@ -93,9 +93,9 @@
     >
       <div class="agreement-content" v-html="agreementDialogContent"></div>
       <template #footer>
-        <el-button @click="agreementDialogVisible = false">关闭</el-button>
+        <el-button @click="agreementDialogVisible = false">Đóng</el-button>
         <el-button type="primary" @click="agreeAndClose">
-          我已阅读并同意
+          Tôi đã đọc và đồng ý
         </el-button>
       </template>
     </el-dialog>
@@ -134,322 +134,322 @@ const currentAgreementType = ref<'user' | 'privacy'>('user')
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên đăng nhập', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập mật khẩu', trigger: 'blur' },
+    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự', trigger: 'blur' }
   ]
 }
 
 // 🔥 批次275新增：获取默认协议内容
 const getDefaultUserAgreement = () => {
   return `<div style="line-height: 2.2; padding: 30px; font-size: 15px;">
-<h2 style="color: #303133; border-bottom: 3px solid #409eff; padding-bottom: 15px; margin-bottom: 30px; text-align: center; font-size: 26px; font-weight: 700;">用户使用协议</h2>
+<h2 style="color: #303133; border-bottom: 3px solid #409eff; padding-bottom: 15px; margin-bottom: 30px; text-align: center; font-size: 26px; font-weight: 700;">Thỏa thuận sử dụng người dùng</h2>
 
 <p style="color: #606266; margin: 25px 0; font-size: 16px; line-height: 2.5; background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #409eff;">
-  <strong>欢迎使用本CRM客户管理系统</strong>（以下简称"本系统"）。在使用本系统之前，<strong style="color: #409eff;">请您仔细阅读并充分理解本协议的全部内容</strong>。
+  <strong>Chào mừng bạn sử dụng Hệ thống quản lý khách hàng CRM</strong> (sau đây gọi là "Hệ thống"). Trước khi sử dụng Hệ thống, <strong style="color: #409eff;">vui lòng đọc kỹ và hiểu rõ toàn bộ nội dung của thỏa thuận này</strong>.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">一、协议的接受</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">I. Chấp nhận thỏa thuận</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>1.1</strong> 本协议是您与本系统运营方之间关于使用本系统服务所订立的协议。
+  <strong>1.1</strong> Thỏa thuận này là thỏa thuận giữa bạn và bên vận hành Hệ thống về việc sử dụng dịch vụ của Hệ thống.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>1.2</strong> 您点击<strong style="color: #409eff;">"同意"</strong>按钮即表示您完全接受本协议的全部条款。
+  <strong>1.2</strong> Bạn nhấp vào nút <strong style="color: #409eff;">"Đồng ý"</strong> có nghĩa là bạn hoàn toàn chấp nhận tất cả các điều khoản của thỏa thuận này.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">二、服务内容</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">II. Nội dung dịch vụ</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>2.1</strong> 本系统为企业提供客户关系管理服务，包括但不限于：
+  <strong>2.1</strong> Hệ thống cung cấp dịch vụ quản lý quan hệ khách hàng cho doanh nghiệp, bao gồm nhưng không giới hạn:
 </p>
 
 <ul style="color: #606266; padding-left: 50px; margin: 20px 0; line-height: 2.5;">
-  <li style="margin: 12px 0;">✓ 客户信息管理</li>
-  <li style="margin: 12px 0;">✓ 订单管理</li>
-  <li style="margin: 12px 0;">✓ 业绩统计</li>
-  <li style="margin: 12px 0;">✓ 数据分析</li>
-  <li style="margin: 12px 0;">✓ 团队协作</li>
+  <li style="margin: 12px 0;">✓ Quản lý thông tin khách hàng</li>
+  <li style="margin: 12px 0;">✓ Quản lý đơn hàng</li>
+  <li style="margin: 12px 0;">✓ Thống kê thành tích</li>
+  <li style="margin: 12px 0;">✓ Phân tích dữ liệu</li>
+  <li style="margin: 12px 0;">✓ Hợp tác nhóm</li>
 </ul>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>2.2</strong> 本系统保留随时修改或中断服务而不需通知用户的权利。
+  <strong>2.2</strong> Hệ thống bảo lưu quyền sửa đổi hoặc ngừng dịch vụ bất cứ lúc nào mà không cần thông báo cho người dùng.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">三、用户权利和义务</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">III. Quyền và nghĩa vụ của người dùng</h3>
 
 <p style="color: #606266; margin: 25px 0; padding-left: 15px;">
-  <strong style="font-size: 17px; color: #333;">3.1 用户权利：</strong>
+  <strong style="font-size: 17px; color: #333;">3.1 Quyền của người dùng:</strong>
 </p>
 
 <ul style="color: #606266; padding-left: 50px; margin: 20px 0; line-height: 2.5;">
-  <li style="margin: 12px 0;">✓ 使用本系统提供的各项功能</li>
-  <li style="margin: 12px 0;">✓ 管理自己的客户数据</li>
-  <li style="margin: 12px 0;">✓ 查看业绩统计报表</li>
-  <li style="margin: 12px 0;">✓ 获得技术支持服务</li>
+  <li style="margin: 12px 0;">✓ Sử dụng các chức năng do Hệ thống cung cấp</li>
+  <li style="margin: 12px 0;">✓ Quản lý dữ liệu khách hàng của mình</li>
+  <li style="margin: 12px 0;">✓ Xem báo cáo thống kê thành tích</li>
+  <li style="margin: 12px 0;">✓ Nhận dịch vụ hỗ trợ kỹ thuật</li>
 </ul>
 
 <p style="color: #606266; margin: 25px 0; padding-left: 15px;">
-  <strong style="font-size: 17px; color: #333;">3.2 用户义务：</strong>
+  <strong style="font-size: 17px; color: #333;">3.2 Nghĩa vụ của người dùng:</strong>
 </p>
 
 <ul style="color: #606266; padding-left: 50px; margin: 20px 0; line-height: 2.5;">
   <li style="margin: 15px 0; padding: 15px; background: #fff3f3; border-left: 4px solid #f56c6c; border-radius: 4px;">
-    <strong style="color: #f56c6c; font-size: 16px;">⚠️ 严禁将本系统用于任何违法犯罪活动，包括但不限于诈骗、洗钱、传销等</strong>
+    <strong style="color: #f56c6c; font-size: 16px;">⚠️ Nghiêm cấm sử dụng Hệ thống cho bất kỳ hoạt động phạm pháp nào, bao gồm nhưng không giới hạn: lừa đảo, rửa tiền, đa cấp, v.v.</strong>
   </li>
-  <li style="margin: 12px 0;">• 遵守国家法律法规和社会公德</li>
-  <li style="margin: 12px 0;">• 不得利用本系统侵害他人合法权益</li>
-  <li style="margin: 12px 0;">• 妥善保管账号密码，对账号下的所有行为负责</li>
-  <li style="margin: 12px 0;">• 不得恶意攻击、破坏系统</li>
-  <li style="margin: 12px 0;">• 不得泄露客户隐私信息</li>
-  <li style="margin: 12px 0;">• 不得传播虚假信息或进行欺诈行为</li>
+  <li style="margin: 12px 0;">• Tuân thủ pháp luật quốc gia và đạo đức xã hội</li>
+  <li style="margin: 12px 0;">• Không được sử dụng Hệ thống để xâm phạm quyền và lợi ích hợp pháp của người khác</li>
+  <li style="margin: 12px 0;">• Bảo quản cẩn thận tên đăng nhập và mật khẩu, chịu trách nhiệm về mọi hành vi dưới tài khoản của mình</li>
+  <li style="margin: 12px 0;">• Không được tấn công hoặc phá hoại Hệ thống</li>
+  <li style="margin: 12px 0;">• Không được tiết lộ thông tin riêng tư của khách hàng</li>
+  <li style="margin: 12px 0;">• Không được phát tán thông tin sai sự thật hoặc thực hiện hành vi lừa đảo</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">四、免责声明</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">IV. Tuyên bố miễn trừ trách nhiệm</h3>
 
 <p style="color: #f56c6c; font-weight: bold; margin: 25px 0; padding: 20px; background: #fff3f3; border-left: 5px solid #f56c6c; border-radius: 8px; font-size: 16px;">
-  <strong>⚠️ 重要提示：</strong>本系统仅作为工具提供服务，<strong>不对用户使用本系统产生的内容、行为及后果承担任何责任</strong>。
+  <strong>⚠️ Lưu ý quan trọng:</strong> Hệ thống chỉ cung cấp dịch vụ như một công cụ, <strong>không chịu trách nhiệm về nội dung, hành vi và hậu quả do người dùng sử dụng Hệ thống tạo ra</strong>.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>4.2</strong> 本系统不对因以下原因导致的损失承担责任：
+  <strong>4.2</strong> Hệ thống không chịu trách nhiệm về các tổn thất do các nguyên nhân sau:
 </p>
 
 <ul style="color: #606266; padding-left: 50px; margin: 20px 0; line-height: 2.5;">
-  <li style="margin: 12px 0;">• 用户违法违规使用本系统</li>
-  <li style="margin: 12px 0;">• 用户利用本系统从事诈骗、欺诈等违法活动</li>
-  <li style="margin: 12px 0;">• 不可抗力因素（自然灾害、战争、政府行为等）</li>
-  <li style="margin: 12px 0;">• 网络故障、设备故障</li>
-  <li style="margin: 12px 0;">• 用户操作不当或误操作</li>
-  <li style="margin: 12px 0;">• 第三方侵权行为</li>
-  <li style="margin: 12px 0;">• 数据丢失或损坏</li>
+  <li style="margin: 12px 0;">• Người dùng sử dụng Hệ thống vi phạm pháp luật</li>
+  <li style="margin: 12px 0;">• Người dùng sử dụng Hệ thống để thực hiện các hoạt động phạm pháp như lừa đảo, gian lận</li>
+  <li style="margin: 12px 0;">• Các yếu tố bất khả kháng (thiên tai, chiến tranh, hành vi của chính phủ, v.v.)</li>
+  <li style="margin: 12px 0;">• Sự cố mạng, sự cố thiết bị</li>
+  <li style="margin: 12px 0;">• Người dùng thao tác không đúng hoặc nhầm lẫn</li>
+  <li style="margin: 12px 0;">• Hành vi xâm phạm của bên thứ ba</li>
+  <li style="margin: 12px 0;">• Mất mát hoặc hư hỏng dữ liệu</li>
 </ul>
 
 <p style="color: #f56c6c; font-weight: bold; margin: 25px 0; padding: 20px; background: #fff3f3; border-left: 5px solid #f56c6c; border-radius: 8px; font-size: 16px;">
-  <strong>4.3</strong> 用户应对其使用本系统的行为<strong>承担全部法律责任</strong>。如因用户违法违规使用本系统导致任何法律纠纷或损失，用户应自行承担全部责任，并赔偿本系统因此遭受的损失。
+  <strong>4.3</strong> Người dùng phải <strong>chịu toàn bộ trách nhiệm pháp lý</strong> về hành vi sử dụng Hệ thống của mình. Nếu việc người dùng sử dụng Hệ thống vi phạm pháp luật dẫn đến bất kỳ tranh chấp pháp lý hoặc tổn thất nào, người dùng phải tự chịu toàn bộ trách nhiệm và bồi thường các tổn thất mà Hệ thống phải chịu do đó.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">五、数据安全</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">V. An toàn dữ liệu</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>5.1</strong> 本系统采用<strong style="color: #409eff;">行业标准的安全措施</strong>保护用户数据。
-</p>
-
-<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>5.2</strong> 用户应定期备份重要数据，本系统不对数据丢失承担责任。
+  <strong>5.1</strong> Hệ thống áp dụng <strong style="color: #409eff;">các biện pháp an toàn theo tiêu chuẩn ngành</strong> để bảo vệ dữ liệu người dùng.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>5.3</strong> 未经授权访问、使用、修改或破坏系统数据的行为将<strong style="color: #f56c6c;">承担法律责任</strong>。
-</p>
-
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">六、知识产权</h3>
-
-<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>6.1</strong> 本系统的所有内容，包括但不限于文字、图片、软件、程序等，均受<strong style="color: #409eff;">知识产权法保护</strong>。
+  <strong>5.2</strong> Người dùng nên thường xuyên sao lưu dữ liệu quan trọng, Hệ thống không chịu trách nhiệm về việc mất dữ liệu.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>6.2</strong> 未经许可，用户不得复制、传播、修改本系统的任何内容。
+  <strong>5.3</strong> Hành vi truy cập, sử dụng, sửa đổi hoặc phá hoại dữ liệu Hệ thống mà không được ủy quyền sẽ <strong style="color: #f56c6c;">phải chịu trách nhiệm pháp lý</strong>.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">七、违规处理</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">VI. Sở hữu trí tuệ</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>7.1</strong> 如发现用户违反本协议或从事违法活动，本系统有权：
+  <strong>6.1</strong> Tất cả nội dung của Hệ thống, bao gồm nhưng không giới hạn: văn bản, hình ảnh, phần mềm, chương trình, v.v., đều được <strong style="color: #409eff;">bảo vệ bởi luật sở hữu trí tuệ</strong>.
+</p>
+
+<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
+  <strong>6.2</strong> Không được phép, người dùng không được sao chép, phát tán, sửa đổi bất kỳ nội dung nào của Hệ thống.
+</p>
+
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">VII. Xử lý vi phạm</h3>
+
+<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
+  <strong>7.1</strong> Nếu phát hiện người dùng vi phạm thỏa thuận này hoặc thực hiện hoạt động phạm pháp, Hệ thống có quyền:
 </p>
 
 <ul style="color: #606266; padding-left: 50px; margin: 20px 0; line-height: 2.5;">
-  <li style="margin: 12px 0;">• 立即终止服务</li>
-  <li style="margin: 12px 0;">• 删除违规内容</li>
-  <li style="margin: 12px 0;">• 冻结或注销账号</li>
-  <li style="margin: 12px 0;">• 向有关部门报告</li>
-  <li style="margin: 12px 0;">• 追究法律责任</li>
+  <li style="margin: 12px 0;">• Chấm dứt dịch vụ ngay lập tức</li>
+  <li style="margin: 12px 0;">• Xóa nội dung vi phạm</li>
+  <li style="margin: 12px 0;">• Đóng băng hoặc hủy tài khoản</li>
+  <li style="margin: 12px 0;">• Báo cáo với cơ quan có thẩm quyền</li>
+  <li style="margin: 12px 0;">• Truy cứu trách nhiệm pháp lý</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">八、协议的变更</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">VIII. Thay đổi thỏa thuận</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>8.1</strong> 本系统有权随时修改本协议条款。
+  <strong>8.1</strong> Hệ thống có quyền sửa đổi các điều khoản của thỏa thuận này bất cứ lúc nào.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>8.2</strong> 协议变更后，继续使用本系统即视为接受新协议。
+  <strong>8.2</strong> Sau khi thỏa thuận thay đổi, việc tiếp tục sử dụng Hệ thống được coi là chấp nhận thỏa thuận mới.
 </p>
 
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">九、争议解决</h3>
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">IX. Giải quyết tranh chấp</h3>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>9.1</strong> 本协议的解释、效力及纠纷的解决，适用<strong style="color: #409eff;">中华人民共和国法律</strong>。
-</p>
-
-<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>9.2</strong> 若发生争议，双方应友好协商解决；协商不成的，可向本系统所在地人民法院提起诉讼。
-</p>
-
-<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">十、其他</h3>
-
-<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>10.1</strong> 本协议自用户点击同意之日起生效。
+  <strong>9.1</strong> Việc giải thích, hiệu lực và giải quyết tranh chấp của thỏa thuận này tuân theo <strong style="color: #409eff;">pháp luật Việt Nam</strong>.
 </p>
 
 <p style="color: #606266; margin: 18px 0; padding-left: 15px;">
-  <strong>10.2</strong> 如本协议中的任何条款无论因何种原因完全或部分无效或不具有执行力，本协议的其余条款仍应有效并且有约束力。
+  <strong>9.2</strong> Nếu phát sinh tranh chấp, các bên nên giải quyết thông qua thương lượng hữu nghị; nếu thương lượng không thành, có thể khởi kiện tại Tòa án nhân dân nơi Hệ thống đặt trụ sở.
+</p>
+
+<h3 style="color: #409eff; margin-top: 45px; margin-bottom: 20px; font-size: 20px; font-weight: 600; padding-left: 15px; border-left: 5px solid #409eff;">X. Các điều khoản khác</h3>
+
+<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
+  <strong>10.1</strong> Thỏa thuận này có hiệu lực kể từ ngày người dùng nhấp đồng ý.
+</p>
+
+<p style="color: #606266; margin: 18px 0; padding-left: 15px;">
+  <strong>10.2</strong> Nếu bất kỳ điều khoản nào trong thỏa thuận này vì bất kỳ lý do nào mà hoàn toàn hoặc một phần vô hiệu hoặc không có hiệu lực thi hành, các điều khoản còn lại của thỏa thuận vẫn có hiệu lực và ràng buộc.
 </p>
 
 <div style="margin-top: 50px; padding-top: 25px; border-top: 2px dashed #e0e0e0; text-align: center;">
-  <p style="color: #909399; font-size: 13px; margin: 0;">最后更新日期：${new Date().toLocaleDateString('zh-CN')}</p>
+  <p style="color: #909399; font-size: 13px; margin: 0;">Ngày cập nhật cuối: ${new Date().toLocaleDateString('vi-VN')}</p>
 </div>
 </div>`
 }
 
 const getDefaultPrivacyPolicy = () => {
   return `<div style="line-height: 2; padding: 20px;">
-<h2 style="color: #303133; border-bottom: 2px solid #409eff; padding-bottom: 10px;">用户隐私协议</h2>
+<h2 style="color: #303133; border-bottom: 2px solid #409eff; padding-bottom: 10px;">Chính sách bảo mật người dùng</h2>
 
-<p style="color: #606266; margin: 20px 0;">本隐私协议（以下简称"本协议"）适用于本CRM客户管理系统（以下简称"本系统"）。我们非常重视用户的隐私保护，特制定本协议。</p>
+<p style="color: #606266; margin: 20px 0;">Chính sách bảo mật này (sau đây gọi là "Chính sách") áp dụng cho Hệ thống quản lý khách hàng CRM (sau đây gọi là "Hệ thống"). Chúng tôi rất coi trọng việc bảo vệ quyền riêng tư của người dùng, do đó đã xây dựng Chính sách này.</p>
 
-<h3 style="color: #409eff; margin-top: 30px;">一、信息收集</h3>
-<p style="color: #606266;"><strong>1.1 我们收集的信息类型：</strong></p>
+<h3 style="color: #409eff; margin-top: 30px;">I. Thu thập thông tin</h3>
+<p style="color: #606266;"><strong>1.1 Các loại thông tin chúng tôi thu thập:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li><strong>账号信息：</strong>用户名、密码、邮箱、手机号</li>
-  <li><strong>个人信息：</strong>姓名、部门、职位、头像</li>
-  <li><strong>业务信息：</strong>客户数据、订单信息、业绩数据、通话记录</li>
-  <li><strong>使用信息：</strong>登录日志、操作记录、访问时间、IP地址</li>
-  <li><strong>设备信息：</strong>浏览器类型、操作系统、设备型号</li>
+  <li><strong>Thông tin tài khoản:</strong> Tên đăng nhập, mật khẩu, email, số điện thoại</li>
+  <li><strong>Thông tin cá nhân:</strong> Họ tên, phòng ban, chức vụ, ảnh đại diện</li>
+  <li><strong>Thông tin nghiệp vụ:</strong> Dữ liệu khách hàng, thông tin đơn hàng, dữ liệu thành tích, bản ghi cuộc gọi</li>
+  <li><strong>Thông tin sử dụng:</strong> Nhật ký đăng nhập, bản ghi thao tác, thời gian truy cập, địa chỉ IP</li>
+  <li><strong>Thông tin thiết bị:</strong> Loại trình duyệt, hệ điều hành, model thiết bị</li>
 </ul>
 
-<p style="color: #606266;"><strong>1.2 信息收集方式：</strong></p>
+<p style="color: #606266;"><strong>1.2 Phương thức thu thập thông tin:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>用户主动提供</li>
-  <li>系统自动收集</li>
-  <li>第三方合法提供</li>
+  <li>Người dùng chủ động cung cấp</li>
+  <li>Hệ thống tự động thu thập</li>
+  <li>Bên thứ ba cung cấp hợp pháp</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">二、信息使用</h3>
-<p style="color: #606266;"><strong>2.1 我们使用收集的信息用于：</strong></p>
+<h3 style="color: #409eff; margin-top: 30px;">II. Sử dụng thông tin</h3>
+<p style="color: #606266;"><strong>2.1 Chúng tôi sử dụng thông tin đã thu thập để:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>提供系统服务和功能</li>
-  <li>改进用户体验</li>
-  <li>数据统计和分析</li>
-  <li>安全监控和风险防范</li>
-  <li>技术支持和客户服务</li>
-  <li>发送系统通知和重要消息</li>
+  <li>Cung cấp dịch vụ và chức năng của hệ thống</li>
+  <li>Cải thiện trải nghiệm người dùng</li>
+  <li>Thống kê và phân tích dữ liệu</li>
+  <li>Giám sát an toàn và phòng ngừa rủi ro</li>
+  <li>Hỗ trợ kỹ thuật và dịch vụ khách hàng</li>
+  <li>Gửi thông báo hệ thống và tin nhắn quan trọng</li>
 </ul>
 
-<p style="color: #606266;"><strong>2.2 我们承诺：</strong></p>
+<p style="color: #606266;"><strong>2.2 Chúng tôi cam kết:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>不会将用户信息用于本协议未载明的其他用途</li>
-  <li>不会向第三方出售、出租或共享用户信息</li>
-  <li>严格限制信息访问权限，仅授权人员可访问</li>
+  <li>Không sử dụng thông tin người dùng cho các mục đích khác không được nêu trong Chính sách này</li>
+  <li>Không bán, cho thuê hoặc chia sẻ thông tin người dùng với bên thứ ba</li>
+  <li>Hạn chế nghiêm ngặt quyền truy cập thông tin, chỉ nhân viên được ủy quyền mới có thể truy cập</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">三、信息存储</h3>
-<p style="color: #606266;"><strong>3.1 存储位置：</strong></p>
+<h3 style="color: #409eff; margin-top: 30px;">III. Lưu trữ thông tin</h3>
+<p style="color: #606266;"><strong>3.1 Vị trí lưu trữ:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>用户数据主要存储在本地浏览器（localStorage）</li>
-  <li>部分数据可能存储在服务器</li>
-  <li>采用加密技术保护敏感信息</li>
+  <li>Dữ liệu người dùng chủ yếu được lưu trữ trong trình duyệt cục bộ (localStorage)</li>
+  <li>Một phần dữ liệu có thể được lưu trữ trên máy chủ</li>
+  <li>Sử dụng công nghệ mã hóa để bảo vệ thông tin nhạy cảm</li>
 </ul>
 
-<p style="color: #606266;"><strong>3.2 存储期限：</strong></p>
+<p style="color: #606266;"><strong>3.2 Thời hạn lưu trữ:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>账号存续期间持续存储</li>
-  <li>账号注销后，数据将在30天内删除</li>
-  <li>法律法规要求保留的除外</li>
+  <li>Lưu trữ liên tục trong thời gian tài khoản tồn tại</li>
+  <li>Sau khi hủy tài khoản, dữ liệu sẽ được xóa trong vòng 30 ngày</li>
+  <li>Trừ trường hợp pháp luật yêu cầu lưu giữ</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">四、信息保护</h3>
-<p style="color: #606266;"><strong>4.1 安全措施：</strong></p>
+<h3 style="color: #409eff; margin-top: 30px;">IV. Bảo vệ thông tin</h3>
+<p style="color: #606266;"><strong>4.1 Biện pháp an toàn:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>数据加密传输（HTTPS）</li>
-  <li>密码加密存储（不可逆加密）</li>
-  <li>访问权限控制（角色权限管理）</li>
-  <li>定期安全审计</li>
-  <li>异常行为监控和预警</li>
-  <li>数据备份和恢复机制</li>
+  <li>Mã hóa truyền tải dữ liệu (HTTPS)</li>
+  <li>Mã hóa lưu trữ mật khẩu (mã hóa không thể đảo ngược)</li>
+  <li>Kiểm soát quyền truy cập (quản lý quyền vai trò)</li>
+  <li>Kiểm toán an toàn định kỳ</li>
+  <li>Giám sát và cảnh báo hành vi bất thường</li>
+  <li>Cơ chế sao lưu và khôi phục dữ liệu</li>
 </ul>
 
-<p style="color: #606266;"><strong>4.2 安全承诺：</strong></p>
+<p style="color: #606266;"><strong>4.2 Cam kết an toàn:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>采用行业标准的安全技术和管理措施</li>
-  <li>建立完善的数据安全管理制度</li>
-  <li>定期对员工进行安全培训</li>
-  <li>及时修复发现的安全漏洞</li>
+  <li>Áp dụng công nghệ và biện pháp quản lý an toàn theo tiêu chuẩn ngành</li>
+  <li>Xây dựng hệ thống quản lý an toàn dữ liệu hoàn chỉnh</li>
+  <li>Đào tạo an toàn cho nhân viên định kỳ</li>
+  <li>Khắc phục kịp thời các lỗ hổng bảo mật được phát hiện</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">五、信息共享</h3>
-<p style="color: #f56c6c; font-weight: bold;">5.1 我们不会与第三方共享用户信息，除非：</p>
+<h3 style="color: #409eff; margin-top: 30px;">V. Chia sẻ thông tin</h3>
+<p style="color: #f56c6c; font-weight: bold;">5.1 Chúng tôi không chia sẻ thông tin người dùng với bên thứ ba, trừ khi:</p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>获得用户明确同意</li>
-  <li>法律法规明确要求</li>
-  <li>司法机关或行政机关依法要求</li>
-  <li>保护系统安全所必需</li>
-  <li>维护用户合法权益所必需</li>
+  <li>Được người dùng đồng ý rõ ràng</li>
+  <li>Pháp luật yêu cầu rõ ràng</li>
+  <li>Cơ quan tư pháp hoặc hành chính yêu cầu theo pháp luật</li>
+  <li>Cần thiết để bảo vệ an toàn hệ thống</li>
+  <li>Cần thiết để bảo vệ quyền và lợi ích hợp pháp của người dùng</li>
 </ul>
 
-<p style="color: #606266;"><strong>5.2 共享原则：</strong></p>
+<p style="color: #606266;"><strong>5.2 Nguyên tắc chia sẻ:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>最小必要原则</li>
-  <li>合法正当原则</li>
-  <li>安全可控原则</li>
+  <li>Nguyên tắc tối thiểu cần thiết</li>
+  <li>Nguyên tắc hợp pháp và chính đáng</li>
+  <li>Nguyên tắc an toàn và kiểm soát được</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">六、用户权利</h3>
-<p style="color: #606266;"><strong>6.1 您享有以下权利：</strong></p>
+<h3 style="color: #409eff; margin-top: 30px;">VI. Quyền của người dùng</h3>
+<p style="color: #606266;"><strong>6.1 Bạn có các quyền sau:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>访问您的个人信息</li>
-  <li>更正不准确的信息</li>
-  <li>删除您的个人信息</li>
-  <li>撤回信息使用授权</li>
-  <li>注销您的账号</li>
-  <li>投诉举报</li>
-  <li>获取个人信息副本</li>
+  <li>Truy cập thông tin cá nhân của bạn</li>
+  <li>Sửa đổi thông tin không chính xác</li>
+  <li>Xóa thông tin cá nhân của bạn</li>
+  <li>Rút lại ủy quyền sử dụng thông tin</li>
+  <li>Hủy tài khoản của bạn</li>
+  <li>Khiếu nại và tố cáo</li>
+  <li>Nhận bản sao thông tin cá nhân</li>
 </ul>
 
-<p style="color: #606266;"><strong>6.2 权利行使方式：</strong></p>
+<p style="color: #606266;"><strong>6.2 Cách thức thực hiện quyền:</strong></p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>通过系统设置自行操作</li>
-  <li>联系客服协助处理</li>
-  <li>发送邮件申请</li>
+  <li>Tự thao tác thông qua cài đặt hệ thống</li>
+  <li>Liên hệ bộ phận hỗ trợ khách hàng để được hỗ trợ</li>
+  <li>Gửi email yêu cầu</li>
 </ul>
 
-<h3 style="color: #409eff; margin-top: 30px;">七、Cookie和类似技术</h3>
-<p style="color: #606266;">7.1 本系统使用Cookie和localStorage技术：</p>
+<h3 style="color: #409eff; margin-top: 30px;">VII. Cookie và công nghệ tương tự</h3>
+<p style="color: #606266;">7.1 Hệ thống sử dụng công nghệ Cookie và localStorage:</p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li>记住登录状态</li>
-  <li>保存用户偏好设置</li>
-  <li>统计访问数据</li>
-  <li>改善用户体验</li>
+  <li>Ghi nhớ trạng thái đăng nhập</li>
+  <li>Lưu cài đặt ưu tiên của người dùng</li>
+  <li>Thống kê dữ liệu truy cập</li>
+  <li>Cải thiện trải nghiệm người dùng</li>
 </ul>
-<p style="color: #606266;">7.2 您可以通过浏览器设置管理Cookie和localStorage。</p>
+<p style="color: #606266;">7.2 Bạn có thể quản lý Cookie và localStorage thông qua cài đặt trình duyệt.</p>
 
-<h3 style="color: #409eff; margin-top: 30px;">八、未成年人保护</h3>
-<p style="color: #606266;">8.1 本系统不向未满18周岁的未成年人提供服务。</p>
-<p style="color: #606266;">8.2 如发现未成年人使用本系统，我们将立即停止服务并删除相关信息。</p>
+<h3 style="color: #409eff; margin-top: 30px;">VIII. Bảo vệ trẻ vị thành niên</h3>
+<p style="color: #606266;">8.1 Hệ thống không cung cấp dịch vụ cho trẻ em dưới 18 tuổi.</p>
+<p style="color: #606266;">8.2 Nếu phát hiện trẻ vị thành niên sử dụng Hệ thống, chúng tôi sẽ ngừng dịch vụ ngay lập tức và xóa thông tin liên quan.</p>
 
-<h3 style="color: #409eff; margin-top: 30px;">九、数据跨境传输</h3>
-<p style="color: #606266;">9.1 您的数据主要存储在中国境内。</p>
-<p style="color: #606266;">9.2 如需跨境传输，我们将遵守相关法律法规，并采取必要的安全措施。</p>
+<h3 style="color: #409eff; margin-top: 30px;">IX. Truyền tải dữ liệu xuyên biên giới</h3>
+<p style="color: #606266;">9.1 Dữ liệu của bạn chủ yếu được lưu trữ trong lãnh thổ Việt Nam.</p>
+<p style="color: #606266;">9.2 Nếu cần truyền tải xuyên biên giới, chúng tôi sẽ tuân thủ các luật và quy định liên quan, và áp dụng các biện pháp an toàn cần thiết.</p>
 
-<h3 style="color: #409eff; margin-top: 30px;">十、隐私协议的变更</h3>
-<p style="color: #606266;">10.1 我们可能适时修订本协议。</p>
-<p style="color: #606266;">10.2 变更后的协议将在系统内公布，继续使用即视为接受新协议。</p>
-<p style="color: #606266;">10.3 重大变更将通过系统通知或邮件方式告知用户。</p>
+<h3 style="color: #409eff; margin-top: 30px;">X. Thay đổi chính sách bảo mật</h3>
+<p style="color: #606266;">10.1 Chúng tôi có thể sửa đổi Chính sách này khi thích hợp.</p>
+<p style="color: #606266;">10.2 Chính sách đã thay đổi sẽ được công bố trong hệ thống, việc tiếp tục sử dụng được coi là chấp nhận chính sách mới.</p>
+<p style="color: #606266;">10.3 Các thay đổi quan trọng sẽ được thông báo cho người dùng thông qua thông báo hệ thống hoặc email.</p>
 
-<h3 style="color: #409eff; margin-top: 30px;">十一、联系我们</h3>
-<p style="color: #606266;">如您对本隐私协议有任何疑问、意见或建议，请通过以下方式联系我们：</p>
+<h3 style="color: #409eff; margin-top: 30px;">XI. Liên hệ với chúng tôi</h3>
+<p style="color: #606266;">Nếu bạn có bất kỳ câu hỏi, ý kiến hoặc đề xuất nào về Chính sách bảo mật này, vui lòng liên hệ với chúng tôi theo các cách sau:</p>
 <ul style="color: #606266; padding-left: 30px;">
-  <li><strong>客服电话：</strong>${configStore.systemConfig.contactPhone || '400-xxx-xxxx'}</li>
-  <li><strong>客服邮箱：</strong>${configStore.systemConfig.contactEmail || 'service@example.com'}</li>
-  <li><strong>公司地址：</strong>${configStore.systemConfig.companyAddress || '请在系统设置中配置'}</li>
+  <li><strong>Số điện thoại hỗ trợ:</strong>${configStore.systemConfig.contactPhone || '400-xxx-xxxx'}</li>
+  <li><strong>Email hỗ trợ:</strong>${configStore.systemConfig.contactEmail || 'service@example.com'}</li>
+  <li><strong>Địa chỉ công ty:</strong>${configStore.systemConfig.companyAddress || 'Vui lòng cấu hình trong cài đặt hệ thống'}</li>
 </ul>
-<p style="color: #606266;">我们将在收到您的反馈后15个工作日内予以回复。</p>
+<p style="color: #606266;">Chúng tôi sẽ trả lời trong vòng 15 ngày làm việc sau khi nhận được phản hồi của bạn.</p>
 
-<p style="color: #909399; margin-top: 30px; font-size: 12px;">最后更新日期：${new Date().toLocaleDateString('zh-CN')}</p>
+<p style="color: #909399; margin-top: 30px; font-size: 12px;">Ngày cập nhật cuối: ${new Date().toLocaleDateString('vi-VN')}</p>
 </div>`
 }
 
@@ -461,13 +461,13 @@ const showAgreementDialog = (type: 'user' | 'privacy') => {
   const agreementList = JSON.parse(localStorage.getItem('crm_agreement_list') || '[]')
 
   if (type === 'user') {
-    agreementDialogTitle.value = '用户使用协议'
-    // 查找用户协议
+    agreementDialogTitle.value = 'Thỏa thuận sử dụng người dùng'
+    // Tìm thỏa thuận người dùng
     const userAgreement = agreementList.find((item: unknown) => item.type === 'user')
     agreementDialogContent.value = userAgreement?.content || configStore.systemConfig.userAgreement || getDefaultUserAgreement()
   } else {
-    agreementDialogTitle.value = '用户隐私协议'
-    // 查找隐私协议
+    agreementDialogTitle.value = 'Chính sách bảo mật người dùng'
+    // Tìm chính sách bảo mật
     const privacyAgreement = agreementList.find((item: unknown) => item.type === 'privacy')
     agreementDialogContent.value = privacyAgreement?.content || configStore.systemConfig.privacyPolicy || getDefaultPrivacyPolicy()
   }
@@ -475,42 +475,42 @@ const showAgreementDialog = (type: 'user' | 'privacy') => {
   agreementDialogVisible.value = true
 }
 
-// 同意并关闭
+// Đồng ý và đóng
 const agreeAndClose = () => {
   agreeToTerms.value = true
   agreementDialogVisible.value = false
-  ElMessage.success('感谢您同意我们的协议')
+  ElMessage.success('Cảm ơn bạn đã đồng ý với thỏa thuận của chúng tôi')
 }
 
-// 🔥 批次275新增：初始化配置和协议状态
+// 🔥 批次275新增：Khởi tạo cấu hình và trạng thái thỏa thuận
 configStore.initConfig()
 
-// 检查是否已经同意过协议（记住用户选择）
+// Kiểm tra xem đã đồng ý thỏa thuận trước đó chưa (ghi nhớ lựa chọn của người dùng)
 const agreedBefore = localStorage.getItem('user_agreed_terms')
 if (agreedBefore === 'true') {
   agreeToTerms.value = true
 }
 
-// 防抖计时器
+// Bộ đếm thời gian chống rung
 let loginDebounceTimer: NodeJS.Timeout | null = null
 
 const handleLogin = async () => {
-  // 🔥 批次275新增：验证协议勾选
+  // 🔥 批次275新增：Xác minh đã chọn đồng ý thỏa thuận
   if (!agreeToTerms.value) {
-    ElMessage.warning('请先阅读并同意《用户使用协议》和《用户隐私协议》')
+    ElMessage.warning('Vui lòng đọc và đồng ý 《Thỏa thuận sử dụng người dùng》và 《Chính sách bảo mật người dùng》')
     return
   }
 
   if (!loginFormRef.value) return
 
-  // 防抖处理：如果用户快速点击，清除之前的计时器
+  // Xử lý chống rung: Nếu người dùng nhấp nhanh, xóa bộ đếm thời gian trước đó
   if (loginDebounceTimer) {
     clearTimeout(loginDebounceTimer)
   }
 
-  // 如果正在登录中，直接返回
+  // Nếu đang đăng nhập, trả về ngay
   if (loading.value) {
-    ElMessage.warning('正在登录中，请稍候...')
+    ElMessage.warning('Đang đăng nhập, vui lòng đợi...')
     return
   }
 
@@ -522,61 +522,61 @@ const handleLogin = async () => {
           loginForm.username,
           loginForm.password,
           false, // rememberMe
-          3 // 最多重试3次
+          3 // Tối đa thử lại 3 lần
         )
 
         if (result) {
-          // 🔥 批次275新增：记住用户同意协议
+          // 🔥 批次275新增：Ghi nhớ người dùng đã đồng ý thỏa thuận
           localStorage.setItem('user_agreed_terms', 'true')
 
-          ElMessage.success('登录成功')
+          ElMessage.success('Đăng nhập thành công')
 
-          // 等待状态同步完成
+          // Đợi đồng bộ trạng thái hoàn tất
           await nextTick()
 
-          // 🔥 登录成功后立即开始预加载应用数据（不阻塞跳转）
-          preloadAppData().catch(err => console.warn('[Login] 预加载数据失败:', err))
+          // 🔥 Sau khi đăng nhập thành công, bắt đầu tải trước dữ liệu ứng dụng ngay lập tức (không chặn chuyển hướng)
+          preloadAppData().catch(err => console.warn('[Login] Tải trước dữ liệu thất bại:', err))
 
-          // 【关键修复】确认token已设置
-          console.log('[Login] 登录成功，检查状态:')
-          console.log('  - token:', userStore.token ? '已设置' : '未设置')
+          // 【关键修复】Xác nhận token đã được thiết lập
+          console.log('[Login] Đăng nhập thành công, kiểm tra trạng thái:')
+          console.log('  - token:', userStore.token ? 'Đã thiết lập' : 'Chưa thiết lập')
           console.log('  - isLoggedIn:', userStore.isLoggedIn)
           console.log('  - currentUser:', userStore.currentUser?.name)
 
-          // 检查是否需要强制修改密码
+          // Kiểm tra xem có cần bắt buộc đổi mật khẩu không
           if (userStore.currentUser?.forcePasswordChange) {
             window.location.href = '/change-password'
           } else {
-            // 🔥 登录成功后使用 location.href 跳转，实现无痕刷新
-            // 这样可以确保所有数据从服务器重新加载
+            // 🔥 Sau khi đăng nhập thành công, sử dụng location.href để chuyển hướng, thực hiện làm mới không dấu vết
+            // Điều này đảm bảo tất cả dữ liệu được tải lại từ máy chủ
             window.location.href = '/'
           }
         } else {
-          ElMessage.error('登录失败')
+          ElMessage.error('Đăng nhập thất bại')
         }
       } catch (error: unknown) {
-        console.error('登录错误:', error)
-        // 【关键修复】检查是否实际上已经登录成功（token已设置）
+        console.error('Lỗi đăng nhập:', error)
+        // 【关键修复】Kiểm tra xem có thực sự đã đăng nhập thành công không (token đã được thiết lập)
         if (userStore.token && userStore.isLoggedIn) {
-          console.log('[Login] 虽然有错误，但登录状态已设置，尝试跳转')
-          ElMessage.success('登录成功')
-          // 使用 location.href 跳转，实现无痕刷新
+          console.log('[Login] Mặc dù có lỗi, nhưng trạng thái đăng nhập đã được thiết lập, thử chuyển hướng')
+          ElMessage.success('Đăng nhập thành công')
+          // Sử dụng location.href để chuyển hướng, thực hiện làm mới không dấu vết
           window.location.href = '/'
           return
         }
-        const errorMessage = error instanceof Error ? error.message : '登录失败，请检查用户名和密码'
+        const errorMessage = error instanceof Error ? error.message : 'Đăng nhập thất bại, vui lòng kiểm tra tên đăng nhập và mật khẩu'
         ElMessage.error(errorMessage)
 
-        // 如果是频率限制错误，禁用登录按钮
+        // Nếu là lỗi giới hạn tần suất, vô hiệu hóa nút đăng nhập
         if (error instanceof Error && (error.message.includes('频繁') || error.message.includes('429') || error.message === 'RATE_LIMITED')) {
           setTimeout(() => {
             loading.value = false
           }, 30000)
-          ElMessage.warning('登录尝试过于频繁，按钮已禁用30秒')
+          ElMessage.warning('Thử đăng nhập quá thường xuyên, nút đã bị vô hiệu hóa trong 30 giây')
           return
         }
       } finally {
-        // 正常情况下，延迟1秒后恢复按钮状态，防止快速重复点击
+        // Trong trường hợp bình thường, khôi phục trạng thái nút sau 1 giây, ngăn chặn nhấp lặp lại nhanh
         loginDebounceTimer = setTimeout(() => {
           loading.value = false
         }, 1000)

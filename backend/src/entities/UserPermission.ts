@@ -22,17 +22,17 @@ export class UserPermission {
   @CreateDateColumn()
   grantedAt: Date
 
-  // 关联用户（移除反向关联，因为User实体没有personalPermissions字段）
+  // Liên kết người dùng (đã loại bỏ liên kết ngược, vì entity User không có trường personalPermissions)
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
   user: User
 
-  // 关联权限
+  // Liên kết quyền hạn
   @ManyToOne(() => Permission)
   @JoinColumn({ name: 'permissionId' })
   permission: Permission
 
-  // 授权人
+  // Người cấp quyền
   @ManyToOne(() => User)
   @JoinColumn({ name: 'grantedBy' })
   grantor: User

@@ -7,34 +7,34 @@ export class OrderItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50, comment: '订单ID' })
+  @Column({ type: 'varchar', length: 50, comment: 'ID đơn hàng' })
   orderId: string;
 
-  @Column({ type: 'varchar', length: 50, comment: '产品ID' })
+  @Column({ type: 'varchar', length: 50, comment: 'ID sản phẩm' })
   productId: string;
 
-  @Column({ length: 100, comment: '产品名称（快照）' })
+  @Column({ length: 100, comment: 'Tên sản phẩm (ảnh chụp nhanh)' })
   productName: string;
 
-  @Column({ length: 50, nullable: true, comment: '产品SKU（快照）' })
+  @Column({ length: 50, nullable: true, comment: 'SKU sản phẩm (ảnh chụp nhanh)' })
   productSku: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: '单价（快照）' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'Đơn giá (ảnh chụp nhanh)' })
   unitPrice: number;
 
-  @Column({ type: 'int', comment: '数量' })
+  @Column({ type: 'int', comment: 'Số lượng' })
   quantity: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: '小计金额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'Tổng tiền' })
   subtotal: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, comment: '优惠金额' })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, comment: 'Tiền khuyến mãi' })
   discountAmount: number;
 
-  @Column({ type: 'text', nullable: true, comment: '备注' })
+  @Column({ type: 'text', nullable: true, comment: 'Ghi chú' })
   notes?: string;
 
-  // 关联关系
+  // Quan hệ liên kết
   @ManyToOne(() => Order, order => order.orderItems)
   @JoinColumn({ name: 'orderId' })
   order: Order;

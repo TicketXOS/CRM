@@ -31,7 +31,7 @@ export class Role {
   @UpdateDateColumn()
   updatedAt: Date
 
-  // 角色拥有的权限（暂时注释掉，避免复杂的关联查询导致错误）
+  // Quyền hạn mà vai trò sở hữu (tạm thời bị chú thích, tránh truy vấn liên kết phức tạp gây lỗi)
   // @ManyToMany(() => Permission, permission => permission.roles)
   // @JoinTable({
   //   name: 'role_permissions',
@@ -40,11 +40,11 @@ export class Role {
   // })
   // permissions: Permission[]
 
-  // 使用 JSON 字段存储权限（与数据库表结构一致）
+  // Sử dụng trường JSON để lưu trữ quyền hạn (khớp với cấu trúc bảng cơ sở dữ liệu)
   @Column('json', { nullable: true })
   permissions: string[] | null
 
-  // 拥有此角色的用户（注释掉，因为User实体使用字符串role而不是关联）
+  // Người dùng sở hữu vai trò này (bị chú thích, vì entity User sử dụng chuỗi role thay vì liên kết)
   // @ManyToMany(() => User, user => user.roles)
   // users: User[]
 }

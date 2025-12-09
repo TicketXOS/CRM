@@ -1,6 +1,6 @@
 import { User } from '../entities/User';
 
-// 扩展 Express Request 类型，这样 req.user 就是合法的
+// Mở rộng kiểu Express Request, để req.user là hợp lệ
 declare global {
   namespace Express {
     interface Request {

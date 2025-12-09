@@ -3,15 +3,15 @@ import { open, Database } from 'sqlite';
 import path from 'path';
 import fs from 'fs';
 
-// 数据库配置
+// Cấu hình cơ sở dữ liệu
 export interface DatabaseConfig {
   filename: string;
   driver: typeof sqlite3.Database;
 }
 
-// 获取数据库路径
+// Lấy đường dẫn cơ sở dữ liệu
 function getDatabasePath(): string {
-  // 在开发环境中使用项目目录
+  // Trong môi trường phát triển, sử dụng thư mục dự án
   if (process.env.NODE_ENV === 'development') {
     const dbDir = path.join(__dirname, '../../data');
     if (!fs.existsSync(dbDir)) {
@@ -19,62 +19,62 @@ function getDatabasePath(): string {
     }
     return path.join(dbDir, 'crm.db');
   }
-  
-  // 在生产环境中使用用户数据目录
+
+  // Trong môi trường sản xuất, sử dụng thư mục dữ liệu người dùng
   const { app } = require('electron');
   const userDataPath = app.getPath('userData');
   const dbDir = path.join(userDataPath, 'data');
-  
+
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true });
   }
-  
+
   return path.join(dbDir, 'crm.db');
 }
 
-// 数据库配置
+// Cấu hình cơ sở dữ liệu
 export const dbConfig: DatabaseConfig = {
   filename: getDatabasePath(),
   driver: sqlite3.Database
 };
 
-// 数据库连接实例
+// Phiên bản kết nối cơ sở dữ liệu
 let db: Database | null = null;
 
-// 获取数据库连接
+// Lấy kết nối cơ sở dữ liệu
 export async function getDatabase(): Promise<Database> {
   if (!db) {
     db = await open(dbConfig);
-    
-    // 启用外键约束
+
+    // Bật ràng buộc khóa ngoại
     await db.exec('PRAGMA foreign_keys = ON');
-    
-    // 设置性能优化
+
+    // Thiết lập tối ưu hiệu suất
     await db.exec('PRAGMA journal_mode = WAL');
     await db.exec('PRAGMA synchronous = NORMAL');
     await db.exec('PRAGMA cache_size = 1000');
     await db.exec('PRAGMA temp_store = MEMORY');
-    
-    console.log('SQLite数据库连接成功:', dbConfig.filename);
+
+    console.log('Kết nối cơ sở dữ liệu SQLite thành công:', dbConfig.filename);
   }
-  
+
   return db;
 }
 
-// 关闭数据库连接
+// Đóng kết nối cơ sở dữ liệu
 export async function closeDatabase(): Promise<void> {
   if (db) {
     await db.close();
     db = null;
-    console.log('数据库连接已关闭');
+    console.log('Kết nối cơ sở dữ liệu đã đóng');
   }
 }
 
-// 初始化数据库表结构
+// Khởi tạo cấu trúc bảng cơ sở dữ liệu
 export async function initializeDatabase(): Promise<void> {
   const database = await getDatabase();
-  
-  // 用户表
+
+  // Bảng người dùng
   await database.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +89,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 客户表
+  // Bảng khách hàng
   await database.exec(`
     CREATE TABLE IF NOT EXISTS customers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,7 +108,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 产品表
+  // Bảng sản phẩm
   await database.exec(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,7 +125,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 订单表
+  // Bảng đơn hàng
   await database.exec(`
     CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,7 +144,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 订单项表
+  // Bảng mục đơn hàng
   await database.exec(`
     CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -159,7 +159,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 系统日志表
+  // Bảng nhật ký hệ thống
   await database.exec(`
     CREATE TABLE IF NOT EXISTS system_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -175,7 +175,7 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // 创建索引
+  // Tạo chỉ mục
   await database.exec(`
     CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
     CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
@@ -186,50 +186,50 @@ export async function initializeDatabase(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_system_logs_created ON system_logs(created_at);
   `);
 
-  // 插入默认管理员用户（如果不存在）
+  // Chèn người dùng quản trị viên mặc định (nếu không tồn tại)
   const adminExists = await database.get('SELECT id FROM users WHERE username = ?', ['admin']);
   if (!adminExists) {
     const bcrypt = require('bcryptjs');
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+
     await database.run(`
       INSERT INTO users (username, password, email, role, status)
       VALUES (?, ?, ?, ?, ?)
     `, ['admin', hashedPassword, 'admin@crm.com', 'admin', 'active']);
-    
-    console.log('默认管理员账户已创建: admin/admin123');
+
+    console.log('Tài khoản quản trị viên mặc định đã được tạo: admin/admin123');
   }
 
-  console.log('数据库表结构初始化完成');
+  console.log('Khởi tạo cấu trúc bảng cơ sở dữ liệu hoàn tất');
 }
 
-// 数据库备份
+// Sao lưu cơ sở dữ liệu
 export async function backupDatabase(backupPath: string): Promise<void> {
-  // 创建备份目录
+  // Tạo thư mục sao lưu
   const backupDir = path.dirname(backupPath);
   if (!fs.existsSync(backupDir)) {
     fs.mkdirSync(backupDir, { recursive: true });
   }
-  
-  // 执行备份 - 使用文件复制
+
+  // Thực hiện sao lưu - sử dụng sao chép tệp
   const sourcePath = getDatabasePath();
   fs.copyFileSync(sourcePath, backupPath);
-  console.log('数据库备份完成:', backupPath);
+  console.log('Sao lưu cơ sở dữ liệu hoàn tất:', backupPath);
 }
 
-// 数据库恢复
+// Khôi phục cơ sở dữ liệu
 export async function restoreDatabase(backupPath: string): Promise<void> {
   if (!fs.existsSync(backupPath)) {
-    throw new Error('备份文件不存在');
+    throw new Error('Tệp sao lưu không tồn tại');
   }
-  
-  // 关闭当前连接
+
+  // Đóng kết nối hiện tại
   await closeDatabase();
-  
-  // 复制备份文件到当前数据库位置
+
+  // Sao chép tệp sao lưu đến vị trí cơ sở dữ liệu hiện tại
   fs.copyFileSync(backupPath, dbConfig.filename);
-  
-  // 重新连接数据库
+
+  // Kết nối lại cơ sở dữ liệu
   await getDatabase();
-  console.log('数据库恢复完成');
+  console.log('Khôi phục cơ sở dữ liệu hoàn tất');
 }

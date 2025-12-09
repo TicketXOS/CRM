@@ -3,36 +3,36 @@ import { Product } from './Product'
 
 @Entity('product_categories')
 export class ProductCategory {
-  @PrimaryColumn({ type: 'varchar', length: 50, comment: '分类ID' })
+  @PrimaryColumn({ type: 'varchar', length: 50, comment: 'ID phân loại' })
   id: string
 
-  @Column({ length: 100, comment: '分类名称' })
+  @Column({ length: 100, comment: 'Tên phân loại' })
   name: string
 
-  @Column({ name: 'parent_id', type: 'varchar', length: 50, nullable: true, comment: '上级分类ID' })
+  @Column({ name: 'parent_id', type: 'varchar', length: 50, nullable: true, comment: 'ID phân loại cấp trên' })
   parentId?: string
 
-  @Column({ type: 'text', nullable: true, comment: '分类描述' })
+  @Column({ type: 'text', nullable: true, comment: 'Mô tả phân loại' })
   description?: string
 
-  @Column({ name: 'sort_order', type: 'int', default: 0, comment: '排序' })
+  @Column({ name: 'sort_order', type: 'int', default: 0, comment: 'Thứ tự sắp xếp' })
   sortOrder: number
 
   @Column({
     type: 'enum',
     enum: ['active', 'inactive'],
     default: 'active',
-    comment: '状态'
+    comment: 'Trạng thái'
   })
   status: 'active' | 'inactive'
 
-  @CreateDateColumn({ name: 'created_at', comment: '创建时间' })
+  @CreateDateColumn({ name: 'created_at', comment: 'Thời gian tạo' })
   createdAt: Date
 
-  @UpdateDateColumn({ name: 'updated_at', comment: '更新时间' })
+  @UpdateDateColumn({ name: 'updated_at', comment: 'Thời gian cập nhật' })
   updatedAt: Date
 
-  // 关联关系
+  // Quan hệ liên kết
   @OneToMany(() => Product, product => product.category)
   products: Product[]
 }

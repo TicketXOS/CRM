@@ -7,18 +7,18 @@ import { JwtConfig } from '../config/jwt';
 
 const router = Router();
 
-// 配置multer用于头像上传
+// Cấu hình multer để tải lên ảnh đại diện
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
-    // 确保目录存在
+    // Đảm bảo thư mục tồn tại
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // 生成唯一文件名
+    // Tạo tên tệp duy nhất
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, `avatar-${uniqueSuffix}${ext}`);
@@ -31,17 +31,17 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB
   },
   fileFilter: (req, file, cb) => {
-    // 只允许图片文件
+    // Chỉ cho phép tệp hình ảnh
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('只允许上传图片文件'));
+      cb(new Error('Chỉ cho phép tải lên tệp hình ảnh'));
     }
   }
 });
 
 /**
- * 简化的认证中间件，不依赖数据库
+ * Middleware xác thực đơn giản, không phụ thuộc cơ sở dữ liệu
  */
 const simpleAuth = (req: any, res: any, next: any) => {
   try {
@@ -51,19 +51,19 @@ const simpleAuth = (req: any, res: any, next: any) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: '访问令牌缺失',
+        message: 'Thiếu mã thông báo truy cập',
         code: 'TOKEN_MISSING'
       });
     }
 
-    // 验证令牌
+    // Xác minh mã thông báo
     const payload = JwtConfig.verifyAccessToken(token);
     req.user = payload;
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: 'JWT认证失败',
+      message: 'Xác thực JWT thất bại',
       code: 'TOKEN_INVALID'
     });
   }
@@ -71,22 +71,22 @@ const simpleAuth = (req: any, res: any, next: any) => {
 
 /**
  * @route GET /api/v1/profile
- * @desc 获取当前用户资料
+ * @desc Lấy thông tin người dùng hiện tại
  * @access Private
  */
 router.get('/', simpleAuth, (req, res) => {
-  // 从JWT token中获取用户信息
+  // Lấy thông tin người dùng từ JWT token
   const user = (req as any).user;
-  
+
   res.json({
     success: true,
     data: {
       id: user.id || '1',
       username: user.username || 'admin',
-      name: user.name || '管理员',
+      name: user.name || 'Quản trị viên',
       email: user.email || 'admin@example.com',
       phone: user.phone || '13800138000',
-      department: user.department || '技术部',
+      department: user.department || 'Phòng kỹ thuật',
       role: user.role || 'admin',
       avatar: user.avatar || '',
       preferences: {
@@ -105,24 +105,24 @@ router.get('/', simpleAuth, (req, res) => {
 
 /**
  * @route PUT /api/v1/profile
- * @desc 更新当前用户资料
+ * @desc Cập nhật thông tin người dùng hiện tại
  * @access Private
  */
 router.put('/', simpleAuth, (req, res) => {
   const user = (req as any).user;
   const updateData = req.body;
-  
-  // 这里应该更新数据库，目前返回模拟数据
+
+  // Ở đây nên cập nhật cơ sở dữ liệu, hiện tại trả về dữ liệu mô phỏng
   res.json({
     success: true,
-    message: '个人资料已更新',
+    message: 'Thông tin cá nhân đã được cập nhật',
     data: {
       id: user.id || '1',
       username: user.username || 'admin',
-      name: updateData.name || user.name || '管理员',
+      name: updateData.name || user.name || 'Quản trị viên',
       email: updateData.email || user.email || 'admin@example.com',
       phone: updateData.phone || user.phone || '13800138000',
-      department: user.department || '技术部',
+      department: user.department || 'Phòng kỹ thuật',
       role: user.role || 'admin',
       avatar: updateData.avatar || user.avatar || '',
       preferences: updateData.preferences || {
@@ -141,15 +141,15 @@ router.put('/', simpleAuth, (req, res) => {
 
 /**
  * @route GET /api/v1/profile/preferences
- * @desc 获取用户偏好设置
+ * @desc Lấy cài đặt tùy chọn người dùng
  * @access Private
  */
 router.get('/preferences', simpleAuth, (req, res) => {
   res.json({
     success: true,
     data: {
-      language: 'zh-CN',
-      timezone: 'Asia/Shanghai',
+      language: 'vi-VN',
+      timezone: 'Asia/Ho_Chi_Minh',
       emailNotifications: true,
       browserNotifications: true,
       smsNotifications: false,
@@ -160,23 +160,23 @@ router.get('/preferences', simpleAuth, (req, res) => {
 
 /**
  * @route PUT /api/v1/profile/preferences
- * @desc 更新用户偏好设置
+ * @desc Cập nhật cài đặt tùy chọn người dùng
  * @access Private
  */
 router.put('/preferences', simpleAuth, (req, res) => {
   const preferences = req.body;
-  
-  // 这里应该保存到数据库，目前返回模拟数据
+
+  // Ở đây nên lưu vào cơ sở dữ liệu, hiện tại trả về dữ liệu mô phỏng
   res.json({
     success: true,
-    message: '偏好设置已更新',
+    message: 'Cài đặt tùy chọn đã được cập nhật',
     data: preferences
   });
 });
 
 /**
  * @route POST /api/v1/profile/avatar
- * @desc 上传用户头像
+ * @desc Tải lên ảnh đại diện người dùng
  * @access Private
  */
 router.post('/avatar', simpleAuth, upload.single('avatar'), (req, res) => {
@@ -184,19 +184,19 @@ router.post('/avatar', simpleAuth, upload.single('avatar'), (req, res) => {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: '请选择要上传的头像文件',
+        message: 'Vui lòng chọn tệp ảnh đại diện để tải lên',
         code: 'NO_FILE_UPLOADED'
       });
     }
 
-    // 生成头像URL
+    // Tạo URL ảnh đại diện
     const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    
-    // 这里应该更新数据库中的用户头像字段
-    // 目前返回模拟响应
+
+    // Ở đây nên cập nhật trường ảnh đại diện trong cơ sở dữ liệu
+    // Hiện tại trả về phản hồi mô phỏng
     return res.json({
       success: true,
-      message: '头像上传成功',
+      message: 'Tải lên ảnh đại diện thành công',
       data: {
         url: avatarUrl,
         filename: req.file.filename,
@@ -204,10 +204,10 @@ router.post('/avatar', simpleAuth, upload.single('avatar'), (req, res) => {
       }
     });
   } catch (error) {
-    console.error('头像上传失败:', error);
+    console.error('Tải lên ảnh đại diện thất bại:', error);
     return res.status(500).json({
       success: false,
-      message: '头像上传失败',
+      message: 'Tải lên ảnh đại diện thất bại',
       code: 'UPLOAD_ERROR'
     });
   }
@@ -215,71 +215,71 @@ router.post('/avatar', simpleAuth, upload.single('avatar'), (req, res) => {
 
 /**
  * @route PUT /api/v1/profile/password
- * @desc 修改用户密码
+ * @desc Đổi mật khẩu người dùng
  * @access Private
  */
 router.put('/password', simpleAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
-    
-    // 验证必填字段
+
+    // Xác thực trường bắt buộc
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: '请填写所有必填字段',
+        message: 'Vui lòng điền tất cả các trường bắt buộc',
         code: 'MISSING_FIELDS'
       });
     }
-    
-    // 验证新密码和确认密码是否一致
+
+    // Xác thực mật khẩu mới và mật khẩu xác nhận có khớp không
     if (newPassword !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: '新密码和确认密码不一致',
+        message: 'Mật khẩu mới và mật khẩu xác nhận không khớp',
         code: 'PASSWORD_MISMATCH'
       });
     }
-    
-    // 验证密码强度
+
+    // Xác thực độ mạnh mật khẩu
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: '新密码长度至少为6位',
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự',
         code: 'PASSWORD_TOO_SHORT'
       });
     }
-    
-    // 这里应该验证当前密码是否正确
-    // 目前模拟验证通过
+
+    // Ở đây nên xác minh mật khẩu hiện tại có đúng không
+    // Hiện tại mô phỏng xác minh thành công
     const user = (req as any).user;
-    
-    // 模拟密码验证（在实际应用中应该从数据库获取用户信息并验证）
-    if (currentPassword !== 'admin123') { // 模拟当前密码
+
+    // Mô phỏng xác minh mật khẩu (trong ứng dụng thực tế nên lấy thông tin người dùng từ cơ sở dữ liệu và xác minh)
+    if (currentPassword !== 'admin123') { // Mô phỏng mật khẩu hiện tại
       return res.status(400).json({
         success: false,
-        message: '当前密码不正确',
+        message: 'Mật khẩu hiện tại không đúng',
         code: 'INVALID_CURRENT_PASSWORD'
       });
     }
-    
-    // 加密新密码
+
+    // Mã hóa mật khẩu mới
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-    
-    // 这里应该更新数据库中的用户密码
-    // 目前返回模拟响应
+
+    // Ở đây nên cập nhật mật khẩu người dùng trong cơ sở dữ liệu
+    // Hiện tại trả về phản hồi mô phỏng
     return res.json({
       success: true,
-      message: '密码修改成功',
+      message: 'Đổi mật khẩu thành công',
       data: {
-        message: '密码已成功更新，请使用新密码登录'
+        message: 'Mật khẩu đã được cập nhật thành công, vui lòng sử dụng mật khẩu mới để đăng nhập'
       }
     });
   } catch (error) {
-    console.error('密码修改失败:', error);
+    console.error('Đổi mật khẩu thất bại:', error);
     return res.status(500).json({
       success: false,
-      message: '密码修改失败',
+      message: 'Đổi mật khẩu thất bại',
       code: 'PASSWORD_UPDATE_ERROR'
     });
   }

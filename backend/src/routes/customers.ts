@@ -8,12 +8,12 @@ import { Like, Between } from 'typeorm';
 
 const router = Router();
 
-// 所有客户路由都需要认证
+// Tất cả các route khách hàng đều cần xác thực
 router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/customers
- * @desc 获取客户列表
+ * @desc Lấy danh sách khách hàng
  * @access Private
  */
 router.get('/', async (req: Request, res: Response) => {
@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response) => {
     const pageSizeNum = parseInt(pageSize as string) || 10;
     const skip = (pageNum - 1) * pageSizeNum;
 
-    // 构建查询条件
+    // Xây dựng điều kiện truy vấn
     const where: Record<string, unknown> = {};
 
     if (name) {
@@ -54,7 +54,7 @@ router.get('/', async (req: Request, res: Response) => {
       where.status = status;
     }
 
-    // 日期范围筛选
+    // Lọc theo phạm vi ngày tháng
     if (startDate && endDate) {
       where.createdAt = Between(new Date(startDate as string), new Date(endDate as string));
     }
@@ -66,7 +66,7 @@ router.get('/', async (req: Request, res: Response) => {
       order: { createdAt: 'DESC' }
     });
 
-    // 转换数据格式以匹配前端期望
+    // Chuyển đổi định dạng dữ liệu để khớp với mong đợi của frontend
     const list = customers.map(customer => ({
       id: customer.id,
       code: customer.customerNo || '',
@@ -108,7 +108,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '获取客户列表成功',
+      message: 'Lấy danh sách khách hàng thành công',
       data: {
         list,
         total,
@@ -117,21 +117,21 @@ router.get('/', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取客户列表失败:', error);
+    console.error('Lấy danh sách khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取客户列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy danh sách khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
-// ========== 客户分组路由（必须在 /:id 之前定义）==========
+// ========== Route nhóm khách hàng (phải được định nghĩa trước /:id) ==========
 
 /**
  * @route GET /api/v1/customers/groups
- * @desc 获取客户分组列表
+ * @desc Lấy danh sách nhóm khách hàng
  * @access Private
  */
 router.get('/groups', async (req: Request, res: Response) => {
@@ -168,23 +168,23 @@ router.get('/groups', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '获取分组列表成功',
+      message: 'Lấy danh sách nhóm thành công',
       data: { list, total, page: pageNum, pageSize: pageSizeNum }
     });
   } catch (error) {
-    console.error('获取分组列表失败:', error);
+    console.error('Lấy danh sách nhóm thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取分组列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy danh sách nhóm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route POST /api/v1/customers/groups
- * @desc 创建客户分组
+ * @desc Tạo nhóm khách hàng
  * @access Private
  */
 router.post('/groups', async (req: Request, res: Response) => {
@@ -196,7 +196,7 @@ router.post('/groups', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '分组名称不能为空'
+        message: 'Tên nhóm không được để trống'
       });
     }
 
@@ -211,7 +211,7 @@ router.post('/groups', async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       code: 200,
-      message: '创建分组成功',
+      message: 'Tạo nhóm thành công',
       data: {
         id: savedGroup.id,
         name: savedGroup.name,
@@ -223,19 +223,19 @@ router.post('/groups', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('创建分组失败:', error);
+    console.error('Tạo nhóm thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '创建分组失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Tạo nhóm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/customers/groups/:id
- * @desc 获取客户分组详情
+ * @desc Lấy chi tiết nhóm khách hàng
  * @access Private
  */
 router.get('/groups/:id', async (req: Request, res: Response) => {
@@ -249,14 +249,14 @@ router.get('/groups/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '分组不存在'
+        message: 'Nhóm không tồn tại'
       });
     }
 
     res.json({
       success: true,
       code: 200,
-      message: '获取分组详情成功',
+      message: 'Lấy chi tiết nhóm thành công',
       data: {
         id: group.id,
         name: group.name,
@@ -268,19 +268,19 @@ router.get('/groups/:id', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取分组详情失败:', error);
+    console.error('Lấy chi tiết nhóm thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取分组详情失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy chi tiết nhóm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route PUT /api/v1/customers/groups/:id
- * @desc 更新客户分组
+ * @desc Cập nhật nhóm khách hàng
  * @access Private
  */
 router.put('/groups/:id', async (req: Request, res: Response) => {
@@ -294,7 +294,7 @@ router.put('/groups/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '分组不存在'
+        message: 'Nhóm không tồn tại'
       });
     }
 
@@ -307,7 +307,7 @@ router.put('/groups/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '更新分组成功',
+      message: 'Cập nhật nhóm thành công',
       data: {
         id: updatedGroup.id,
         name: updatedGroup.name,
@@ -319,19 +319,19 @@ router.put('/groups/:id', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('更新分组失败:', error);
+    console.error('Cập nhật nhóm thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '更新分组失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật nhóm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route DELETE /api/v1/customers/groups/:id
- * @desc 删除客户分组
+ * @desc Xóa nhóm khách hàng
  * @access Private
  */
 router.delete('/groups/:id', async (req: Request, res: Response) => {
@@ -345,7 +345,7 @@ router.delete('/groups/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '分组不存在'
+        message: 'Nhóm không tồn tại'
       });
     }
 
@@ -354,24 +354,24 @@ router.delete('/groups/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '删除分组成功'
+      message: 'Xóa nhóm thành công'
     });
   } catch (error) {
-    console.error('删除分组失败:', error);
+    console.error('Xóa nhóm thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '删除分组失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Xóa nhóm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
-// ========== 客户标签路由（必须在 /:id 之前定义）==========
+// ========== Route nhãn khách hàng (phải được định nghĩa trước /:id) ==========
 
 /**
  * @route GET /api/v1/customers/tags
- * @desc 获取客户标签列表
+ * @desc Lấy danh sách nhãn khách hàng
  * @access Private
  */
 router.get('/tags', async (req: Request, res: Response) => {
@@ -408,23 +408,23 @@ router.get('/tags', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '获取标签列表成功',
+      message: 'Lấy danh sách nhãn thành công',
       data: { list, total, page: pageNum, pageSize: pageSizeNum }
     });
   } catch (error) {
-    console.error('获取标签列表失败:', error);
+    console.error('Lấy danh sách nhãn thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取标签列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy danh sách nhãn thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route POST /api/v1/customers/tags
- * @desc 创建客户标签
+ * @desc Tạo nhãn khách hàng
  * @access Private
  */
 router.post('/tags', async (req: Request, res: Response) => {
@@ -436,7 +436,7 @@ router.post('/tags', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '标签名称不能为空'
+        message: 'Tên nhãn không được để trống'
       });
     }
 
@@ -452,7 +452,7 @@ router.post('/tags', async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       code: 200,
-      message: '创建标签成功',
+      message: 'Tạo nhãn thành công',
       data: {
         id: savedTag.id,
         name: savedTag.name,
@@ -464,19 +464,19 @@ router.post('/tags', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('创建标签失败:', error);
+    console.error('Tạo nhãn thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '创建标签失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Tạo nhãn thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/customers/tags/:id
- * @desc 获取客户标签详情
+ * @desc Lấy chi tiết nhãn khách hàng
  * @access Private
  */
 router.get('/tags/:id', async (req: Request, res: Response) => {
@@ -490,14 +490,14 @@ router.get('/tags/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '标签不存在'
+        message: 'Nhãn không tồn tại'
       });
     }
 
     res.json({
       success: true,
       code: 200,
-      message: '获取标签详情成功',
+      message: 'Lấy chi tiết nhãn thành công',
       data: {
         id: tag.id,
         name: tag.name,
@@ -509,19 +509,19 @@ router.get('/tags/:id', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取标签详情失败:', error);
+    console.error('Lấy chi tiết nhãn thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取标签详情失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy chi tiết nhãn thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route PUT /api/v1/customers/tags/:id
- * @desc 更新客户标签
+ * @desc Cập nhật nhãn khách hàng
  * @access Private
  */
 router.put('/tags/:id', async (req: Request, res: Response) => {
@@ -535,7 +535,7 @@ router.put('/tags/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '标签不存在'
+        message: 'Nhãn không tồn tại'
       });
     }
 
@@ -549,7 +549,7 @@ router.put('/tags/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '更新标签成功',
+      message: 'Cập nhật nhãn thành công',
       data: {
         id: updatedTag.id,
         name: updatedTag.name,
@@ -561,19 +561,19 @@ router.put('/tags/:id', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('更新标签失败:', error);
+    console.error('Cập nhật nhãn thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '更新标签失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật nhãn thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route DELETE /api/v1/customers/tags/:id
- * @desc 删除客户标签
+ * @desc Xóa nhãn khách hàng
  * @access Private
  */
 router.delete('/tags/:id', async (req: Request, res: Response) => {
@@ -587,7 +587,7 @@ router.delete('/tags/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '标签不存在'
+        message: 'Nhãn không tồn tại'
       });
     }
 
@@ -596,24 +596,24 @@ router.delete('/tags/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '删除标签成功'
+      message: 'Xóa nhãn thành công'
     });
   } catch (error) {
-    console.error('删除标签失败:', error);
+    console.error('Xóa nhãn thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '删除标签失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Xóa nhãn thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/customers/check-exists
- * @desc 检查客户是否存在（通过手机号）
+ * @desc Kiểm tra khách hàng có tồn tại không (qua số điện thoại)
  * @access Private
- * @note 此路由必须在 /:id 路由之前定义，否则会被 /:id 匹配
+ * @note Route này phải được định nghĩa trước route /:id, nếu không sẽ bị /:id khớp
  */
 router.get('/check-exists', async (req: Request, res: Response) => {
   try {
@@ -624,23 +624,23 @@ router.get('/check-exists', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '手机号不能为空',
+        message: 'Số điện thoại không được để trống',
         data: null
       });
     }
 
-    console.log('[检查客户存在] 查询手机号:', phone);
+    console.log('[Kiểm tra khách hàng tồn tại] Truy vấn số điện thoại:', phone);
 
     const existingCustomer = await customerRepository.findOne({
       where: { phone: phone as string }
     });
 
     if (existingCustomer) {
-      console.log('[检查客户存在] 找到客户:', existingCustomer.name);
+      console.log('[Kiểm tra khách hàng tồn tại] Tìm thấy khách hàng:', existingCustomer.name);
       return res.json({
         success: true,
         code: 200,
-        message: '该手机号已存在客户记录',
+        message: 'Số điện thoại này đã có bản ghi khách hàng',
         data: {
           id: existingCustomer.id,
           name: existingCustomer.name,
@@ -651,20 +651,20 @@ router.get('/check-exists', async (req: Request, res: Response) => {
       });
     }
 
-    console.log('[检查客户存在] 客户不存在，可以创建');
+    console.log('[Kiểm tra khách hàng tồn tại] Khách hàng không tồn tại, có thể tạo');
     return res.json({
       success: true,
       code: 200,
-      message: '该手机号不存在，可以创建',
+      message: 'Số điện thoại này chưa tồn tại, có thể tạo',
       data: null
     });
   } catch (error) {
-    console.error('检查客户存在失败:', error);
+    console.error('Kiểm tra khách hàng tồn tại thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '检查客户存在失败',
-      error: error instanceof Error ? error.message : '未知错误',
+      message: 'Kiểm tra khách hàng tồn tại thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định',
       data: null
     });
   }
@@ -672,7 +672,7 @@ router.get('/check-exists', async (req: Request, res: Response) => {
 
 /**
  * @route GET /api/v1/customers/:id
- * @desc 获取客户详情
+ * @desc Lấy chi tiết khách hàng
  * @access Private
  */
 router.get('/:id', async (req: Request, res: Response) => {
@@ -686,11 +686,11 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '客户不存在'
+        message: 'Khách hàng không tồn tại'
       });
     }
 
-    // 转换数据格式
+    // Chuyển đổi định dạng dữ liệu
     const data = {
       id: customer.id,
       code: customer.customerNo || '',
@@ -732,16 +732,16 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '获取客户详情成功',
+      message: 'Lấy chi tiết khách hàng thành công',
       data
     });
   } catch (error) {
-    console.error('获取客户详情失败:', error);
+    console.error('Lấy chi tiết khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '获取客户详情失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy chi tiết khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
@@ -762,34 +762,34 @@ router.post('/', async (req: Request, res: Response) => {
       status, salesPersonId, createdBy
     } = req.body;
 
-    console.log('[创建客户] 收到请求数据:', req.body);
+    console.log('[Tạo khách hàng] Nhận dữ liệu yêu cầu:', req.body);
 
-    // 验证必填字段
+    // Xác thực trường bắt buộc
     if (!name) {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '客户姓名不能为空'
+        message: 'Tên khách hàng không được để trống'
       });
     }
 
-    // 检查手机号是否已存在
+    // Kiểm tra số điện thoại đã tồn tại chưa
     if (phone) {
       const existingCustomer = await customerRepository.findOne({ where: { phone } });
       if (existingCustomer) {
         return res.status(400).json({
           success: false,
           code: 400,
-          message: '该手机号已存在客户记录'
+          message: 'Số điện thoại này đã có bản ghi khách hàng'
         });
       }
     }
 
-    // 获取当前用户信息
+    // Lấy thông tin người dùng hiện tại
     const currentUser = (req as any).user;
     const finalCreatedBy = createdBy || salesPersonId || currentUser?.id || 'admin';
 
-    // 创建客户
+    // Tạo khách hàng
     const customer = customerRepository.create({
       name,
       phone,
@@ -809,7 +809,7 @@ router.post('/', async (req: Request, res: Response) => {
       status: status || 'active',
       salesPersonId: salesPersonId || currentUser?.id || null,
       createdBy: finalCreatedBy,
-      // 新增字段
+      // Các trường mới
       age: age || null,
       gender: gender || 'unknown',
       height: height || null,
@@ -824,22 +824,22 @@ router.post('/', async (req: Request, res: Response) => {
       totalAmount: 0
     });
 
-    console.log('[创建客户] 准备保存的客户对象:', customer);
+    console.log('[Tạo khách hàng] Đối tượng khách hàng chuẩn bị lưu:', customer);
 
     const savedCustomer = await customerRepository.save(customer);
-    console.log('[创建客户] 第一次保存完成，savedCustomer:', savedCustomer);
-    console.log('[创建客户] savedCustomer.id:', savedCustomer.id);
+    console.log('[Tạo khách hàng] Lần lưu đầu tiên hoàn tất, savedCustomer:', savedCustomer);
+    console.log('[Tạo khách hàng] savedCustomer.id:', savedCustomer.id);
 
-    // 生成客户编号
+    // Tạo mã khách hàng
     savedCustomer.customerNo = `C${savedCustomer.id.substring(0, 8).toUpperCase()}`;
-    console.log('[创建客户] 生成的客户编号:', savedCustomer.customerNo);
+    console.log('[Tạo khách hàng] Mã khách hàng đã tạo:', savedCustomer.customerNo);
 
     await customerRepository.save(savedCustomer);
-    console.log('[创建客户] 第二次保存完成');
+    console.log('[Tạo khách hàng] Lần lưu thứ hai hoàn tất');
 
-    console.log('[创建客户] 保存成功，客户ID:', savedCustomer.id);
+    console.log('[Tạo khách hàng] Lưu thành công, ID khách hàng:', savedCustomer.id);
 
-    // 转换数据格式返回
+    // Chuyển đổi định dạng dữ liệu để trả về
     const data = {
       id: savedCustomer.id,
       code: savedCustomer.customerNo,
@@ -872,33 +872,33 @@ router.post('/', async (req: Request, res: Response) => {
       otherGoals: savedCustomer.otherGoals || ''
     };
 
-    console.log('[创建客户] 准备返回的data对象:', data);
-    console.log('[创建客户] data.id:', data.id);
-    console.log('[创建客户] data.name:', data.name);
+    console.log('[Tạo khách hàng] Đối tượng data chuẩn bị trả về:', data);
+    console.log('[Tạo khách hàng] data.id:', data.id);
+    console.log('[Tạo khách hàng] data.name:', data.name);
 
     res.status(201).json({
       success: true,
       code: 200,
-      message: '创建客户成功',
+      message: 'Tạo khách hàng thành công',
       data
     });
 
-    console.log('[创建客户] 响应已发送');
+    console.log('[Tạo khách hàng] Phản hồi đã gửi');
   } catch (error) {
-    console.error('[创建客户] 创建客户失败:', error);
-    console.error('[创建客户] 错误详情:', error instanceof Error ? error.stack : error);
+    console.error('[Tạo khách hàng] Tạo khách hàng thất bại:', error);
+    console.error('[Tạo khách hàng] Chi tiết lỗi:', error instanceof Error ? error.stack : error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '创建客户失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Tạo khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route PUT /api/v1/customers/:id
- * @desc 更新客户
+ * @desc Cập nhật khách hàng
  * @access Private
  */
 router.put('/:id', async (req: Request, res: Response) => {
@@ -912,7 +912,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '客户不存在'
+        message: 'Khách hàng không tồn tại'
       });
     }
 
@@ -923,7 +923,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       medicalHistory, improvementGoals, otherGoals, fanAcquisitionTime
     } = req.body;
 
-    // 更新字段
+    // Cập nhật trường
     if (name !== undefined) customer.name = name;
     if (phone !== undefined) customer.phone = phone;
     if (email !== undefined) customer.email = email;
@@ -952,7 +952,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     const updatedCustomer = await customerRepository.save(customer);
 
-    // 转换数据格式返回
+    // Chuyển đổi định dạng dữ liệu để trả về
     const data = {
       id: updatedCustomer.id,
       code: updatedCustomer.customerNo || '',
@@ -979,23 +979,23 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '更新客户成功',
+      message: 'Cập nhật khách hàng thành công',
       data
     });
   } catch (error) {
-    console.error('更新客户失败:', error);
+    console.error('Cập nhật khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '更新客户失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route DELETE /api/v1/customers/:id
- * @desc 删除客户
+ * @desc Xóa khách hàng
  * @access Private
  */
 router.delete('/:id', async (req: Request, res: Response) => {
@@ -1009,7 +1009,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         code: 404,
-        message: '客户不存在'
+        message: 'Khách hàng không tồn tại'
       });
     }
 
@@ -1018,22 +1018,22 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '删除客户成功'
+      message: 'Xóa khách hàng thành công'
     });
   } catch (error) {
-    console.error('删除客户失败:', error);
+    console.error('Xóa khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '删除客户失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Xóa khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/customers/search
- * @desc 搜索客户
+ * @desc Tìm kiếm khách hàng
  * @access Private
  */
 router.get('/search', async (req: Request, res: Response) => {
@@ -1060,7 +1060,7 @@ router.get('/search', async (req: Request, res: Response) => {
       .orderBy('customer.createdAt', 'DESC')
       .getManyAndCount();
 
-    // 转换数据格式
+    // Chuyển đổi định dạng dữ liệu
     const list = customers.map(customer => ({
       id: customer.id,
       code: customer.customerNo || '',
@@ -1084,7 +1084,7 @@ router.get('/search', async (req: Request, res: Response) => {
     res.json({
       success: true,
       code: 200,
-      message: '搜索客户成功',
+      message: 'Tìm kiếm khách hàng thành công',
       data: {
         list,
         total,
@@ -1093,41 +1093,41 @@ router.get('/search', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('搜索客户失败:', error);
+    console.error('Tìm kiếm khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
       code: 500,
-      message: '搜索客户失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Tìm kiếm khách hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
-// ========== 客户详情子路由 ==========
+// ========== Route con chi tiết khách hàng ==========
 
 /**
  * @route GET /api/v1/customers/:id/orders
- * @desc 获取客户订单历史
+ * @desc Lấy lịch sử đơn hàng của khách hàng
  * @access Private
  */
 router.get('/:id/orders', async (req: Request, res: Response) => {
   try {
     const customerId = req.params.id;
-    // 返回空数组，实际应从订单表查询
+    // Trả về mảng rỗng, thực tế nên truy vấn từ bảng đơn hàng
     res.json({
       success: true,
       code: 200,
       data: []
     });
   } catch (error) {
-    console.error('获取客户订单失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取客户订单失败' });
+    console.error('Lấy đơn hàng khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy đơn hàng khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customers/:id/services
- * @desc 获取客户售后记录
+ * @desc Lấy bản ghi dịch vụ sau bán hàng của khách hàng
  * @access Private
  */
 router.get('/:id/services', async (req: Request, res: Response) => {
@@ -1135,14 +1135,14 @@ router.get('/:id/services', async (req: Request, res: Response) => {
     const customerId = req.params.id;
     res.json({ success: true, code: 200, data: [] });
   } catch (error) {
-    console.error('获取客户售后记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取客户售后记录失败' });
+    console.error('Lấy bản ghi dịch vụ sau bán hàng khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy bản ghi dịch vụ sau bán hàng khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customers/:id/calls
- * @desc 获取客户通话记录
+ * @desc Lấy lịch sử cuộc gọi của khách hàng
  * @access Private
  */
 router.get('/:id/calls', async (req: Request, res: Response) => {
@@ -1150,14 +1150,14 @@ router.get('/:id/calls', async (req: Request, res: Response) => {
     const customerId = req.params.id;
     res.json({ success: true, code: 200, data: [] });
   } catch (error) {
-    console.error('获取客户通话记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取客户通话记录失败' });
+    console.error('Lấy lịch sử cuộc gọi khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy lịch sử cuộc gọi khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customers/:id/followups
- * @desc 获取客户跟进记录
+ * @desc Lấy bản ghi theo dõi khách hàng
  * @access Private
  */
 router.get('/:id/followups', async (req: Request, res: Response) => {
@@ -1165,14 +1165,14 @@ router.get('/:id/followups', async (req: Request, res: Response) => {
     const customerId = req.params.id;
     res.json({ success: true, code: 200, data: [] });
   } catch (error) {
-    console.error('获取客户跟进记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取客户跟进记录失败' });
+    console.error('Lấy bản ghi theo dõi khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy bản ghi theo dõi khách hàng thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/customers/:id/followups
- * @desc 添加客户跟进记录
+ * @desc Thêm bản ghi theo dõi khách hàng
  * @access Private
  */
 router.post('/:id/followups', async (req: Request, res: Response) => {
@@ -1187,14 +1187,14 @@ router.post('/:id/followups', async (req: Request, res: Response) => {
     };
     res.status(201).json({ success: true, code: 200, data: newFollowUp });
   } catch (error) {
-    console.error('添加跟进记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '添加跟进记录失败' });
+    console.error('Thêm bản ghi theo dõi thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Thêm bản ghi theo dõi thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/customers/:id/followups/:followUpId
- * @desc 更新客户跟进记录
+ * @desc Cập nhật bản ghi theo dõi khách hàng
  * @access Private
  */
 router.put('/:id/followups/:followUpId', async (req: Request, res: Response) => {
@@ -1203,28 +1203,28 @@ router.put('/:id/followups/:followUpId', async (req: Request, res: Response) => 
     const followUpData = req.body;
     res.json({ success: true, code: 200, data: { id: followUpId, ...followUpData } });
   } catch (error) {
-    console.error('更新跟进记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '更新跟进记录失败' });
+    console.error('Cập nhật bản ghi theo dõi thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Cập nhật bản ghi theo dõi thất bại' });
   }
 });
 
 /**
  * @route DELETE /api/v1/customers/:id/followups/:followUpId
- * @desc 删除客户跟进记录
+ * @desc Xóa bản ghi theo dõi khách hàng
  * @access Private
  */
 router.delete('/:id/followups/:followUpId', async (req: Request, res: Response) => {
   try {
-    res.json({ success: true, code: 200, message: '删除成功' });
+    res.json({ success: true, code: 200, message: 'Xóa thành công' });
   } catch (error) {
-    console.error('删除跟进记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '删除跟进记录失败' });
+    console.error('Xóa bản ghi theo dõi thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Xóa bản ghi theo dõi thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customers/:id/tags
- * @desc 获取客户标签
+ * @desc Lấy nhãn khách hàng
  * @access Private
  */
 router.get('/:id/tags', async (req: Request, res: Response) => {
@@ -1233,14 +1233,14 @@ router.get('/:id/tags', async (req: Request, res: Response) => {
     const customer = await customerRepository.findOne({ where: { id: req.params.id } });
     res.json({ success: true, code: 200, data: customer?.tags || [] });
   } catch (error) {
-    console.error('获取客户标签失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取客户标签失败' });
+    console.error('Lấy nhãn khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy nhãn khách hàng thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/customers/:id/tags
- * @desc 添加客户标签
+ * @desc Thêm nhãn khách hàng
  * @access Private
  */
 router.post('/:id/tags', async (req: Request, res: Response) => {
@@ -1248,7 +1248,7 @@ router.post('/:id/tags', async (req: Request, res: Response) => {
     const customerRepository = AppDataSource.getRepository(Customer);
     const customer = await customerRepository.findOne({ where: { id: req.params.id } });
     if (!customer) {
-      return res.status(404).json({ success: false, code: 404, message: '客户不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Khách hàng không tồn tại' });
     }
     const tagData = req.body;
     const newTag = { id: `tag_${Date.now()}`, ...tagData };
@@ -1256,14 +1256,14 @@ router.post('/:id/tags', async (req: Request, res: Response) => {
     await customerRepository.save(customer);
     res.status(201).json({ success: true, code: 200, data: newTag });
   } catch (error) {
-    console.error('添加客户标签失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '添加客户标签失败' });
+    console.error('Thêm nhãn khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Thêm nhãn khách hàng thất bại' });
   }
 });
 
 /**
  * @route DELETE /api/v1/customers/:id/tags/:tagId
- * @desc 删除客户标签
+ * @desc Xóa nhãn khách hàng
  * @access Private
  */
 router.delete('/:id/tags/:tagId', async (req: Request, res: Response) => {
@@ -1271,15 +1271,15 @@ router.delete('/:id/tags/:tagId', async (req: Request, res: Response) => {
     const customerRepository = AppDataSource.getRepository(Customer);
     const customer = await customerRepository.findOne({ where: { id: req.params.id } });
     if (!customer) {
-      return res.status(404).json({ success: false, code: 404, message: '客户不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Khách hàng không tồn tại' });
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     customer.tags = (customer.tags || []).filter((tag: any) => tag.id !== req.params.tagId);
     await customerRepository.save(customer);
-    res.json({ success: true, code: 200, message: '删除成功' });
+    res.json({ success: true, code: 200, message: 'Xóa thành công' });
   } catch (error) {
-    console.error('删除客户标签失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '删除客户标签失败' });
+    console.error('Xóa nhãn khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Xóa nhãn khách hàng thất bại' });
   }
 });
 

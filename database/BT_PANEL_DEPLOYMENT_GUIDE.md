@@ -1,166 +1,166 @@
-# 宝塔面板 + MySQL 部署指南
+# Hướng Dẫn Triển Khai Bảng Điều Khiển Bảo Tháp + MySQL
 
-## 一、宝塔面板环境准备
+## Một、Chuẩn Bị Môi Trường Bảng Điều Khiển Bảo Tháp
 
-### 1. 服务器要求
-- **操作系统**：CentOS 7+ / Ubuntu 18+ / Debian 9+
-- **内存**：至少 1GB（推荐 2GB+）
-- **硬盘**：至少 20GB 可用空间
-- **网络**：公网IP，开放 80、443、8888 端口
+### 1. Yêu Cầu Server
+- **Hệ điều hành**：CentOS 7+ / Ubuntu 18+ / Debian 9+
+- **RAM**：Ít nhất 1GB（Khuyến nghị 2GB+）
+- **Ổ cứng**：Ít nhất 20GB dung lượng trống
+- **Mạng**：IP công cộng，mở port 80、443、8888
 
-### 2. 安装宝塔面板
+### 2. Cài Đặt Bảng Điều Khiển Bảo Tháp
 ```bash
-# CentOS 安装命令
+# Lệnh cài đặt CentOS
 yum install -y wget && wget -O install.sh http://download.bt.cn/install/install_6.0.sh && sh install.sh
 
-# Ubuntu/Debian 安装命令
+# Lệnh cài đặt Ubuntu/Debian
 wget -O install.sh http://download.bt.cn/install/install-ubuntu_6.0.sh && sudo bash install.sh
 ```
 
-### 3. 登录宝塔面板
-- 安装完成后记录面板地址、用户名和密码
-- 通过浏览器访问：`http://你的服务器IP:8888`
-- 首次登录建议修改默认端口和密码
+### 3. Đăng Nhập Bảng Điều Khiển Bảo Tháp
+- Sau khi cài đặt xong ghi lại địa chỉ panel、tên người dùng và mật khẩu
+- Truy cập qua trình duyệt：`http://IP_server_của_bạn:8888`
+- Lần đầu đăng nhập khuyến nghị sửa port mặc định và mật khẩu
 
-## 二、环境软件安装
+## Hai、Cài Đặt Phần Mềm Môi Trường
 
-### 1. 安装必要软件
-在宝塔面板 → 软件商店 → 一键安装：
-- **Nginx** 1.20+ （Web服务器）
-- **MySQL** 8.0+ （数据库）
-- **PHP** 8.0+ （可选，用于phpMyAdmin）
-- **Node.js** 18+ （后端API服务）
-- **PM2** 管理器（Node.js进程管理）
+### 1. Cài Đặt Phần Mềm Cần Thiết
+Trong Bảng Điều Khiển Bảo Tháp → Software Store → Cài đặt một lần：
+- **Nginx** 1.20+ （Web server）
+- **MySQL** 8.0+ （Database）
+- **PHP** 8.0+ （Tùy chọn，dùng cho phpMyAdmin）
+- **Node.js** 18+ （Backend API service）
+- **PM2** Manager（Quản lý process Node.js）
 
-### 2. MySQL 配置优化
-进入 MySQL 管理 → 配置修改：
+### 2. Tối Ưu Cấu Hình MySQL
+Vào MySQL Management → Sửa cấu hình：
 ```ini
 [mysqld]
-# 字符集配置
+# Cấu hình bộ ký tự
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
 
-# 性能配置
+# Cấu hình hiệu suất
 innodb_buffer_pool_size = 256M
 max_connections = 200
 query_cache_size = 32M
 query_cache_type = 1
 
-# 时区配置
+# Cấu hình múi giờ
 default-time-zone = '+08:00'
 
-# 安全配置
+# Cấu hình bảo mật
 sql_mode = STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
 ```
 
-## 三、数据库创建和配置
+## Ba、Tạo Và Cấu Hình Database
 
-### 1. 创建数据库
-1. 进入宝塔面板 → 数据库 → 添加数据库
-2. 数据库名：`crm_system`
-3. 用户名：`crm_user`（不要使用root）
-4. 密码：生成强密码并记录
-5. 访问权限：本地服务器（127.0.0.1）
+### 1. Tạo Database
+1. Vào Bảng Điều Khiển Bảo Tháp → Database → Thêm database
+2. Tên database：`crm_system`
+3. Tên người dùng：`crm_user`（Không dùng root）
+4. Mật khẩu：Tạo mật khẩu mạnh và ghi lại
+5. Quyền truy cập：Local server（127.0.0.1）
 
-### 2. 导入数据库结构
-1. 点击数据库名称进入 phpMyAdmin
-2. 选择 `crm_system` 数据库
-3. 点击"导入"选项卡
-4. 上传 `bt_panel_setup.sql` 文件
-5. 点击"执行"完成导入
+### 2. Import Cấu Trúc Database
+1. Click tên database vào phpMyAdmin
+2. Chọn database `crm_system`
+3. Click tab "Import"
+4. Upload file `bt_panel_setup.sql`
+5. Click "Execute" để hoàn thành import
 
-### 3. 验证数据库
-执行以下SQL验证安装：
+### 3. Xác Minh Database
+Thực thi SQL sau để xác minh cài đặt：
 ```sql
--- 检查表是否创建成功
+-- Kiểm tra bảng có được tạo thành công không
 SHOW TABLES;
 
--- 检查默认数据
+-- Kiểm tra dữ liệu mặc định
 SELECT * FROM departments;
 SELECT * FROM users;
 SELECT * FROM system_configs;
 
--- 检查字符集
+-- Kiểm tra bộ ký tự
 SHOW VARIABLES LIKE 'character_set%';
 ```
 
-## 四、后端API部署
+## Bốn、Triển Khai Backend API
 
-### 1. 创建网站
-1. 宝塔面板 → 网站 → 添加站点
-2. 域名：`api.yourdomain.com`（或使用IP:端口）
-3. 根目录：`/www/wwwroot/crm-api`
-4. PHP版本：纯静态（不需要PHP）
+### 1. Tạo Website
+1. Bảng Điều Khiển Bảo Tháp → Website → Thêm site
+2. Domain：`api.yourdomain.com`（hoặc dùng IP:port）
+3. Thư mục gốc：`/www/wwwroot/crm-api`
+4. Phiên bản PHP：Tĩnh thuần（không cần PHP）
 
-### 2. 上传后端代码
+### 2. Upload Backend Code
 ```bash
-# 进入网站根目录
+# Vào thư mục gốc website
 cd /www/wwwroot/crm-api
 
-# 上传后端代码（通过FTP或宝塔文件管理器）
-# 或者使用Git克隆
+# Upload backend code（qua FTP hoặc Bảng Điều Khiển Bảo Tháp File Manager）
+# Hoặc dùng Git clone
 git clone https://github.com/your-repo/crm-backend.git .
 
-# 安装依赖
+# Cài đặt dependencies
 npm install
 
-# 创建环境配置文件
+# Tạo file cấu hình môi trường
 cp .env.example .env
 ```
 
-### 3. 配置环境变量
-编辑 `.env` 文件：
+### 3. Cấu Hình Biến Môi Trường
+Chỉnh sửa file `.env`：
 ```env
-# 数据库配置
+# Cấu hình database
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=crm_system
 DB_USER=crm_user
-DB_PASSWORD=你的数据库密码
+DB_PASSWORD=Mật_khẩu_database_của_bạn
 
-# 服务配置
+# Cấu hình service
 PORT=3001
 NODE_ENV=production
 
-# JWT配置
-JWT_SECRET=你的JWT密钥
+# Cấu hình JWT
+JWT_SECRET=JWT_secret_key_của_bạn
 JWT_EXPIRES_IN=7d
 
-# 跨域配置
+# Cấu hình CORS
 CORS_ORIGIN=https://your-frontend-domain.com
 
-# 文件上传配置
+# Cấu hình upload file
 UPLOAD_PATH=/www/wwwroot/crm-api/uploads
 MAX_FILE_SIZE=10485760
 
-# 邮件配置（可选）
+# Cấu hình email（Tùy chọn）
 SMTP_HOST=smtp.qq.com
 SMTP_PORT=587
 SMTP_USER=your-email@qq.com
 SMTP_PASS=your-email-password
 ```
 
-### 4. 使用PM2启动服务
+### 4. Sử Dụng PM2 Khởi Động Service
 ```bash
-# 安装PM2（如果未安装）
+# Cài đặt PM2（nếu chưa cài）
 npm install -g pm2
 
-# 启动应用
+# Khởi động ứng dụng
 pm2 start ecosystem.config.js
 
-# 查看状态
+# Xem trạng thái
 pm2 status
 
-# 查看日志
+# Xem log
 pm2 logs crm-api
 
-# 设置开机自启
+# Thiết lập tự khởi động khi boot
 pm2 startup
 pm2 save
 ```
 
-### 5. Nginx反向代理配置
-在宝塔面板 → 网站 → 你的API站点 → 配置文件，添加：
+### 5. Cấu Hình Nginx Reverse Proxy
+Trong Bảng Điều Khiển Bảo Tháp → Website → Site API của bạn → File cấu hình，thêm：
 ```nginx
 location /api/ {
     proxy_pass http://127.0.0.1:3001/;
@@ -169,7 +169,7 @@ location /api/ {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     
-    # 处理跨域
+    # Xử lý CORS
     add_header Access-Control-Allow-Origin *;
     add_header Access-Control-Allow-Methods 'GET, POST, PUT, DELETE, OPTIONS';
     add_header Access-Control-Allow-Headers 'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
@@ -180,18 +180,18 @@ location /api/ {
 }
 ```
 
-## 五、前端部署
+## Năm、Triển Khai Frontend
 
-### 1. 构建前端项目
+### 1. Build Dự Án Frontend
 ```bash
-# 在本地开发环境
+# Trong môi trường phát triển local
 npm run build
 
-# 上传dist目录到服务器
-# 目标路径：/www/wwwroot/your-domain.com
+# Upload thư mục dist lên server
+# Đường dẫn đích：/www/wwwroot/your-domain.com
 ```
 
-### 2. Nginx配置
+### 2. Cấu Hình Nginx
 ```nginx
 server {
     listen 80;
@@ -199,12 +199,12 @@ server {
     root /www/wwwroot/your-domain.com;
     index index.html;
     
-    # 前端路由支持
+    # Hỗ trợ route frontend
     location / {
         try_files $uri $uri/ /index.html;
     }
     
-    # API代理
+    # Proxy API
     location /api/ {
         proxy_pass http://127.0.0.1:3001/;
         proxy_set_header Host $host;
@@ -212,7 +212,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
     
-    # 静态资源缓存
+    # Cache tài nguyên tĩnh
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
@@ -220,116 +220,116 @@ server {
 }
 ```
 
-## 六、SSL证书配置
+## Sáu、Cấu Hình Certificate SSL
 
-### 1. 申请免费SSL证书
-1. 宝塔面板 → 网站 → 你的域名 → SSL
-2. 选择"Let's Encrypt"免费证书
-3. 填写邮箱，点击申请
-4. 开启"强制HTTPS"
+### 1. Đăng Ký Certificate SSL Miễn Phí
+1. Bảng Điều Khiển Bảo Tháp → Website → Domain của bạn → SSL
+2. Chọn certificate miễn phí "Let's Encrypt"
+3. Điền email，click đăng ký
+4. Bật "Bắt buộc HTTPS"
 
-### 2. 证书自动续期
-宝塔面板会自动处理证书续期，无需手动操作。
+### 2. Tự Động Gia Hạn Certificate
+Bảng Điều Khiển Bảo Tháp sẽ tự động xử lý gia hạn certificate，không cần thao tác thủ công.
 
-## 七、安全配置
+## Bảy、Cấu Hình Bảo Mật
 
-### 1. 防火墙设置
-宝塔面板 → 安全：
-- 开放端口：80, 443, 8888（面板端口）
-- 关闭不必要的端口
-- 设置SSH端口（非22）
+### 1. Cài Đặt Firewall
+Bảng Điều Khiển Bảo Tháp → Security：
+- Mở port：80, 443, 8888（Port panel）
+- Đóng port không cần thiết
+- Thiết lập port SSH（không phải 22）
 
-### 2. 数据库安全
-- 不要使用root用户连接应用
-- 设置强密码
-- 定期备份数据库
-- 限制远程访问
+### 2. Bảo Mật Database
+- Không dùng user root kết nối ứng dụng
+- Thiết lập mật khẩu mạnh
+- Backup database định kỳ
+- Giới hạn truy cập từ xa
 
-### 3. 文件权限
+### 3. Quyền File
 ```bash
-# 设置网站目录权限
+# Thiết lập quyền thư mục website
 chown -R www:www /www/wwwroot/
 chmod -R 755 /www/wwwroot/
 
-# 设置敏感文件权限
+# Thiết lập quyền file nhạy cảm
 chmod 600 /www/wwwroot/crm-api/.env
 ```
 
-## 八、监控和维护
+## Tám、Giám Sát Và Bảo Trì
 
-### 1. 系统监控
-宝塔面板 → 监控：
-- CPU使用率
-- 内存使用率
-- 磁盘使用率
-- 网络流量
+### 1. Giám Sát Hệ Thống
+Bảng Điều Khiển Bảo Tháp → Monitor：
+- Tỷ lệ sử dụng CPU
+- Tỷ lệ sử dụng RAM
+- Tỷ lệ sử dụng ổ cứng
+- Lưu lượng mạng
 
-### 2. 日志管理
-- Nginx访问日志：`/www/wwwroot/logs/`
-- MySQL错误日志：宝塔面板 → MySQL → 日志
-- PM2应用日志：`pm2 logs`
+### 2. Quản Lý Log
+- Log truy cập Nginx：`/www/wwwroot/logs/`
+- Log lỗi MySQL：Bảng Điều Khiển Bảo Tháp → MySQL → Log
+- Log ứng dụng PM2：`pm2 logs`
 
-### 3. 备份策略
-宝塔面板 → 计划任务：
-- 数据库备份：每日凌晨2点
-- 网站文件备份：每周一次
-- 备份保留：30天
+### 3. Chiến Lược Backup
+Bảng Điều Khiển Bảo Tháp → Scheduled Tasks：
+- Backup database：2 giờ sáng mỗi ngày
+- Backup file website：Mỗi tuần một lần
+- Giữ backup：30 ngày
 
-### 4. 性能优化
-- 启用Gzip压缩
-- 配置浏览器缓存
-- 使用CDN加速
-- 定期清理日志文件
+### 4. Tối Ưu Hiệu Suất
+- Bật nén Gzip
+- Cấu hình cache trình duyệt
+- Sử dụng CDN tăng tốc
+- Dọn dẹp file log định kỳ
 
-## 九、故障排除
+## Chín、Xử Lý Sự Cố
 
-### 1. 常见问题
-**数据库连接失败**：
-- 检查数据库服务状态
-- 验证连接参数
-- 查看MySQL错误日志
+### 1. Vấn Đề Thường Gặp
+**Kết nối database thất bại**：
+- Kiểm tra trạng thái service database
+- Xác minh tham số kết nối
+- Xem log lỗi MySQL
 
-**API服务无法访问**：
-- 检查PM2进程状态
-- 查看应用日志
-- 验证Nginx配置
+**Service API không thể truy cập**：
+- Kiểm tra trạng thái process PM2
+- Xem log ứng dụng
+- Xác minh cấu hình Nginx
 
-**前端页面空白**：
-- 检查构建文件是否完整
-- 查看浏览器控制台错误
-- 验证API接口连通性
+**Trang frontend trắng**：
+- Kiểm tra file build có đầy đủ không
+- Xem lỗi console trình duyệt
+- Xác minh tính kết nối interface API
 
-### 2. 调试命令
+### 2. Lệnh Debug
 ```bash
-# 检查服务状态
+# Kiểm tra trạng thái service
 systemctl status nginx
 systemctl status mysql
 pm2 status
 
-# 查看日志
+# Xem log
 tail -f /var/log/nginx/error.log
 tail -f /var/log/mysql/error.log
 pm2 logs crm-api
 
-# 测试数据库连接
+# Test kết nối database
 mysql -u crm_user -p crm_system
 
-# 测试API接口
+# Test interface API
 curl http://localhost:3001/api/health
 ```
 
-## 十、联系支持
+## Mười、Liên Hệ Hỗ Trợ
 
-如果在部署过程中遇到问题：
-1. 查看宝塔面板官方文档
-2. 检查系统日志和错误信息
-3. 参考本项目的技术文档
-4. 联系技术支持团队
+Nếu gặp vấn đề trong quá trình triển khai：
+1. Xem tài liệu chính thức Bảng Điều Khiển Bảo Tháp
+2. Kiểm tra log hệ thống và thông tin lỗi
+3. Tham khảo tài liệu kỹ thuật dự án này
+4. Liên hệ team hỗ trợ kỹ thuật
 
 ---
 
-**重要提醒**：
-- 部署前请备份现有数据
-- 修改所有默认密码
-- 定期更新系统和软件
-- 监控系统性能和安全状态
+**Lưu ý quan trọng**：
+- Trước khi triển khai vui lòng backup dữ liệu hiện có
+- Sửa tất cả mật khẩu mặc định
+- Cập nhật hệ thống và phần mềm định kỳ
+- Giám sát hiệu suất và trạng thái bảo mật hệ thống

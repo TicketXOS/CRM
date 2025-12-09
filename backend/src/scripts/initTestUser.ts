@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
-// 加载环境变量 - 优先加载开发环境配置
+// Tải biến môi trường - ưu tiên tải cấu hình môi trường phát triển
 dotenv.config({ path: '.env.development' });
-dotenv.config(); // 加载默认配置作为备用
+dotenv.config(); // Tải cấu hình mặc định làm dự phòng
 
 import { getDataSource, initializeDatabase } from '../config/database';
 import { User } from '../entities/User';
@@ -10,44 +10,44 @@ import bcrypt from 'bcryptjs';
 
 async function initTestUser() {
   try {
-    console.log('正在初始化数据库连接...');
+    console.log('Đang khởi tạo kết nối cơ sở dữ liệu...');
     const dataSource = getDataSource();
     if (!dataSource) {
-      throw new Error('无法获取数据源');
+      throw new Error('Không thể lấy nguồn dữ liệu');
     }
     await dataSource.initialize();
-    
+
     const userRepository = dataSource.getRepository(User);
     const departmentRepository = dataSource.getRepository(Department);
 
-    // 创建默认部门（如果不存在）
+    // Tạo phòng ban mặc định (nếu chưa tồn tại)
     let adminDepartment = await departmentRepository.findOne({
-      where: { name: '管理部' }
+      where: { name: 'Phòng quản lý' }
     });
 
     if (!adminDepartment) {
       adminDepartment = departmentRepository.create({
-        name: '管理部',
+        name: 'Phòng quản lý',
         code: 'ADMIN',
-        description: '系统管理部门'
+        description: 'Phòng ban quản lý hệ thống'
       });
       await departmentRepository.save(adminDepartment);
-      console.log('已创建管理部门');
+      console.log('Đã tạo phòng ban quản lý');
     }
 
-    // 检查是否已存在admin用户
+    // Kiểm tra xem đã tồn tại người dùng admin chưa
     const existingAdmin = await userRepository.findOne({
       where: { username: 'admin' }
     });
 
     if (!existingAdmin) {
-      // 创建管理员用户
+      // Tạo người dùng quản trị viên
       const hashedPassword = '$2a$12$TVl3t.lovkbJzvstu5OF1uqKmj0sdcwVTDfNXHulgL/Q2PJxTp4pO'; // admin123
-      
+
       const adminUser = userRepository.create({
         username: 'admin',
         password: hashedPassword,
-        realName: '系统管理员',
+        realName: 'Quản trị viên hệ thống',
         email: 'admin@company.com',
         role: 'admin' as const,
         status: 'active' as const,
@@ -55,48 +55,48 @@ async function initTestUser() {
       });
 
       await userRepository.save(adminUser);
-      console.log('已创建管理员用户: admin / admin123');
+      console.log('Đã tạo người dùng quản trị viên: admin / admin123');
     } else {
-      console.log('管理员用户已存在');
+      console.log('Người dùng quản trị viên đã tồn tại');
     }
 
-    // 创建其他部门
+    // Tạo các phòng ban khác
     let salesDepartment = await departmentRepository.findOne({
-      where: { name: '销售部' }
+      where: { name: 'Phòng bán hàng' }
     });
 
     if (!salesDepartment) {
       salesDepartment = departmentRepository.create({
-        name: '销售部',
+        name: 'Phòng bán hàng',
         code: 'SALES',
-        description: '销售部门'
+        description: 'Phòng ban bán hàng'
       });
       await departmentRepository.save(salesDepartment);
-      console.log('已创建销售部门');
+      console.log('Đã tạo phòng ban bán hàng');
     }
 
     let serviceDepartment = await departmentRepository.findOne({
-      where: { name: '客服部' }
+      where: { name: 'Phòng dịch vụ khách hàng' }
     });
 
     if (!serviceDepartment) {
       serviceDepartment = departmentRepository.create({
-        name: '客服部',
+        name: 'Phòng dịch vụ khách hàng',
         code: 'SERVICE',
-        description: '客服部门'
+        description: 'Phòng ban dịch vụ khách hàng'
       });
       await departmentRepository.save(serviceDepartment);
-      console.log('已创建客服部门');
+      console.log('Đã tạo phòng ban dịch vụ khách hàng');
     }
 
     const hashedPassword = '$2a$12$TVl3t.lovkbJzvstu5OF1uqKmj0sdcwVTDfNXHulgL/Q2PJxTp4pO'; // admin123
 
-    // 创建测试用户列表
+    // Danh sách người dùng kiểm thử
     const testUsers = [
       {
         username: 'manager',
         password: hashedPassword,
-        realName: '部门经理',
+        realName: 'Quản lý phòng ban',
         email: 'manager@company.com',
         role: 'manager' as const,
         status: 'active' as const,
@@ -105,7 +105,7 @@ async function initTestUser() {
       {
         username: 'sales001',
         password: hashedPassword,
-        realName: '销售员001',
+        realName: 'Nhân viên bán hàng 001',
         email: 'sales001@company.com',
         role: 'sales' as const,
         status: 'active' as const,
@@ -114,7 +114,7 @@ async function initTestUser() {
       {
         username: 'service001',
         password: hashedPassword,
-        realName: '客服员001',
+        realName: 'Nhân viên dịch vụ khách hàng 001',
         email: 'service001@company.com',
         role: 'service' as const,
         status: 'active' as const,
@@ -122,7 +122,7 @@ async function initTestUser() {
       }
     ];
 
-    // 创建测试用户
+    // Tạo người dùng kiểm thử
     for (const userData of testUsers) {
       const existingUser = await userRepository.findOne({
         where: { username: userData.username }
@@ -131,16 +131,16 @@ async function initTestUser() {
       if (!existingUser) {
         const user = userRepository.create(userData);
         await userRepository.save(user);
-        console.log(`已创建测试用户: ${userData.username} / admin123`);
+        console.log(`Đã tạo người dùng kiểm thử: ${userData.username} / admin123`);
       } else {
-        console.log(`用户 ${userData.username} 已存在`);
+        console.log(`Người dùng ${userData.username} đã tồn tại`);
       }
     }
 
-    console.log('测试用户初始化完成！');
-    
+    console.log('Khởi tạo người dùng kiểm thử hoàn tất!');
+
   } catch (error) {
-    console.error('初始化测试用户失败:', error);
+    console.error('Khởi tạo người dùng kiểm thử thất bại:', error);
   } finally {
     process.exit(0);
   }

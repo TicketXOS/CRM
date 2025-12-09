@@ -10,9 +10,9 @@ import fs from 'fs';
 const router = Router();
 const departmentController = new DepartmentController();
 
-// ========== 文件上传配置 ==========
+// ========== Cấu hình tải lên tệp ==========
 
-// 获取上传配置（从数据库读取maxFileSize）
+// Lấy cấu hình tải lên (đọc maxFileSize từ cơ sở dữ liệu)
 const getUploadConfig = async (): Promise<{ maxFileSize: number; allowedTypes: string }> => {
   try {
     const configRepository = AppDataSource.getRepository(SystemConfig);
@@ -24,7 +24,7 @@ const getUploadConfig = async (): Promise<{ maxFileSize: number; allowedTypes: s
     });
 
     return {
-      maxFileSize: maxFileSizeConfig ? Number(maxFileSizeConfig.configValue) : 10, // 默认10MB
+      maxFileSize: maxFileSizeConfig ? Number(maxFileSizeConfig.configValue) : 10, // Mặc định 10MB
       allowedTypes: allowedTypesConfig ? allowedTypesConfig.configValue : 'jpg,png,gif,webp,jpeg'
     };
   } catch {
@@ -32,7 +32,7 @@ const getUploadConfig = async (): Promise<{ maxFileSize: number; allowedTypes: s
   }
 };
 
-// 创建通用图片上传存储配置
+// Tạo cấu hình lưu trữ tải lên hình ảnh chung
 const createImageStorage = (subDir: string) => multer.diskStorage({
   destination: (_req, _file, cb) => {
     const uploadDir = path.join(process.cwd(), 'uploads', subDir);
@@ -48,33 +48,33 @@ const createImageStorage = (subDir: string) => multer.diskStorage({
   }
 });
 
-// 创建multer实例（默认配置，实际限制在路由中动态检查）
+// Tạo instance multer (cấu hình mặc định, giới hạn thực tế được kiểm tra động trong route)
 const createImageUpload = (subDir: string) => multer({
   storage: createImageStorage(subDir),
   limits: {
-    fileSize: 50 * 1024 * 1024 // 设置一个较大的默认值，实际限制在路由中检查
+    fileSize: 50 * 1024 * 1024 // Đặt giá trị mặc định lớn hơn, giới hạn thực tế được kiểm tra trong route
   },
   fileFilter: (_req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('只允许上传图片文件（jpg, png, gif, webp）'));
+      cb(new Error('Chỉ cho phép tải lên tệp hình ảnh (jpg, png, gif, webp)'));
     }
   }
 });
 
-// 各模块的上传实例
+// Các instance tải lên của từng module
 const systemImageUpload = createImageUpload('system');
 const productImageUpload = createImageUpload('products');
 const avatarImageUpload = createImageUpload('avatars');
 const orderImageUpload = createImageUpload('orders');
 const serviceImageUpload = createImageUpload('services');
 
-// ========== 通用配置辅助函数 ==========
+// ========== Hàm trợ giúp cấu hình chung ==========
 
 /**
- * 根据配置组获取配置
+ * Lấy cấu hình theo nhóm cấu hình
  */
 const getConfigsByGroup = async (group: string): Promise<Record<string, unknown>> => {
   const configRepository = AppDataSource.getRepository(SystemConfig);
@@ -90,7 +90,7 @@ const getConfigsByGroup = async (group: string): Promise<Record<string, unknown>
 };
 
 /**
- * 保存配置到指定组
+ * Lưu cấu hình vào nhóm chỉ định
  */
 const saveConfigsByGroup = async (
   group: string,
@@ -123,14 +123,14 @@ const saveConfigsByGroup = async (
 };
 
 /**
- * 系统管理路由
+ * Route quản lý hệ thống
  */
 
-// ========== 公共路由（只需要登录，不需要管理员权限）==========
+// ========== Route công khai (chỉ cần đăng nhập, không cần quyền quản trị viên) ==========
 
 /**
  * @route GET /api/v1/system/global-config
- * @desc 获取全局配置（所有登录用户可访问）
+ * @desc Lấy cấu hình toàn cục (tất cả người dùng đã đăng nhập có thể truy cập)
  * @access Private (All authenticated users)
  */
 router.get('/global-config', authenticateToken, (_req, res) => {
@@ -150,10 +150,10 @@ router.get('/global-config', authenticateToken, (_req, res) => {
   });
 });
 
-// ========== 文件上传路由 ==========
+// ========== Route tải lên tệp ==========
 
 /**
- * 获取存储配置（从数据库读取localDomain等）
+ * Lấy cấu hình lưu trữ (đọc localDomain từ cơ sở dữ liệu, v.v.)
  */
 const getStorageConfig = async (): Promise<{ localDomain: string; storageType: string }> => {
   try {
@@ -175,34 +175,34 @@ const getStorageConfig = async (): Promise<{ localDomain: string; storageType: s
 };
 
 /**
- * 通用图片上传处理函数
+ * Hàm xử lý tải lên hình ảnh chung
  */
 const handleImageUpload = async (req: Request, res: Response, subDir: string) => {
   try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: '请选择要上传的图片文件'
+        message: 'Vui lòng chọn tệp hình ảnh cần tải lên'
       });
     }
 
-    // 获取上传配置，检查文件大小
+    // Lấy cấu hình tải lên, kiểm tra kích thước tệp
     const uploadConfig = await getUploadConfig();
     const maxSizeBytes = uploadConfig.maxFileSize * 1024 * 1024;
 
     if (req.file.size > maxSizeBytes) {
-      // 删除已上传的文件
+      // Xóa tệp đã tải lên
       fs.unlinkSync(req.file.path);
       return res.status(400).json({
         success: false,
-        message: `文件大小超过限制，最大允许 ${uploadConfig.maxFileSize}MB`
+        message: `Kích thước tệp vượt quá giới hạn, tối đa cho phép ${uploadConfig.maxFileSize}MB`
       });
     }
 
-    // 获取存储配置中的访问域名
+    // Lấy tên miền truy cập trong cấu hình lưu trữ
     const storageConfig = await getStorageConfig();
 
-    // 优先使用数据库配置的域名，其次使用环境变量，最后使用请求的host
+    // Ưu tiên sử dụng tên miền được cấu hình trong cơ sở dữ liệu, sau đó sử dụng biến môi trường, cuối cùng sử dụng host của yêu cầu
     let baseUrl = storageConfig.localDomain;
     if (!baseUrl) {
       const protocol = req.protocol;
@@ -210,16 +210,16 @@ const handleImageUpload = async (req: Request, res: Response, subDir: string) =>
       baseUrl = process.env.API_BASE_URL || `${protocol}://${host}`;
     }
 
-    // 移除末尾的斜杠
+    // Loại bỏ dấu gạch chéo ở cuối
     baseUrl = baseUrl.replace(/\/$/, '');
 
-    // 生成图片URL - 使用相对路径，让前端通过 Nginx 代理访问
-    // 注意：这里使用 /uploads 而不是 /api/v1/uploads，因为后端静态文件服务配置的是 /uploads
+    // Tạo URL hình ảnh - sử dụng đường dẫn tương đối, để frontend truy cập qua proxy Nginx
+    // Lưu ý: Ở đây sử dụng /uploads thay vì /api/v1/uploads, vì dịch vụ tệp tĩnh của backend được cấu hình là /uploads
     const imageUrl = `/uploads/${subDir}/${req.file.filename}`;
 
     res.json({
       success: true,
-      message: '图片上传成功',
+      message: 'Tải lên hình ảnh thành công',
       data: {
         url: imageUrl,
         filename: req.file.filename,
@@ -228,17 +228,17 @@ const handleImageUpload = async (req: Request, res: Response, subDir: string) =>
       }
     });
   } catch (error) {
-    console.error('图片上传失败:', error);
+    console.error('Tải lên hình ảnh thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '图片上传失败'
+      message: 'Tải lên hình ảnh thất bại'
     });
   }
 };
 
 /**
  * @route GET /api/v1/system/upload-config
- * @desc 获取上传配置（文件大小限制等）
+ * @desc Lấy cấu hình tải lên (giới hạn kích thước tệp, v.v.)
  * @access Private
  */
 router.get('/upload-config', authenticateToken, async (_req: Request, res: Response) => {
@@ -249,17 +249,17 @@ router.get('/upload-config', authenticateToken, async (_req: Request, res: Respo
       data: config
     });
   } catch (error) {
-    console.error('获取上传配置失败:', error);
+    console.error('Lấy cấu hình tải lên thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取上传配置失败'
+      message: 'Lấy cấu hình tải lên thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/system/upload-image
- * @desc 上传系统图片（Logo、二维码等）
+ * @desc Tải lên hình ảnh hệ thống (Logo, mã QR, v.v.)
  * @access Private (Admin)
  */
 router.post('/upload-image', authenticateToken, requireAdmin, systemImageUpload.single('image'), (req: Request, res: Response) => {
@@ -268,7 +268,7 @@ router.post('/upload-image', authenticateToken, requireAdmin, systemImageUpload.
 
 /**
  * @route POST /api/v1/system/upload-product-image
- * @desc 上传商品图片
+ * @desc Tải lên hình ảnh sản phẩm
  * @access Private (Admin)
  */
 router.post('/upload-product-image', authenticateToken, requireAdmin, productImageUpload.single('image'), (req: Request, res: Response) => {
@@ -277,7 +277,7 @@ router.post('/upload-product-image', authenticateToken, requireAdmin, productIma
 
 /**
  * @route POST /api/v1/system/upload-avatar
- * @desc 上传用户头像
+ * @desc Tải lên avatar người dùng
  * @access Private
  */
 router.post('/upload-avatar', authenticateToken, avatarImageUpload.single('image'), (req: Request, res: Response) => {
@@ -286,7 +286,7 @@ router.post('/upload-avatar', authenticateToken, avatarImageUpload.single('image
 
 /**
  * @route POST /api/v1/system/upload-order-image
- * @desc 上传订单相关图片（定金凭证等）
+ * @desc Tải lên hình ảnh liên quan đến đơn hàng (chứng từ đặt cọc, v.v.)
  * @access Private
  */
 router.post('/upload-order-image', authenticateToken, orderImageUpload.single('image'), (req: Request, res: Response) => {
@@ -295,7 +295,7 @@ router.post('/upload-order-image', authenticateToken, orderImageUpload.single('i
 
 /**
  * @route POST /api/v1/system/upload-service-image
- * @desc 上传售后服务图片
+ * @desc Tải lên hình ảnh dịch vụ sau bán hàng
  * @access Private
  */
 router.post('/upload-service-image', authenticateToken, serviceImageUpload.single('image'), (req: Request, res: Response) => {
@@ -304,7 +304,7 @@ router.post('/upload-service-image', authenticateToken, serviceImageUpload.singl
 
 /**
  * @route DELETE /api/v1/system/delete-image
- * @desc 删除系统图片
+ * @desc Xóa hình ảnh hệ thống
  * @access Private (Admin)
  */
 router.delete('/delete-image', authenticateToken, requireAdmin, (req: Request, res: Response) => {
@@ -314,11 +314,11 @@ router.delete('/delete-image', authenticateToken, requireAdmin, (req: Request, r
     if (!filename) {
       return res.status(400).json({
         success: false,
-        message: '请提供要删除的文件名'
+        message: 'Vui lòng cung cấp tên tệp cần xóa'
       });
     }
 
-    // 安全检查：只允许删除system目录下的文件
+    // Kiểm tra bảo mật: chỉ cho phép xóa tệp trong thư mục system
     const filePath = path.join(process.cwd(), 'uploads', 'system', path.basename(filename));
 
     if (fs.existsSync(filePath)) {
@@ -327,43 +327,43 @@ router.delete('/delete-image', authenticateToken, requireAdmin, (req: Request, r
 
     res.json({
       success: true,
-      message: '图片删除成功'
+      message: 'Xóa hình ảnh thành công'
     });
   } catch (error) {
-    console.error('图片删除失败:', error);
+    console.error('Xóa hình ảnh thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '图片删除失败'
+      message: 'Xóa hình ảnh thất bại'
     });
   }
 });
 
-// ========== 基本设置路由 ==========
+// ========== Route cấu hình cơ bản ==========
 
 /**
  * @route GET /api/v1/system/basic-settings
- * @desc 获取系统基本设置
+ * @desc Lấy cấu hình cơ bản hệ thống
  * @access Private (All authenticated users)
  */
 router.get('/basic-settings', authenticateToken, async (req: Request, res: Response) => {
   try {
     const configRepository = AppDataSource.getRepository(SystemConfig);
 
-    // 获取所有基本设置配置
+    // Lấy tất cả cấu hình cài đặt cơ bản
     const configs = await configRepository.find({
       where: { configGroup: 'basic_settings', isEnabled: true },
       order: { sortOrder: 'ASC' }
     });
 
-    // 转换为键值对格式
+    // Chuyển đổi sang định dạng cặp khóa-giá trị
     const settings: Record<string, unknown> = {};
     configs.forEach(config => {
       settings[config.configKey] = config.getParsedValue();
     });
 
-    // 设置默认值
+    // Đặt giá trị mặc định
     const defaultSettings = {
-      systemName: settings.systemName || 'CRM客户管理系统',
+      systemName: settings.systemName || 'Hệ thống quản lý khách hàng CRM',
       systemVersion: settings.systemVersion || '1.0.0',
       companyName: settings.companyName || '',
       contactPhone: settings.contactPhone || '',
@@ -373,7 +373,7 @@ router.get('/basic-settings', authenticateToken, async (req: Request, res: Respo
       systemDescription: settings.systemDescription || '',
       systemLogo: settings.systemLogo || '',
       contactQRCode: settings.contactQRCode || '',
-      contactQRCodeLabel: settings.contactQRCodeLabel || '扫码联系'
+      contactQRCodeLabel: settings.contactQRCodeLabel || 'Quét mã liên hệ'
     };
 
     res.json({
@@ -381,17 +381,17 @@ router.get('/basic-settings', authenticateToken, async (req: Request, res: Respo
       data: { ...defaultSettings, ...settings }
     });
   } catch (error) {
-    console.error('获取基本设置失败:', error);
+    console.error('Lấy cấu hình cơ bản thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取基本设置失败'
+      message: 'Lấy cấu hình cơ bản thất bại'
     });
   }
 });
 
 /**
  * @route PUT /api/v1/system/basic-settings
- * @desc 更新系统基本设置
+ * @desc Cập nhật cấu hình cơ bản hệ thống
  * @access Private (Admin)
  */
 router.put('/basic-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
@@ -399,22 +399,22 @@ router.put('/basic-settings', authenticateToken, requireAdmin, async (req: Reque
     const configRepository = AppDataSource.getRepository(SystemConfig);
     const settings = req.body;
 
-    // 定义需要保存的配置项
+    // Định nghĩa các mục cấu hình cần lưu
     const configItems = [
-      { key: 'systemName', type: 'string' as const, desc: '系统名称' },
-      { key: 'systemVersion', type: 'string' as const, desc: '系统版本' },
-      { key: 'companyName', type: 'string' as const, desc: '公司名称' },
-      { key: 'contactPhone', type: 'string' as const, desc: '联系电话' },
-      { key: 'contactEmail', type: 'string' as const, desc: '联系邮箱' },
-      { key: 'websiteUrl', type: 'string' as const, desc: '网站地址' },
-      { key: 'companyAddress', type: 'string' as const, desc: '公司地址' },
-      { key: 'systemDescription', type: 'text' as const, desc: '系统描述' },
-      { key: 'systemLogo', type: 'text' as const, desc: '系统Logo' },
-      { key: 'contactQRCode', type: 'text' as const, desc: '联系二维码' },
-      { key: 'contactQRCodeLabel', type: 'string' as const, desc: '二维码标签' }
+      { key: 'systemName', type: 'string' as const, desc: 'Tên hệ thống' },
+      { key: 'systemVersion', type: 'string' as const, desc: 'Phiên bản hệ thống' },
+      { key: 'companyName', type: 'string' as const, desc: 'Tên công ty' },
+      { key: 'contactPhone', type: 'string' as const, desc: 'Số điện thoại liên hệ' },
+      { key: 'contactEmail', type: 'string' as const, desc: 'Email liên hệ' },
+      { key: 'websiteUrl', type: 'string' as const, desc: 'Địa chỉ website' },
+      { key: 'companyAddress', type: 'string' as const, desc: 'Địa chỉ công ty' },
+      { key: 'systemDescription', type: 'text' as const, desc: 'Mô tả hệ thống' },
+      { key: 'systemLogo', type: 'text' as const, desc: 'Logo hệ thống' },
+      { key: 'contactQRCode', type: 'text' as const, desc: 'Mã QR liên hệ' },
+      { key: 'contactQRCodeLabel', type: 'string' as const, desc: 'Nhãn mã QR' }
     ];
 
-    // 保存或更新每个配置项
+    // Lưu hoặc cập nhật từng mục cấu hình
     for (const item of configItems) {
       if (settings[item.key] !== undefined) {
         let config = await configRepository.findOne({
@@ -422,11 +422,11 @@ router.put('/basic-settings', authenticateToken, requireAdmin, async (req: Reque
         });
 
         if (config) {
-          // 更新现有配置
+          // Cập nhật cấu hình hiện có
           config.configValue = String(settings[item.key]);
           config.valueType = item.type;
         } else {
-          // 创建新配置
+          // Tạo cấu hình mới
           config = configRepository.create({
             configKey: item.key,
             configValue: String(settings[item.key]),
@@ -444,23 +444,23 @@ router.put('/basic-settings', authenticateToken, requireAdmin, async (req: Reque
 
     res.json({
       success: true,
-      message: '基本设置保存成功',
+      message: 'Lưu cấu hình cơ bản thành công',
       data: settings
     });
   } catch (error) {
-    console.error('保存基本设置失败:', error);
+    console.error('Lưu cấu hình cơ bản thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '保存基本设置失败'
+      message: 'Lưu cấu hình cơ bản thất bại'
     });
   }
 });
 
-// ========== 安全设置路由 ==========
+// ========== Route cấu hình bảo mật ==========
 
 /**
  * @route GET /api/v1/system/security-settings
- * @desc 获取安全设置
+ * @desc Lấy cấu hình bảo mật
  * @access Private (Admin)
  */
 router.get('/security-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -479,43 +479,43 @@ router.get('/security-settings', authenticateToken, requireAdmin, async (_req: R
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取安全设置失败:', error);
-    res.status(500).json({ success: false, message: '获取安全设置失败' });
+    console.error('Lấy cấu hình bảo mật thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình bảo mật thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/security-settings
- * @desc 更新安全设置
+ * @desc Cập nhật cấu hình bảo mật
  * @access Private (Admin)
  */
 router.put('/security-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'passwordMinLength', type: 'number' as const, desc: '密码最小长度' },
-      { key: 'passwordComplexity', type: 'json' as const, desc: '密码复杂度要求' },
-      { key: 'passwordExpireDays', type: 'number' as const, desc: '密码有效期(天)' },
-      { key: 'loginFailLock', type: 'boolean' as const, desc: '登录失败锁定' },
-      { key: 'maxLoginFails', type: 'number' as const, desc: '最大失败次数' },
-      { key: 'lockDuration', type: 'number' as const, desc: '锁定时间(分钟)' },
-      { key: 'sessionTimeout', type: 'number' as const, desc: '会话超时时间(分钟)' },
-      { key: 'forceHttps', type: 'boolean' as const, desc: '强制HTTPS' },
-      { key: 'ipWhitelist', type: 'text' as const, desc: 'IP白名单' }
+      { key: 'passwordMinLength', type: 'number' as const, desc: 'Độ dài mật khẩu tối thiểu' },
+      { key: 'passwordComplexity', type: 'json' as const, desc: 'Yêu cầu độ phức tạp mật khẩu' },
+      { key: 'passwordExpireDays', type: 'number' as const, desc: 'Thời hạn mật khẩu (ngày)' },
+      { key: 'loginFailLock', type: 'boolean' as const, desc: 'Khóa khi đăng nhập thất bại' },
+      { key: 'maxLoginFails', type: 'number' as const, desc: 'Số lần thất bại tối đa' },
+      { key: 'lockDuration', type: 'number' as const, desc: 'Thời gian khóa (phút)' },
+      { key: 'sessionTimeout', type: 'number' as const, desc: 'Thời gian chờ phiên hết hạn (phút)' },
+      { key: 'forceHttps', type: 'boolean' as const, desc: 'Bắt buộc HTTPS' },
+      { key: 'ipWhitelist', type: 'text' as const, desc: 'Danh sách trắng IP' }
     ];
     await saveConfigsByGroup('security_settings', settings, configItems);
-    res.json({ success: true, message: '安全设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình bảo mật thành công', data: settings });
   } catch (error) {
-    console.error('保存安全设置失败:', error);
-    res.status(500).json({ success: false, message: '保存安全设置失败' });
+    console.error('Lưu cấu hình bảo mật thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình bảo mật thất bại' });
   }
 });
 
-// ========== 通话设置路由 ==========
+// ========== Route cấu hình cuộc gọi ==========
 
 /**
  * @route GET /api/v1/system/call-settings
- * @desc 获取通话设置
+ * @desc Lấy cấu hình cuộc gọi
  * @access Private (Admin)
  */
 router.get('/call-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -544,53 +544,53 @@ router.get('/call-settings', authenticateToken, requireAdmin, async (_req: Reque
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取通话设置失败:', error);
-    res.status(500).json({ success: false, message: '获取通话设置失败' });
+    console.error('Lấy cấu hình cuộc gọi thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình cuộc gọi thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/call-settings
- * @desc 更新通话设置
+ * @desc Cập nhật cấu hình cuộc gọi
  * @access Private (Admin)
  */
 router.put('/call-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'sipServer', type: 'string' as const, desc: 'SIP服务器地址' },
-      { key: 'sipPort', type: 'number' as const, desc: 'SIP端口' },
-      { key: 'sipUsername', type: 'string' as const, desc: 'SIP用户名' },
-      { key: 'sipPassword', type: 'string' as const, desc: 'SIP密码' },
-      { key: 'sipTransport', type: 'string' as const, desc: '传输协议' },
-      { key: 'autoAnswer', type: 'boolean' as const, desc: '自动接听' },
-      { key: 'autoRecord', type: 'boolean' as const, desc: '自动录音' },
-      { key: 'qualityMonitoring', type: 'boolean' as const, desc: '通话质量监控' },
-      { key: 'incomingCallPopup', type: 'boolean' as const, desc: '呼入弹窗' },
-      { key: 'maxCallDuration', type: 'number' as const, desc: '最大通话时长(秒)' },
-      { key: 'recordFormat', type: 'string' as const, desc: '录音格式' },
-      { key: 'recordQuality', type: 'string' as const, desc: '录音质量' },
-      { key: 'recordPath', type: 'string' as const, desc: '录音保存路径' },
-      { key: 'recordRetentionDays', type: 'number' as const, desc: '录音保留时间(天)' },
-      { key: 'outboundPermission', type: 'json' as const, desc: '外呼权限' },
-      { key: 'recordAccessPermission', type: 'json' as const, desc: '录音访问权限' },
-      { key: 'statisticsPermission', type: 'json' as const, desc: '通话统计权限' },
-      { key: 'numberRestriction', type: 'boolean' as const, desc: '号码限制' },
-      { key: 'allowedPrefixes', type: 'text' as const, desc: '允许的号码前缀' }
+      { key: 'sipServer', type: 'string' as const, desc: 'Địa chỉ máy chủ SIP' },
+      { key: 'sipPort', type: 'number' as const, desc: 'Cổng SIP' },
+      { key: 'sipUsername', type: 'string' as const, desc: 'Tên người dùng SIP' },
+      { key: 'sipPassword', type: 'string' as const, desc: 'Mật khẩu SIP' },
+      { key: 'sipTransport', type: 'string' as const, desc: 'Giao thức truyền tải' },
+      { key: 'autoAnswer', type: 'boolean' as const, desc: 'Tự động trả lời' },
+      { key: 'autoRecord', type: 'boolean' as const, desc: 'Tự động ghi âm' },
+      { key: 'qualityMonitoring', type: 'boolean' as const, desc: 'Giám sát chất lượng cuộc gọi' },
+      { key: 'incomingCallPopup', type: 'boolean' as const, desc: 'Cửa sổ bật lên cuộc gọi đến' },
+      { key: 'maxCallDuration', type: 'number' as const, desc: 'Thời lượng cuộc gọi tối đa (giây)' },
+      { key: 'recordFormat', type: 'string' as const, desc: 'Định dạng ghi âm' },
+      { key: 'recordQuality', type: 'string' as const, desc: 'Chất lượng ghi âm' },
+      { key: 'recordPath', type: 'string' as const, desc: 'Đường dẫn lưu ghi âm' },
+      { key: 'recordRetentionDays', type: 'number' as const, desc: 'Thời gian lưu ghi âm (ngày)' },
+      { key: 'outboundPermission', type: 'json' as const, desc: 'Quyền gọi ra' },
+      { key: 'recordAccessPermission', type: 'json' as const, desc: 'Quyền truy cập ghi âm' },
+      { key: 'statisticsPermission', type: 'json' as const, desc: 'Quyền thống kê cuộc gọi' },
+      { key: 'numberRestriction', type: 'boolean' as const, desc: 'Hạn chế số' },
+      { key: 'allowedPrefixes', type: 'text' as const, desc: 'Tiền tố số được phép' }
     ];
     await saveConfigsByGroup('call_settings', settings, configItems);
-    res.json({ success: true, message: '通话设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình cuộc gọi thành công', data: settings });
   } catch (error) {
-    console.error('保存通话设置失败:', error);
-    res.status(500).json({ success: false, message: '保存通话设置失败' });
+    console.error('Lưu cấu hình cuộc gọi thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình cuộc gọi thất bại' });
   }
 });
 
-// ========== 邮件设置路由 ==========
+// ========== Route cấu hình email ==========
 
 /**
  * @route GET /api/v1/system/email-settings
- * @desc 获取邮件设置
+ * @desc Lấy cấu hình email
  * @access Private (Admin)
  */
 router.get('/email-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -608,42 +608,42 @@ router.get('/email-settings', authenticateToken, requireAdmin, async (_req: Requ
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取邮件设置失败:', error);
-    res.status(500).json({ success: false, message: '获取邮件设置失败' });
+    console.error('Lấy cấu hình email thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình email thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/email-settings
- * @desc 更新邮件设置
+ * @desc Cập nhật cấu hình email
  * @access Private (Admin)
  */
 router.put('/email-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'smtpHost', type: 'string' as const, desc: 'SMTP服务器地址' },
-      { key: 'smtpPort', type: 'number' as const, desc: 'SMTP端口' },
-      { key: 'senderEmail', type: 'string' as const, desc: '发件人邮箱' },
-      { key: 'senderName', type: 'string' as const, desc: '发件人名称' },
-      { key: 'emailPassword', type: 'string' as const, desc: '邮箱密码' },
-      { key: 'enableSsl', type: 'boolean' as const, desc: '启用SSL' },
-      { key: 'enableTls', type: 'boolean' as const, desc: '启用TLS' },
-      { key: 'testEmail', type: 'string' as const, desc: '测试邮箱' }
+      { key: 'smtpHost', type: 'string' as const, desc: 'Địa chỉ máy chủ SMTP' },
+      { key: 'smtpPort', type: 'number' as const, desc: 'Cổng SMTP' },
+      { key: 'senderEmail', type: 'string' as const, desc: 'Email người gửi' },
+      { key: 'senderName', type: 'string' as const, desc: 'Tên người gửi' },
+      { key: 'emailPassword', type: 'string' as const, desc: 'Mật khẩu email' },
+      { key: 'enableSsl', type: 'boolean' as const, desc: 'Bật SSL' },
+      { key: 'enableTls', type: 'boolean' as const, desc: 'Bật TLS' },
+      { key: 'testEmail', type: 'string' as const, desc: 'Email kiểm tra' }
     ];
     await saveConfigsByGroup('email_settings', settings, configItems);
-    res.json({ success: true, message: '邮件设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình email thành công', data: settings });
   } catch (error) {
-    console.error('保存邮件设置失败:', error);
-    res.status(500).json({ success: false, message: '保存邮件设置失败' });
+    console.error('Lưu cấu hình email thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình email thất bại' });
   }
 });
 
-// ========== 短信设置路由 ==========
+// ========== Route cấu hình SMS ==========
 
 /**
  * @route GET /api/v1/system/sms-settings
- * @desc 获取短信设置
+ * @desc Lấy cấu hình SMS
  * @access Private (Admin)
  */
 router.get('/sms-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -662,44 +662,44 @@ router.get('/sms-settings', authenticateToken, requireAdmin, async (_req: Reques
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取短信设置失败:', error);
-    res.status(500).json({ success: false, message: '获取短信设置失败' });
+    console.error('Lấy cấu hình SMS thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình SMS thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/sms-settings
- * @desc 更新短信设置
+ * @desc Cập nhật cấu hình SMS
  * @access Private (Admin)
  */
 router.put('/sms-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'provider', type: 'string' as const, desc: '短信服务商' },
+      { key: 'provider', type: 'string' as const, desc: 'Nhà cung cấp dịch vụ SMS' },
       { key: 'accessKey', type: 'string' as const, desc: 'AccessKey' },
       { key: 'secretKey', type: 'string' as const, desc: 'SecretKey' },
-      { key: 'signName', type: 'string' as const, desc: '短信签名' },
-      { key: 'dailyLimit', type: 'number' as const, desc: '每日发送限制' },
-      { key: 'monthlyLimit', type: 'number' as const, desc: '每月发送限制' },
-      { key: 'enabled', type: 'boolean' as const, desc: '启用短信功能' },
-      { key: 'requireApproval', type: 'boolean' as const, desc: '需要审核' },
-      { key: 'testPhone', type: 'string' as const, desc: '测试手机号' }
+      { key: 'signName', type: 'string' as const, desc: 'Chữ ký SMS' },
+      { key: 'dailyLimit', type: 'number' as const, desc: 'Giới hạn gửi hàng ngày' },
+      { key: 'monthlyLimit', type: 'number' as const, desc: 'Giới hạn gửi hàng tháng' },
+      { key: 'enabled', type: 'boolean' as const, desc: 'Bật chức năng SMS' },
+      { key: 'requireApproval', type: 'boolean' as const, desc: 'Cần phê duyệt' },
+      { key: 'testPhone', type: 'string' as const, desc: 'Số điện thoại kiểm tra' }
     ];
     await saveConfigsByGroup('sms_settings', settings, configItems);
-    res.json({ success: true, message: '短信设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình SMS thành công', data: settings });
   } catch (error) {
-    console.error('保存短信设置失败:', error);
-    res.status(500).json({ success: false, message: '保存短信设置失败' });
+    console.error('Lưu cấu hình SMS thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình SMS thất bại' });
   }
 });
 
-// ========== 存储设置路由 ==========
+// ========== Route cấu hình lưu trữ ==========
 
 /**
  * @route GET /api/v1/system/storage-settings
- * @desc 获取存储设置
- * @access Private (All authenticated users - 上传图片需要获取配置)
+ * @desc Lấy cấu hình lưu trữ
+ * @access Private (All authenticated users - Tải lên hình ảnh cần lấy cấu hình)
  */
 router.get('/storage-settings', authenticateToken, async (_req: Request, res: Response) => {
   try {
@@ -718,44 +718,44 @@ router.get('/storage-settings', authenticateToken, async (_req: Request, res: Re
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取存储设置失败:', error);
-    res.status(500).json({ success: false, message: '获取存储设置失败' });
+    console.error('Lấy cấu hình lưu trữ thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình lưu trữ thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/storage-settings
- * @desc 更新存储设置
+ * @desc Cập nhật cấu hình lưu trữ
  * @access Private (Admin)
  */
 router.put('/storage-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'storageType', type: 'string' as const, desc: '存储类型' },
-      { key: 'localPath', type: 'string' as const, desc: '本地存储路径' },
-      { key: 'localDomain', type: 'string' as const, desc: '访问域名' },
+      { key: 'storageType', type: 'string' as const, desc: 'Loại lưu trữ' },
+      { key: 'localPath', type: 'string' as const, desc: 'Đường dẫn lưu trữ cục bộ' },
+      { key: 'localDomain', type: 'string' as const, desc: 'Tên miền truy cập' },
       { key: 'accessKey', type: 'string' as const, desc: 'Access Key' },
       { key: 'secretKey', type: 'string' as const, desc: 'Secret Key' },
-      { key: 'bucketName', type: 'string' as const, desc: '存储桶名称' },
-      { key: 'region', type: 'string' as const, desc: '存储区域' },
-      { key: 'customDomain', type: 'string' as const, desc: '自定义域名' },
-      { key: 'maxFileSize', type: 'number' as const, desc: '最大文件大小(MB)' },
-      { key: 'allowedTypes', type: 'string' as const, desc: '允许的文件类型' }
+      { key: 'bucketName', type: 'string' as const, desc: 'Tên bucket lưu trữ' },
+      { key: 'region', type: 'string' as const, desc: 'Khu vực lưu trữ' },
+      { key: 'customDomain', type: 'string' as const, desc: 'Tên miền tùy chỉnh' },
+      { key: 'maxFileSize', type: 'number' as const, desc: 'Kích thước tệp tối đa (MB)' },
+      { key: 'allowedTypes', type: 'string' as const, desc: 'Loại tệp được phép' }
     ];
     await saveConfigsByGroup('storage_settings', settings, configItems);
-    res.json({ success: true, message: '存储设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình lưu trữ thành công', data: settings });
   } catch (error) {
-    console.error('保存存储设置失败:', error);
-    res.status(500).json({ success: false, message: '保存存储设置失败' });
+    console.error('Lưu cấu hình lưu trữ thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình lưu trữ thất bại' });
   }
 });
 
-// ========== 商品设置路由 ==========
+// ========== Route cấu hình sản phẩm ==========
 
 /**
  * @route GET /api/v1/system/product-settings
- * @desc 获取商品设置
+ * @desc Lấy cấu hình sản phẩm
  * @access Private (Admin)
  */
 router.get('/product-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -786,55 +786,55 @@ router.get('/product-settings', authenticateToken, requireAdmin, async (_req: Re
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取商品设置失败:', error);
-    res.status(500).json({ success: false, message: '获取商品设置失败' });
+    console.error('Lấy cấu hình sản phẩm thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình sản phẩm thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/product-settings
- * @desc 更新商品设置
+ * @desc Cập nhật cấu hình sản phẩm
  * @access Private (Admin)
  */
 router.put('/product-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'maxDiscountPercent', type: 'number' as const, desc: '全局最大优惠比例' },
-      { key: 'adminMaxDiscount', type: 'number' as const, desc: '管理员最大优惠' },
-      { key: 'managerMaxDiscount', type: 'number' as const, desc: '经理最大优惠' },
-      { key: 'salesMaxDiscount', type: 'number' as const, desc: '销售员最大优惠' },
-      { key: 'discountApprovalThreshold', type: 'number' as const, desc: '优惠审批阈值' },
-      { key: 'allowPriceModification', type: 'boolean' as const, desc: '允许价格修改' },
-      { key: 'priceModificationRoles', type: 'json' as const, desc: '价格修改权限' },
-      { key: 'enablePriceHistory', type: 'boolean' as const, desc: '价格变动记录' },
-      { key: 'pricePrecision', type: 'string' as const, desc: '价格显示精度' },
-      { key: 'enableInventory', type: 'boolean' as const, desc: '启用库存管理' },
-      { key: 'lowStockThreshold', type: 'number' as const, desc: '低库存预警阈值' },
-      { key: 'allowNegativeStock', type: 'boolean' as const, desc: '允许负库存销售' },
-      { key: 'defaultCategory', type: 'string' as const, desc: '默认分类' },
-      { key: 'maxCategoryLevel', type: 'number' as const, desc: '分类层级限制' },
-      { key: 'enableCategoryCode', type: 'boolean' as const, desc: '启用分类编码' },
-      { key: 'costPriceViewRoles', type: 'json' as const, desc: '成本价格查看权限' },
-      { key: 'salesDataViewRoles', type: 'json' as const, desc: '销售数据查看权限' },
-      { key: 'stockInfoViewRoles', type: 'json' as const, desc: '库存信息查看权限' },
-      { key: 'operationLogsViewRoles', type: 'json' as const, desc: '操作日志查看权限' },
-      { key: 'sensitiveInfoHideMethod', type: 'string' as const, desc: '敏感信息隐藏方式' },
-      { key: 'enablePermissionControl', type: 'boolean' as const, desc: '启用权限控制' }
+      { key: 'maxDiscountPercent', type: 'number' as const, desc: 'Tỷ lệ giảm giá tối đa toàn cục' },
+      { key: 'adminMaxDiscount', type: 'number' as const, desc: 'Giảm giá tối đa quản trị viên' },
+      { key: 'managerMaxDiscount', type: 'number' as const, desc: 'Giảm giá tối đa quản lý' },
+      { key: 'salesMaxDiscount', type: 'number' as const, desc: 'Giảm giá tối đa nhân viên bán hàng' },
+      { key: 'discountApprovalThreshold', type: 'number' as const, desc: 'Ngưỡng phê duyệt giảm giá' },
+      { key: 'allowPriceModification', type: 'boolean' as const, desc: 'Cho phép sửa đổi giá' },
+      { key: 'priceModificationRoles', type: 'json' as const, desc: 'Quyền sửa đổi giá' },
+      { key: 'enablePriceHistory', type: 'boolean' as const, desc: 'Ghi lại thay đổi giá' },
+      { key: 'pricePrecision', type: 'string' as const, desc: 'Độ chính xác hiển thị giá' },
+      { key: 'enableInventory', type: 'boolean' as const, desc: 'Bật quản lý kho' },
+      { key: 'lowStockThreshold', type: 'number' as const, desc: 'Ngưỡng cảnh báo kho thấp' },
+      { key: 'allowNegativeStock', type: 'boolean' as const, desc: 'Cho phép bán kho âm' },
+      { key: 'defaultCategory', type: 'string' as const, desc: 'Danh mục mặc định' },
+      { key: 'maxCategoryLevel', type: 'number' as const, desc: 'Giới hạn cấp danh mục' },
+      { key: 'enableCategoryCode', type: 'boolean' as const, desc: 'Bật mã danh mục' },
+      { key: 'costPriceViewRoles', type: 'json' as const, desc: 'Quyền xem giá thành' },
+      { key: 'salesDataViewRoles', type: 'json' as const, desc: 'Quyền xem dữ liệu bán hàng' },
+      { key: 'stockInfoViewRoles', type: 'json' as const, desc: 'Quyền xem thông tin kho' },
+      { key: 'operationLogsViewRoles', type: 'json' as const, desc: 'Quyền xem nhật ký thao tác' },
+      { key: 'sensitiveInfoHideMethod', type: 'string' as const, desc: 'Phương thức ẩn thông tin nhạy cảm' },
+      { key: 'enablePermissionControl', type: 'boolean' as const, desc: 'Bật kiểm soát quyền' }
     ];
     await saveConfigsByGroup('product_settings', settings, configItems);
-    res.json({ success: true, message: '商品设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình sản phẩm thành công', data: settings });
   } catch (error) {
-    console.error('保存商品设置失败:', error);
-    res.status(500).json({ success: false, message: '保存商品设置失败' });
+    console.error('Lưu cấu hình sản phẩm thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình sản phẩm thất bại' });
   }
 });
 
-// ========== 数据备份设置路由 ==========
+// ========== Route cấu hình sao lưu dữ liệu ==========
 
 /**
  * @route GET /api/v1/system/backup-settings
- * @desc 获取数据备份设置
+ * @desc Lấy cấu hình sao lưu dữ liệu
  * @access Private (Admin)
  */
 router.get('/backup-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -848,38 +848,38 @@ router.get('/backup-settings', authenticateToken, requireAdmin, async (_req: Req
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取数据备份设置失败:', error);
-    res.status(500).json({ success: false, message: '获取数据备份设置失败' });
+    console.error('Lấy cấu hình sao lưu dữ liệu thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình sao lưu dữ liệu thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/backup-settings
- * @desc 更新数据备份设置
+ * @desc Cập nhật cấu hình sao lưu dữ liệu
  * @access Private (Admin)
  */
 router.put('/backup-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'autoBackupEnabled', type: 'boolean' as const, desc: '自动备份' },
-      { key: 'backupFrequency', type: 'string' as const, desc: '备份频率' },
-      { key: 'retentionDays', type: 'number' as const, desc: '保留天数' },
-      { key: 'compression', type: 'boolean' as const, desc: '压缩备份' }
+      { key: 'autoBackupEnabled', type: 'boolean' as const, desc: 'Sao lưu tự động' },
+      { key: 'backupFrequency', type: 'string' as const, desc: 'Tần suất sao lưu' },
+      { key: 'retentionDays', type: 'number' as const, desc: 'Số ngày lưu giữ' },
+      { key: 'compression', type: 'boolean' as const, desc: 'Nén sao lưu' }
     ];
     await saveConfigsByGroup('backup_settings', settings, configItems);
-    res.json({ success: true, message: '数据备份设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình sao lưu dữ liệu thành công', data: settings });
   } catch (error) {
-    console.error('保存数据备份设置失败:', error);
-    res.status(500).json({ success: false, message: '保存数据备份设置失败' });
+    console.error('Lưu cấu hình sao lưu dữ liệu thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình sao lưu dữ liệu thất bại' });
   }
 });
 
-// ========== 用户协议设置路由 ==========
+// ========== Route cấu hình thỏa thuận người dùng ==========
 
 /**
  * @route GET /api/v1/system/agreement-settings
- * @desc 获取用户协议设置
+ * @desc Lấy cấu hình thỏa thuận người dùng
  * @access Private (Admin)
  */
 router.get('/agreement-settings', authenticateToken, requireAdmin, async (_req: Request, res: Response) => {
@@ -887,57 +887,57 @@ router.get('/agreement-settings', authenticateToken, requireAdmin, async (_req: 
     const settings = await getConfigsByGroup('agreement_settings');
     const defaultSettings = {
       userAgreementEnabled: true,
-      userAgreementTitle: '用户服务协议',
+      userAgreementTitle: 'Thỏa thuận dịch vụ người dùng',
       userAgreementContent: '',
       privacyAgreementEnabled: true,
-      privacyAgreementTitle: '隐私政策',
+      privacyAgreementTitle: 'Chính sách bảo mật',
       privacyAgreementContent: ''
     };
     res.json({ success: true, data: { ...defaultSettings, ...settings } });
   } catch (error) {
-    console.error('获取用户协议设置失败:', error);
-    res.status(500).json({ success: false, message: '获取用户协议设置失败' });
+    console.error('Lấy cấu hình thỏa thuận người dùng thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy cấu hình thỏa thuận người dùng thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/agreement-settings
- * @desc 更新用户协议设置
+ * @desc Cập nhật cấu hình thỏa thuận người dùng
  * @access Private (Admin)
  */
 router.put('/agreement-settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
   try {
     const settings = req.body;
     const configItems = [
-      { key: 'userAgreementEnabled', type: 'boolean' as const, desc: '用户协议启用' },
-      { key: 'userAgreementTitle', type: 'string' as const, desc: '用户协议标题' },
-      { key: 'userAgreementContent', type: 'text' as const, desc: '用户协议内容' },
-      { key: 'privacyAgreementEnabled', type: 'boolean' as const, desc: '隐私协议启用' },
-      { key: 'privacyAgreementTitle', type: 'string' as const, desc: '隐私协议标题' },
-      { key: 'privacyAgreementContent', type: 'text' as const, desc: '隐私协议内容' }
+      { key: 'userAgreementEnabled', type: 'boolean' as const, desc: 'Bật thỏa thuận người dùng' },
+      { key: 'userAgreementTitle', type: 'string' as const, desc: 'Tiêu đề thỏa thuận người dùng' },
+      { key: 'userAgreementContent', type: 'text' as const, desc: 'Nội dung thỏa thuận người dùng' },
+      { key: 'privacyAgreementEnabled', type: 'boolean' as const, desc: 'Bật thỏa thuận bảo mật' },
+      { key: 'privacyAgreementTitle', type: 'string' as const, desc: 'Tiêu đề thỏa thuận bảo mật' },
+      { key: 'privacyAgreementContent', type: 'text' as const, desc: 'Nội dung thỏa thuận bảo mật' }
     ];
     await saveConfigsByGroup('agreement_settings', settings, configItems);
-    res.json({ success: true, message: '用户协议设置保存成功', data: settings });
+    res.json({ success: true, message: 'Lưu cấu hình thỏa thuận người dùng thành công', data: settings });
   } catch (error) {
-    console.error('保存用户协议设置失败:', error);
-    res.status(500).json({ success: false, message: '保存用户协议设置失败' });
+    console.error('Lưu cấu hình thỏa thuận người dùng thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu cấu hình thỏa thuận người dùng thất bại' });
   }
 });
 
-// ========== 管理员路由（需要管理员权限）==========
+// ========== Route quản trị viên (cần quyền quản trị viên) ==========
 
 /**
  * @route PUT /api/v1/system/global-config
- * @desc 更新全局配置（仅管理员可操作）
+ * @desc Cập nhật cấu hình toàn cục (chỉ quản trị viên mới có thể thao tác)
  * @access Private (Admin)
  */
 router.put('/global-config', authenticateToken, requireAdmin, (req, res) => {
   const { storageConfig } = req.body;
 
-  // 这里应该保存到数据库，目前返回模拟数据
+  // Ở đây nên lưu vào cơ sở dữ liệu, hiện tại trả về dữ liệu mô phỏng
   res.json({
     success: true,
-    message: '全局配置已更新',
+    message: 'Cấu hình toàn cục đã được cập nhật',
     data: {
       storageConfig: {
         ...storageConfig,
@@ -950,13 +950,13 @@ router.put('/global-config', authenticateToken, requireAdmin, (req, res) => {
 
 /**
  * @route GET /api/v1/system/info
- * @desc 获取系统信息
+ * @desc Lấy thông tin hệ thống
  * @access Private (Admin)
  */
 router.get('/info', authenticateToken, requireAdmin, (_req, res) => {
   res.json({
     success: true,
-    message: '系统管理功能开发中',
+    message: 'Chức năng quản lý hệ thống đang được phát triển',
     data: {
       version: '1.0.0',
       environment: process.env.NODE_ENV || 'development',
@@ -966,112 +966,112 @@ router.get('/info', authenticateToken, requireAdmin, (_req, res) => {
   });
 });
 
-// ========== 部门管理路由（需要管理员权限）==========
-// 为部门路由添加认证和管理员权限中间件
+// ========== Route quản lý phòng ban (cần quyền quản trị viên) ==========
+// Thêm middleware xác thực và quyền quản trị viên cho route phòng ban
 
 /**
  * @route GET /api/v1/system/departments
- * @desc 获取部门列表
+ * @desc Lấy danh sách phòng ban
  * @access Private (Admin)
  */
 router.get('/departments', authenticateToken, requireAdmin, departmentController.getDepartments.bind(departmentController));
 
 /**
  * @route GET /api/v1/system/departments/tree
- * @desc 获取部门树形结构
+ * @desc Lấy cấu trúc cây phòng ban
  * @access Private (Admin)
  */
 router.get('/departments/tree', authenticateToken, requireAdmin, departmentController.getDepartmentTree.bind(departmentController));
 
 /**
  * @route GET /api/v1/system/departments/stats
- * @desc 获取部门统计信息
+ * @desc Lấy thông tin thống kê phòng ban
  * @access Private (Admin)
  */
 router.get('/departments/stats', authenticateToken, requireAdmin, departmentController.getDepartmentStats.bind(departmentController));
 
 /**
  * @route GET /api/v1/system/departments/:id
- * @desc 获取部门详情
+ * @desc Lấy chi tiết phòng ban
  * @access Private (Admin)
  */
 router.get('/departments/:id', authenticateToken, requireAdmin, departmentController.getDepartmentById.bind(departmentController));
 
 /**
  * @route POST /api/v1/system/departments
- * @desc 创建部门
+ * @desc Tạo phòng ban
  * @access Private (Admin)
  */
 router.post('/departments', authenticateToken, requireAdmin, departmentController.createDepartment.bind(departmentController));
 
 /**
  * @route PUT /api/v1/system/departments/:id
- * @desc 更新部门
+ * @desc Cập nhật phòng ban
  * @access Private (Admin)
  */
 router.put('/departments/:id', authenticateToken, requireAdmin, departmentController.updateDepartment.bind(departmentController));
 
 /**
  * @route PATCH /api/v1/system/departments/:id/status
- * @desc 更新部门状态
+ * @desc Cập nhật trạng thái phòng ban
  * @access Private (Admin)
  */
 router.patch('/departments/:id/status', authenticateToken, requireAdmin, departmentController.updateDepartmentStatus.bind(departmentController));
 
 /**
  * @route DELETE /api/v1/system/departments/:id
- * @desc 删除部门
+ * @desc Xóa phòng ban
  * @access Private (Admin)
  */
 router.delete('/departments/:id', authenticateToken, requireAdmin, departmentController.deleteDepartment.bind(departmentController));
 
 /**
  * @route GET /api/v1/system/departments/:id/members
- * @desc 获取部门成员
+ * @desc Lấy thành viên phòng ban
  * @access Private (Admin)
  */
 router.get('/departments/:id/members', authenticateToken, requireAdmin, departmentController.getDepartmentMembers.bind(departmentController));
 
 /**
  * @route GET /api/v1/system/departments/:id/roles
- * @desc 获取部门角色列表
+ * @desc Lấy danh sách vai trò phòng ban
  * @access Private (Admin)
  */
 router.get('/departments/:id/roles', authenticateToken, requireAdmin, departmentController.getDepartmentRoles.bind(departmentController));
 
 /**
  * @route PATCH /api/v1/system/departments/:id/permissions
- * @desc 更新部门权限
+ * @desc Cập nhật quyền phòng ban
  * @access Private (Admin)
  */
 router.patch('/departments/:id/permissions', authenticateToken, requireAdmin, departmentController.updateDepartmentPermissions.bind(departmentController));
 
 /**
  * @route PATCH /api/v1/system/departments/:id/move
- * @desc 移动部门
+ * @desc Di chuyển phòng ban
  * @access Private (Admin)
  */
 router.patch('/departments/:id/move', authenticateToken, requireAdmin, departmentController.moveDepartment.bind(departmentController));
 
 /**
  * @route POST /api/v1/system/departments/:departmentId/members
- * @desc 添加部门成员
+ * @desc Thêm thành viên phòng ban
  * @access Private (Admin)
  */
 router.post('/departments/:departmentId/members', authenticateToken, requireAdmin, departmentController.addDepartmentMember.bind(departmentController));
 
 /**
  * @route DELETE /api/v1/system/departments/:departmentId/members/:userId
- * @desc 移除部门成员
+ * @desc Xóa thành viên phòng ban
  * @access Private (Admin)
  */
 router.delete('/departments/:departmentId/members/:userId', authenticateToken, requireAdmin, departmentController.removeDepartmentMember.bind(departmentController));
 
-// ========== 订单字段配置路由 ==========
+// ========== Route cấu hình trường đơn hàng ==========
 
 /**
  * @route GET /api/v1/system/order-field-config
- * @desc 获取订单字段配置
+ * @desc Lấy cấu hình trường đơn hàng
  * @access Private
  */
 router.get('/order-field-config', authenticateToken, async (_req: Request, res: Response) => {
@@ -1084,18 +1084,18 @@ router.get('/order-field-config', authenticateToken, async (_req: Request, res: 
     if (config) {
       res.json({ success: true, code: 200, data: JSON.parse(config.configValue) });
     } else {
-      // 返回默认配置
+      // Trả về cấu hình mặc định
       res.json({
         success: true,
         code: 200,
         data: {
           orderSource: {
-            fieldName: '订单来源',
+            fieldName: 'Nguồn đơn hàng',
             options: [
-              { label: '线上商城', value: 'online_store' },
-              { label: '微信小程序', value: 'wechat_mini' },
-              { label: '电话咨询', value: 'phone_call' },
-              { label: '其他渠道', value: 'other' }
+              { label: 'Cửa hàng trực tuyến', value: 'online_store' },
+              { label: 'Ứng dụng WeChat Mini', value: 'wechat_mini' },
+              { label: 'Tư vấn qua điện thoại', value: 'phone_call' },
+              { label: 'Kênh khác', value: 'other' }
             ]
           },
           customFields: []
@@ -1103,14 +1103,14 @@ router.get('/order-field-config', authenticateToken, async (_req: Request, res: 
       });
     }
   } catch (error) {
-    console.error('获取订单字段配置失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取订单字段配置失败' });
+    console.error('Lấy cấu hình trường đơn hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy cấu hình trường đơn hàng thất bại' });
   }
 });
 
 /**
  * @route PUT /api/v1/system/order-field-config
- * @desc 更新订单字段配置
+ * @desc Cập nhật cấu hình trường đơn hàng
  * @access Private (Admin)
  */
 router.put('/order-field-config', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
@@ -1128,25 +1128,25 @@ router.put('/order-field-config', authenticateToken, requireAdmin, async (req: R
         configValue: JSON.stringify(req.body),
         valueType: 'json',
         configGroup: 'order_settings',
-        description: '订单字段配置',
+        description: 'Cấu hình trường đơn hàng',
         isEnabled: true,
         isSystem: true
       });
     }
 
     await configRepository.save(config);
-    res.json({ success: true, code: 200, message: '订单字段配置保存成功' });
+    res.json({ success: true, code: 200, message: 'Lưu cấu hình trường đơn hàng thành công' });
   } catch (error) {
-    console.error('保存订单字段配置失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '保存订单字段配置失败' });
+    console.error('Lưu cấu hình trường đơn hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lưu cấu hình trường đơn hàng thất bại' });
   }
 });
 
-// ========== 通用设置路由 ==========
+// ========== Route cài đặt chung ==========
 
 /**
  * @route GET /api/v1/system/settings
- * @desc 获取系统设置（通用）
+ * @desc Lấy cài đặt hệ thống (chung)
  * @access Private
  */
 router.get('/settings', authenticateToken, async (_req: Request, res: Response) => {
@@ -1170,17 +1170,17 @@ router.get('/settings', authenticateToken, async (_req: Request, res: Response) 
       data: settings
     });
   } catch (error) {
-    console.error('获取系统设置失败:', error);
+    console.error('Lấy cài đặt hệ thống thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取系统设置失败'
+      message: 'Lấy cài đặt hệ thống thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/system/settings
- * @desc 保存系统设置（通用）
+ * @desc Lưu cài đặt hệ thống (chung)
  * @access Private (Admin)
  */
 router.post('/settings', authenticateToken, requireAdmin, async (req: Request, res: Response) => {
@@ -1189,7 +1189,7 @@ router.post('/settings', authenticateToken, requireAdmin, async (req: Request, r
     const configRepository = AppDataSource.getRepository(SystemConfig);
 
     if (type && config) {
-      // 保存特定类型的配置
+      // Lưu cấu hình loại cụ thể
       for (const [key, value] of Object.entries(config)) {
         let existingConfig = await configRepository.findOne({
           where: { configKey: key, configGroup: type }
@@ -1213,13 +1213,13 @@ router.post('/settings', authenticateToken, requireAdmin, async (req: Request, r
 
     res.json({
       success: true,
-      message: '设置保存成功'
+      message: 'Lưu cài đặt thành công'
     });
   } catch (error) {
-    console.error('保存系统设置失败:', error);
+    console.error('Lưu cài đặt hệ thống thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '保存系统设置失败'
+      message: 'Lưu cài đặt hệ thống thất bại'
     });
   }
 });

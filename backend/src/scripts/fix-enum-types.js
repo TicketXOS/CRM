@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// 实体文件目录
+// Thư mục file entity
 const entitiesDir = path.join(__dirname, '../entities');
 
-// 需要修复的文件列表
+// Danh sách file cần sửa
 const files = [
   'ProductCategory.ts',
-  'OrderStatusHistory.ts', 
+  'OrderStatusHistory.ts',
   'OperationLog.ts',
   'Product.ts',
   'User.ts',
@@ -16,48 +16,48 @@ const files = [
   'SystemConfig.ts'
 ];
 
-// 修复enum类型的函数
+// Hàm sửa kiểu enum
 function fixEnumTypes(content) {
-  // 替换 type: 'enum' 为 type: 'varchar'
-  // 并添加 length: 50 如果没有指定长度
+  // Thay thế type: 'enum' thành type: 'varchar'
+  // Và thêm length: 50 nếu chưa chỉ định độ dài
   return content.replace(
     /(@Column\(\s*\{[^}]*?)type:\s*['"]enum['"][^}]*?enum:\s*\[[^\]]*\][^}]*?\}/gs,
     (match) => {
-      // 移除 enum 属性并替换 type
+      // Xóa thuộc tính enum và thay thế type
       let fixed = match
         .replace(/type:\s*['"]enum['"]/, "type: 'varchar'")
         .replace(/,?\s*enum:\s*\[[^\]]*\]/, '');
-      
-      // 如果没有 length 属性，添加一个
+
+      // Nếu chưa có thuộc tính length, thêm một
       if (!fixed.includes('length:')) {
         fixed = fixed.replace(/type:\s*['"]varchar['"]/, "type: 'varchar',\n    length: 50");
       }
-      
+
       return fixed;
     }
   );
 }
 
-// 处理每个文件
+// Xử lý từng file
 files.forEach(filename => {
   const filePath = path.join(entitiesDir, filename);
-  
+
   if (fs.existsSync(filePath)) {
-    console.log(`修复文件: ${filename}`);
-    
-    // 读取文件内容
+    console.log(`Đang sửa file: ${filename}`);
+
+    // Đọc nội dung file
     const content = fs.readFileSync(filePath, 'utf8');
-    
-    // 修复enum类型
+
+    // Sửa kiểu enum
     const fixedContent = fixEnumTypes(content);
-    
-    // 写回文件
+
+    // Ghi lại file
     fs.writeFileSync(filePath, fixedContent, 'utf8');
-    
-    console.log(`✅ ${filename} 修复完成`);
+
+    console.log(`✅ ${filename} đã sửa xong`);
   } else {
-    console.log(`⚠️  文件不存在: ${filename}`);
+    console.log(`⚠️  File không tồn tại: ${filename}`);
   }
 });
 
-console.log('🎉 所有enum类型修复完成！');
+console.log('🎉 Đã sửa xong tất cả kiểu enum!');

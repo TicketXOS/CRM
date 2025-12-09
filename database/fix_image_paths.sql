@@ -1,47 +1,47 @@
 -- =============================================
--- 图片路径修复脚本
--- 用途：修复数据库中图片路径格式问题
--- 执行方式：在宝塔面板的phpMyAdmin中执行
+  -- Ảnh đường dẫn sửa chữa script
+  -- Mục đích：Sửa chữa vấn đề đường dẫn ảnh trong cơ sở dữ liệu
+  -- Cách thực hiện：Thực thi trong phpMyAdmin của Panel Bảo Tháp
 -- =============================================
 
--- 1. 修复系统配置表中的图片路径（去掉/api/v1前缀）
+-- 1. Sửa chữa đường dẫn ảnh trong bảng cấu hình hệ thống（loại bỏ tiền tố /api/v1）
 UPDATE system_configs 
 SET configValue = REPLACE(configValue, '/api/v1/uploads/', '/uploads/')
 WHERE configKey IN ('systemLogo', 'contactQRCode')
   AND configValue LIKE '%/api/v1/uploads/%';
 
--- 2. 修复商品表中的图片路径
+-- 2. Sửa chữa đường dẫn ảnh trong bảng sản phẩm
 UPDATE products 
 SET images = REPLACE(images, '/api/v1/uploads/', '/uploads/')
 WHERE images LIKE '%/api/v1/uploads/%';
 
--- 3. 修复用户头像路径
+-- 3. Sửa chữa đường dẫn ảnh trong bảng người dùng
 UPDATE users 
 SET avatar = REPLACE(avatar, '/api/v1/uploads/', '/uploads/')
 WHERE avatar LIKE '%/api/v1/uploads/%';
 
--- 4. 修复订单表中的定金截图路径
+-- 4. Sửa chữa đường dẫn ảnh trong bảng đơn hàng
 UPDATE orders 
 SET deposit_screenshots = REPLACE(deposit_screenshots, '/api/v1/uploads/', '/uploads/')
 WHERE deposit_screenshots LIKE '%/api/v1/uploads/%';
 
--- 5. 修复售后服务表中的附件路径
+-- 5. Sửa chữa đường dẫn ảnh trong bảng dịch vụ sau bán hàng
 UPDATE after_sales_services 
 SET attachments = REPLACE(attachments, '/api/v1/uploads/', '/uploads/')
 WHERE attachments LIKE '%/api/v1/uploads/%';
 
--- 6. 查看修复结果
-SELECT '系统配置图片' as 类型, COUNT(*) as 数量 
+-- 6. Xem kết quả sửa chữa
+SELECT 'Ảnh cấu hình hệ thống' as 'Loại', COUNT(*) as 'Số lượng' 
 FROM system_configs 
 WHERE configKey IN ('systemLogo', 'contactQRCode') AND configValue LIKE '/uploads/%'
 UNION ALL
-SELECT '商品图片' as 类型, COUNT(*) as 数量 
+SELECT 'Ảnh sản phẩm' as 'Loại', COUNT(*) as 'Số lượng' 
 FROM products 
 WHERE images LIKE '%/uploads/%'
 UNION ALL
-SELECT '用户头像' as 类型, COUNT(*) as 数量 
+SELECT 'Ảnh người dùng' as 'Loại', COUNT(*) as 'Số lượng' 
 FROM users 
 WHERE avatar LIKE '/uploads/%';
 
--- 完成提示
-SELECT '图片路径修复完成！' as 状态;
+-- Thông báo hoàn tất
+SELECT 'Sửa chữa đường dẫn ảnh hoàn tất！' as 'Trạng thái';

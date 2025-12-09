@@ -3,19 +3,19 @@ import { qrConnectionController } from '../controllers/qr-connection';
 
 const router = Router();
 
-// 生成连接二维码
+// Tạo mã QR kết nối
 router.post('/generate', qrConnectionController.generateQRCode.bind(qrConnectionController));
 
-// 验证扫码并建立连接
+// Xác minh quét mã và thiết lập kết nối
 router.post('/connect', qrConnectionController.connectDevice.bind(qrConnectionController));
 
-// 获取连接状态
+// Lấy trạng thái kết nối
 router.get('/status/:connectionId', qrConnectionController.getConnectionStatus.bind(qrConnectionController));
 
-// 断开连接
+// Ngắt kết nối
 router.delete('/disconnect/:connectionId', qrConnectionController.disconnectDevice.bind(qrConnectionController));
 
-// 获取已连接设备列表
+// Lấy danh sách thiết bị đã kết nối
 router.get('/devices', qrConnectionController.getConnectedDevices.bind(qrConnectionController));
 
 export default router;

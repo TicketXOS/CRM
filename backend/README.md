@@ -1,181 +1,181 @@
-# CRM系统后端API
+# API Backend Hệ Thống CRM
 
-基于Node.js + TypeScript + Express + TypeORM + MySQL的CRM系统后端API服务。
+Dịch vụ API backend hệ thống CRM dựa trên Node.js + TypeScript + Express + TypeORM + MySQL.
 
-## 🚀 快速开始
+## 🚀 Bắt Đầu Nhanh
 
-### 环境要求
+### Yêu Cầu Môi Trường
 
 - Node.js 18.0+
 - MySQL 8.0+
 - npm 8.0+
 
-### 安装依赖
+### Cài Đặt Dependencies
 
 ```bash
 npm install
 ```
 
-### 环境配置
+### Cấu Hình Môi Trường
 
-1. 复制环境变量配置文件：
+1. Sao chép file cấu hình biến môi trường：
 ```bash
 cp .env.example .env
 ```
 
-2. 编辑 `.env` 文件，配置数据库连接等信息：
+2. Chỉnh sửa file `.env`，cấu hình thông tin kết nối database：
 ```env
-# 数据库配置
+# Cấu hình database
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=crm_user
 DB_PASSWORD=your_password
 DB_DATABASE=crm_system
 
-# JWT密钥
+# JWT Secret
 JWT_SECRET=your_jwt_secret_key
 ```
 
-### 数据库初始化
+### Khởi Tạo Database
 
-1. 创建数据库：
+1. Tạo database：
 ```sql
 CREATE DATABASE crm_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-2. 导入初始化SQL（可选）：
+2. Import SQL khởi tạo（tùy chọn）：
 ```bash
 mysql -u crm_user -p crm_system < ../database/bt_panel_setup.sql
 ```
 
-### 启动服务
+### Khởi Động Dịch Vụ
 
 ```bash
-# 开发模式
+# Chế độ phát triển
 npm run dev
 
-# 生产模式
+# Chế độ production
 npm run build
 npm start
 
-# 使用PM2启动
+# Sử dụng PM2 khởi động
 npm run start:prod
 ```
 
-## 📁 项目结构
+## 📁 Cấu Trúc Dự Án
 
 ```
 backend/
 ├── src/
-│   ├── config/          # 配置文件
-│   │   ├── database.ts  # 数据库配置
-│   │   ├── jwt.ts       # JWT配置
-│   │   └── logger.ts    # 日志配置
-│   ├── controllers/     # 控制器
+│   ├── config/          # File cấu hình
+│   │   ├── database.ts  # Cấu hình database
+│   │   ├── jwt.ts       # Cấu hình JWT
+│   │   └── logger.ts    # Cấu hình log
+│   ├── controllers/     # Controllers
 │   │   └── UserController.ts
-│   ├── entities/        # 数据库实体
+│   ├── entities/        # Database entities
 │   │   ├── User.ts
 │   │   ├── Customer.ts
 │   │   ├── Product.ts
 │   │   └── ...
-│   ├── middleware/      # 中间件
-│   │   ├── auth.ts      # 认证中间件
-│   │   ├── errorHandler.ts # 错误处理
-│   │   └── validation.ts    # 请求验证
-│   ├── routes/          # 路由
-│   │   ├── auth.ts      # 认证路由
-│   │   ├── users.ts     # 用户管理
+│   ├── middleware/      # Middleware
+│   │   ├── auth.ts      # Middleware xác thực
+│   │   ├── errorHandler.ts # Xử lý lỗi
+│   │   └── validation.ts    # Xác thực request
+│   ├── routes/          # Routes
+│   │   ├── auth.ts      # Routes xác thực
+│   │   ├── users.ts     # Quản lý người dùng
 │   │   └── ...
-│   └── app.ts           # 应用入口
-├── logs/                # 日志文件
-├── uploads/             # 上传文件
+│   └── app.ts           # Entry point ứng dụng
+├── logs/                # File log
+├── uploads/             # File upload
 ├── package.json
 ├── tsconfig.json
-└── ecosystem.config.js  # PM2配置
+└── ecosystem.config.js  # Cấu hình PM2
 ```
 
-## 🔌 API接口
+## 🔌 API Endpoints
 
-### 认证相关
+### Xác Thực
 
-- `POST /api/v1/auth/login` - 用户登录
-- `POST /api/v1/auth/refresh` - 刷新令牌
-- `GET /api/v1/auth/me` - 获取当前用户信息
-- `PUT /api/v1/auth/me` - 更新用户信息
-- `PUT /api/v1/auth/password` - 修改密码
-- `POST /api/v1/auth/logout` - 用户登出
+- `POST /api/v1/auth/login` - Đăng nhập người dùng
+- `POST /api/v1/auth/refresh` - Làm mới token
+- `GET /api/v1/auth/me` - Lấy thông tin người dùng hiện tại
+- `PUT /api/v1/auth/me` - Cập nhật thông tin người dùng
+- `PUT /api/v1/auth/password` - Đổi mật khẩu
+- `POST /api/v1/auth/logout` - Đăng xuất người dùng
 
-### 用户管理
+### Quản Lý Người Dùng
 
-- `GET /api/v1/users` - 获取用户列表（管理员）
+- `GET /api/v1/users` - Lấy danh sách người dùng（quản trị viên）
 
-### 其他模块
+### Các Module Khác
 
-- 客户管理：`/api/v1/customers`
-- 产品管理：`/api/v1/products`
-- 订单管理：`/api/v1/orders`
-- 系统管理：`/api/v1/system`
+- Quản lý khách hàng：`/api/v1/customers`
+- Quản lý sản phẩm：`/api/v1/products`
+- Quản lý đơn hàng：`/api/v1/orders`
+- Quản lý hệ thống：`/api/v1/system`
 
-## 🔐 认证机制
+## 🔐 Cơ Chế Xác Thực
 
-使用JWT (JSON Web Token) 进行身份认证：
+Sử dụng JWT (JSON Web Token) để xác thực：
 
-1. 用户登录成功后获得访问令牌(access token)和刷新令牌(refresh token)
-2. 访问令牌用于API请求认证，有效期7天
-3. 刷新令牌用于获取新的访问令牌，有效期30天
-4. 请求头格式：`Authorization: Bearer <access_token>`
+1. Sau khi đăng nhập thành công, người dùng nhận được access token và refresh token
+2. Access token dùng để xác thực API requests，hiệu lực 7 ngày
+3. Refresh token dùng để lấy access token mới，hiệu lực 30 ngày
+4. Format header：`Authorization: Bearer <access_token>`
 
-## 🛡️ 安全特性
+## 🛡️ Tính Năng Bảo Mật
 
-- **密码加密**：使用bcrypt进行密码哈希
-- **JWT认证**：基于令牌的无状态认证
-- **请求限流**：防止API滥用
-- **CORS配置**：跨域请求控制
-- **Helmet安全头**：HTTP安全头设置
-- **输入验证**：使用Joi进行请求数据验证
-- **SQL注入防护**：TypeORM参数化查询
-- **错误处理**：统一错误响应格式
+- **Mã hóa mật khẩu**：Sử dụng bcrypt để hash mật khẩu
+- **Xác thực JWT**：Xác thực không trạng thái dựa trên token
+- **Giới hạn request**：Ngăn chặn lạm dụng API
+- **Cấu hình CORS**：Kiểm soát cross-origin requests
+- **Helmet security headers**：Thiết lập HTTP security headers
+- **Xác thực input**：Sử dụng Joi để xác thực dữ liệu request
+- **Bảo vệ SQL injection**：TypeORM parameterized queries
+- **Xử lý lỗi**：Format phản hồi lỗi thống nhất
 
-## 📊 日志系统
+## 📊 Hệ Thống Log
 
-使用Winston进行日志管理：
+Sử dụng Winston để quản lý log：
 
-- **访问日志**：记录所有HTTP请求
-- **错误日志**：记录应用错误和异常
-- **操作日志**：记录用户操作行为
-- **性能日志**：记录性能指标
+- **Access log**：Ghi lại tất cả HTTP requests
+- **Error log**：Ghi lại lỗi và exception của ứng dụng
+- **Operation log**：Ghi lại hành vi thao tác của người dùng
+- **Performance log**：Ghi lại các chỉ số hiệu suất
 
-日志文件位置：`logs/` 目录
+Vị trí file log：thư mục `logs/`
 
-## 🚀 部署指南
+## 🚀 Hướng Dẫn Triển Khai
 
-### 宝塔面板部署
+### Triển Khai Bảng Điều Khiển Bảo Tháp
 
-1. **环境准备**
-   - 安装Node.js 18+
-   - 安装MySQL 8.0+
-   - 安装PM2
+1. **Chuẩn bị môi trường**
+   - Cài đặt Node.js 18+
+   - Cài đặt MySQL 8.0+
+   - Cài đặt PM2
 
-2. **代码部署**
+2. **Triển khai code**
    ```bash
-   # 上传代码到服务器
+   # Upload code lên server
    git clone <repository>
    cd backend
    npm install
    npm run build
    ```
 
-3. **数据库配置**
-   - 创建数据库和用户
-   - 导入初始化SQL
-   - 配置环境变量
+3. **Cấu hình database**
+   - Tạo database và user
+   - Import SQL khởi tạo
+   - Cấu hình biến môi trường
 
-4. **启动服务**
+4. **Khởi động dịch vụ**
    ```bash
    npm run start:prod
    ```
 
-5. **Nginx反向代理**
+5. **Nginx Reverse Proxy**
    ```nginx
    location /api/ {
        proxy_pass http://localhost:3000;
@@ -185,7 +185,7 @@ backend/
    }
    ```
 
-### Docker部署（可选）
+### Triển Khai Docker（Tùy Chọn）
 
 ```dockerfile
 FROM node:18-alpine
@@ -197,69 +197,69 @@ EXPOSE 3000
 CMD ["node", "dist/app.js"]
 ```
 
-## 🔧 开发指南
+## 🔧 Hướng Dẫn Phát Triển
 
-### 添加新的API端点
+### Thêm API Endpoint Mới
 
-1. 创建实体模型（如需要）
-2. 创建控制器方法
-3. 添加路由定义
-4. 添加请求验证规则
-5. 更新API文档
+1. Tạo entity model（nếu cần）
+2. Tạo controller method
+3. Thêm route definition
+4. Thêm request validation rules
+5. Cập nhật API documentation
 
-### 数据库迁移
+### Database Migration
 
 ```bash
-# 生成迁移文件
+# Tạo file migration
 npm run typeorm migration:generate -- -n MigrationName
 
-# 运行迁移
+# Chạy migration
 npm run typeorm migration:run
 
-# 回滚迁移
+# Rollback migration
 npm run typeorm migration:revert
 ```
 
-### 测试
+### Testing
 
 ```bash
-# 运行测试
+# Chạy tests
 npm test
 
-# 监听模式
+# Chế độ watch
 npm run test:watch
 ```
 
-## 📝 API响应格式
+## 📝 Format Phản Hồi API
 
-### 成功响应
+### Phản Hồi Thành Công
 ```json
 {
   "success": true,
-  "message": "操作成功",
+  "message": "Thao tác thành công",
   "data": { ... }
 }
 ```
 
-### 错误响应
+### Phản Hồi Lỗi
 ```json
 {
   "success": false,
-  "message": "错误信息",
+  "message": "Thông tin lỗi",
   "code": "ERROR_CODE",
   "timestamp": "2024-01-01T00:00:00.000Z",
   "path": "/api/v1/endpoint"
 }
 ```
 
-## 🤝 贡献指南
+## 🤝 Hướng Dẫn Đóng Góp
 
-1. Fork 项目
-2. 创建功能分支
-3. 提交更改
-4. 推送到分支
-5. 创建Pull Request
+1. Fork dự án
+2. Tạo feature branch
+3. Commit thay đổi
+4. Push lên branch
+5. Tạo Pull Request
 
-## 📄 许可证
+## 📄 Giấy Phép
 
 MIT License

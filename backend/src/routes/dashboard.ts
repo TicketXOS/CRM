@@ -8,12 +8,12 @@ import { Between, In } from 'typeorm';
 
 const router = Router();
 
-// 所有仪表板路由都需要认证
+// Tất cả các route bảng điều khiển đều cần xác thực
 router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/dashboard/metrics
- * @desc 获取核心指标数据
+ * @desc Lấy dữ liệu chỉ số cốt lõi
  * @access Private
  */
 router.get('/metrics', async (_req: Request, res: Response) => {
@@ -26,21 +26,21 @@ router.get('/metrics', async (_req: Request, res: Response) => {
     const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // 今日订单数（排除已取消）
+    // Số đơn hàng hôm nay (loại trừ đã hủy)
     const todayOrders = await orderRepository.count({
       where: {
         createdAt: Between(todayStart, todayEnd)
       }
     });
 
-    // 今日新增客户
+    // Khách hàng mới hôm nay
     const newCustomers = await customerRepository.count({
       where: {
         createdAt: Between(todayStart, todayEnd)
       }
     });
 
-    // 今日业绩
+    // Doanh thu hôm nay
     const todayOrdersData = await orderRepository.find({
       where: {
         createdAt: Between(todayStart, todayEnd)
@@ -51,14 +51,14 @@ router.get('/metrics', async (_req: Request, res: Response) => {
       .filter(o => o.status !== 'cancelled' && o.status !== 'refunded')
       .reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
 
-    // 本月订单数
+    // Số đơn hàng tháng này
     const monthlyOrders = await orderRepository.count({
       where: {
         createdAt: Between(monthStart, todayEnd)
       }
     });
 
-    // 本月业绩
+    // Doanh thu tháng này
     const monthlyOrdersData = await orderRepository.find({
       where: {
         createdAt: Between(monthStart, todayEnd)
@@ -81,18 +81,18 @@ router.get('/metrics', async (_req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取核心指标失败:', error);
+    console.error('Lấy chỉ số cốt lõi thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取核心指标失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy chỉ số cốt lõi thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/dashboard/rankings
- * @desc 获取排行榜数据
+ * @desc Lấy dữ liệu bảng xếp hạng
  * @access Private
  */
 router.get('/rankings', async (_req: Request, res: Response) => {
@@ -103,7 +103,7 @@ router.get('/rankings', async (_req: Request, res: Response) => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // 获取本月订单（排除已取消和已退款）
+    // Lấy đơn hàng tháng này (loại trừ đã hủy và đã hoàn tiền)
     const monthOrders = await orderRepository.find({
       where: {
         createdAt: Between(monthStart, now)
@@ -112,10 +112,10 @@ router.get('/rankings', async (_req: Request, res: Response) => {
       relations: ['orderItems']
     });
 
-    // 过滤有效订单
+    // Lọc đơn hàng hợp lệ
     const validOrders = monthOrders.filter(o => o.status !== 'cancelled' && o.status !== 'refunded');
 
-    // 统计销售人员业绩
+    // Thống kê hiệu suất nhân viên bán hàng
     const salesStats: Record<string, { sales: number; orders: number }> = {};
     validOrders.forEach(order => {
       const createdBy = order.createdBy;
@@ -129,7 +129,7 @@ router.get('/rankings', async (_req: Request, res: Response) => {
       salesStats[createdByStr].orders += 1;
     });
 
-    // 获取用户信息
+    // Lấy thông tin người dùng
     const userIds = Object.keys(salesStats);
     const users = userIds.length > 0 ? await userRepository.find({
       where: { id: In(userIds) },
@@ -138,7 +138,7 @@ router.get('/rankings', async (_req: Request, res: Response) => {
 
     const userMap = new Map(users.map(u => [u.id, u]));
 
-    // 构建销售排行榜
+    // Xây dựng bảng xếp hạng bán hàng
     const salesRankings = Object.entries(salesStats)
       .map(([userIdStr, stats]) => {
         const user = userMap.get(userIdStr);
@@ -154,7 +154,7 @@ router.get('/rankings', async (_req: Request, res: Response) => {
       .sort((a, b) => b.sales - a.sales)
       .slice(0, 10);
 
-    // 统计产品销售（从订单项中统计）
+    // Thống kê bán hàng sản phẩm (từ các mục đơn hàng)
     const productStats: Record<number, { name: string; sales: number; orders: number; revenue: number }> = {};
     for (const order of validOrders) {
       if (order.orderItems && Array.isArray(order.orderItems)) {
@@ -196,18 +196,18 @@ router.get('/rankings', async (_req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取排行榜数据失败:', error);
+    console.error('Lấy dữ liệu bảng xếp hạng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取排行榜数据失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy dữ liệu bảng xếp hạng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/dashboard/charts
- * @desc 获取图表数据
+ * @desc Lấy dữ liệu biểu đồ
  * @access Private
  */
 router.get('/charts', async (req: Request, res: Response) => {
@@ -221,12 +221,12 @@ router.get('/charts', async (req: Request, res: Response) => {
     const ordersData: number[] = [];
 
     if (period === 'month') {
-      // 最近6个月
+      // 6 tháng gần đây
       for (let i = 5; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
 
-        categories.push(`${date.getMonth() + 1}月`);
+        categories.push(`Tháng ${date.getMonth() + 1}`);
 
         const monthOrders = await orderRepository.find({
           where: {
@@ -240,12 +240,12 @@ router.get('/charts', async (req: Request, res: Response) => {
         revenueData.push(validOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0));
       }
     } else if (period === 'week') {
-      // 最近8周
+      // 8 tuần gần đây
       for (let i = 7; i >= 0; i--) {
         const weekStart = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
         const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
 
-        categories.push(`第${8 - i}周`);
+        categories.push(`Tuần ${8 - i}`);
 
         const weekOrders = await orderRepository.find({
           where: {
@@ -259,7 +259,7 @@ router.get('/charts', async (req: Request, res: Response) => {
         revenueData.push(validOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0));
       }
     } else {
-      // 最近7天
+      // 7 ngày gần đây
       for (let i = 6; i >= 0; i--) {
         const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
         const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -280,20 +280,20 @@ router.get('/charts', async (req: Request, res: Response) => {
       }
     }
 
-    // 获取订单状态分布
+    // Lấy phân bố trạng thái đơn hàng
     const allOrders = await orderRepository.find({
       select: ['status']
     });
 
     const statusMap: Record<string, { name: string; count: number; color: string }> = {
-      pending: { name: '待处理', count: 0, color: '#909399' },
-      confirmed: { name: '已确认', count: 0, color: '#409EFF' },
-      paid: { name: '已支付', count: 0, color: '#67C23A' },
-      shipped: { name: '已发货', count: 0, color: '#E6A23C' },
-      delivered: { name: '已送达', count: 0, color: '#67C23A' },
-      completed: { name: '已完成', count: 0, color: '#67C23A' },
-      cancelled: { name: '已取消', count: 0, color: '#F56C6C' },
-      refunded: { name: '已退款', count: 0, color: '#F56C6C' }
+      pending: { name: 'Chờ xử lý', count: 0, color: '#909399' },
+      confirmed: { name: 'Đã xác nhận', count: 0, color: '#409EFF' },
+      paid: { name: 'Đã thanh toán', count: 0, color: '#67C23A' },
+      shipped: { name: 'Đã giao hàng', count: 0, color: '#E6A23C' },
+      delivered: { name: 'Đã giao đến', count: 0, color: '#67C23A' },
+      completed: { name: 'Đã hoàn thành', count: 0, color: '#67C23A' },
+      cancelled: { name: 'Đã hủy', count: 0, color: '#F56C6C' },
+      refunded: { name: 'Đã hoàn tiền', count: 0, color: '#F56C6C' }
     };
 
     allOrders.forEach(order => {
@@ -316,33 +316,33 @@ router.get('/charts', async (req: Request, res: Response) => {
         performance: {
           categories,
           series: [
-            { name: '订单数量', data: ordersData },
-            { name: '销售额', data: revenueData }
+            { name: 'Số lượng đơn hàng', data: ordersData },
+            { name: 'Doanh thu', data: revenueData }
           ]
         },
         orderStatus
       }
     });
   } catch (error) {
-    console.error('获取图表数据失败:', error);
+    console.error('Lấy dữ liệu biểu đồ thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取图表数据失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy dữ liệu biểu đồ thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/dashboard/todos
- * @desc 获取待办事项数据
+ * @desc Lấy dữ liệu công việc cần làm
  * @access Private
  */
 router.get('/todos', async (_req: Request, res: Response) => {
   try {
     const orderRepository = AppDataSource.getRepository(Order);
 
-    // 获取待处理订单作为待办事项
+    // Lấy đơn hàng chờ xử lý làm công việc cần làm
     const pendingOrders = await orderRepository.find({
       where: { status: 'pending' },
       take: 10,
@@ -351,12 +351,12 @@ router.get('/todos', async (_req: Request, res: Response) => {
 
     const todos = pendingOrders.map(order => ({
       id: String(order.id),
-      title: '订单待处理',
+      title: 'Đơn hàng chờ xử lý',
       type: 'order',
       priority: 'high',
       status: 'pending',
       deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      description: `订单号: ${order.orderNumber}`
+      description: `Số đơn hàng: ${order.orderNumber}`
     }));
 
     res.json({
@@ -364,57 +364,57 @@ router.get('/todos', async (_req: Request, res: Response) => {
       data: todos
     });
   } catch (error) {
-    console.error('获取待办事项失败:', error);
+    console.error('Lấy công việc cần làm thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取待办事项失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy công việc cần làm thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
  * @route GET /api/v1/dashboard/quick-actions
- * @desc 获取快捷操作数据
+ * @desc Lấy dữ liệu thao tác nhanh
  * @access Private
  */
 router.get('/quick-actions', (_req: Request, res: Response) => {
   const quickActions = [
     {
       key: 'add_customer',
-      label: '新建客户',
+      label: 'Tạo khách hàng mới',
       icon: 'UserPlus',
       color: '#409EFF',
       gradient: 'linear-gradient(135deg, #409EFF 0%, #1890ff 100%)',
       route: '/customer/add',
-      description: '快速添加新客户'
+      description: 'Thêm khách hàng mới nhanh chóng'
     },
     {
       key: 'create_order',
-      label: '新建订单',
+      label: 'Tạo đơn hàng mới',
       icon: 'ShoppingCart',
       color: '#67C23A',
       gradient: 'linear-gradient(135deg, #67C23A 0%, #52c41a 100%)',
       route: '/order/add',
-      description: '为客户创建新订单'
+      description: 'Tạo đơn hàng mới cho khách hàng'
     },
     {
       key: 'create_service',
-      label: '新建售后',
+      label: 'Tạo dịch vụ sau bán hàng mới',
       icon: 'CustomerService',
       color: '#F56C6C',
       gradient: 'linear-gradient(135deg, #F56C6C 0%, #ff4d4f 100%)',
       route: '/service/add',
-      description: '创建售后服务单'
+      description: 'Tạo đơn dịch vụ sau bán hàng'
     },
     {
       key: 'order_list',
-      label: '订单列表',
+      label: 'Danh sách đơn hàng',
       icon: 'List',
       color: '#E6A23C',
       gradient: 'linear-gradient(135deg, #E6A23C 0%, #fa8c16 100%)',
       route: '/order/list',
-      description: '查看订单列表'
+      description: 'Xem danh sách đơn hàng'
     }
   ];
 

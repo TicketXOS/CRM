@@ -4,7 +4,7 @@ import { getDataSource } from '../config/database';
 import { User } from '../entities/User';
 import { logger } from '../config/logger';
 
-// 扩展Request接口
+// Mở rộng interface Request
 declare global {
   namespace Express {
     interface Request {
@@ -15,7 +15,7 @@ declare global {
 }
 
 /**
- * JWT认证中间件
+ * Middleware xác thực JWT
  */
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   const authHeader = req.headers.authorization;
@@ -26,21 +26,21 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: '访问令牌缺失',
+        message: 'Thiếu mã truy cập',
         code: 'TOKEN_MISSING'
       });
     }
 
-    // 验证令牌
+    // Xác minh mã thông báo
     const payload = JwtConfig.verifyAccessToken(token);
     req.user = payload;
 
-    // 获取用户详细信息
+    // Lấy thông tin chi tiết người dùng
     const dataSource = getDataSource();
     if (!dataSource) {
       return res.status(500).json({
         success: false,
-        message: '数据库连接未初始化',
+        message: 'Kết nối cơ sở dữ liệu chưa được khởi tạo',
         code: 'DATABASE_NOT_INITIALIZED'
       });
     }
@@ -52,7 +52,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: '用户不存在',
+        message: 'Người dùng không tồn tại',
         code: 'USER_NOT_FOUND'
       });
     }
@@ -60,7 +60,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     if (user.status !== 'active') {
       return res.status(401).json({
         success: false,
-        message: '用户账户已被禁用',
+        message: 'Tài khoản người dùng đã bị vô hiệu hóa',
         code: 'USER_DISABLED'
       });
     }
@@ -68,11 +68,11 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     req.currentUser = user;
     next();
   } catch (error) {
-    logger.error('JWT认证失败:', error);
-    logger.error('Token内容:', token?.substring(0, 50) + '...');
+    logger.error('Xác thực JWT thất bại:', error);
+    logger.error('Nội dung Token:', token?.substring(0, 50) + '...');
 
     if (error instanceof Error) {
-      logger.error('错误详情:', {
+      logger.error('Chi tiết lỗi:', {
         message: error.message,
         name: error.name,
         stack: error.stack
@@ -81,7 +81,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       if (error.message.includes('expired')) {
         return res.status(401).json({
           success: false,
-          message: '访问令牌已过期',
+          message: 'Mã truy cập đã hết hạn',
           code: 'TOKEN_EXPIRED',
           error: error.message
         });
@@ -90,7 +90,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       if (error.message.includes('invalid')) {
         return res.status(401).json({
           success: false,
-          message: '访问令牌无效',
+          message: 'Mã truy cập không hợp lệ',
           code: 'TOKEN_INVALID',
           error: error.message
         });
@@ -99,22 +99,22 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 
     return res.status(401).json({
       success: false,
-      message: '认证失败',
+      message: 'Xác thực thất bại',
       code: 'AUTH_FAILED',
-      error: error instanceof Error ? error.message : '未知错误'
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 };
 
 /**
- * 角色权限检查中间件
+ * Middleware kiểm tra quyền vai trò
  */
 export const requireRole = (roles: string | string[]) => {
   return (req: Request, res: Response, next: NextFunction): Response | void => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: '未认证',
+        message: 'Chưa xác thực',
         code: 'UNAUTHENTICATED'
       });
     }
@@ -123,11 +123,11 @@ export const requireRole = (roles: string | string[]) => {
     const allowedRoles = Array.isArray(roles) ? roles : [roles];
 
     if (!allowedRoles.includes(userRole)) {
-      logger.warn(`用户 ${req.user.username} 尝试访问需要 ${allowedRoles.join('/')} 权限的资源，但用户角色为 ${userRole}`);
+      logger.warn(`Người dùng ${req.user.username} đã cố gắng truy cập tài nguyên yêu cầu quyền ${allowedRoles.join('/')}, nhưng vai trò người dùng là ${userRole}`);
 
       return res.status(403).json({
         success: false,
-        message: '权限不足',
+        message: 'Quyền không đủ',
         code: 'INSUFFICIENT_PERMISSIONS'
       });
     }
@@ -137,14 +137,14 @@ export const requireRole = (roles: string | string[]) => {
 };
 
 /**
- * 管理员权限检查中间件
- * 支持的角色: admin, superadmin, super_admin
+ * Middleware kiểm tra quyền quản trị viên
+ * Các vai trò được hỗ trợ: admin, superadmin, super_admin
  */
 export const requireAdmin = requireRole(['admin', 'superadmin', 'super_admin']);
 
 /**
- * 管理员或经理权限检查中间件
- * 支持的角色: admin, super_admin, manager, department_manager
+ * Middleware kiểm tra quyền quản trị viên hoặc quản lý
+ * Các vai trò được hỗ trợ: admin, super_admin, manager, department_manager
  */
 export const requireManagerOrAdmin = requireRole([
   'admin',
@@ -155,7 +155,7 @@ export const requireManagerOrAdmin = requireRole([
 ]);
 
 /**
- * 可选认证中间件（不强制要求认证）
+ * Middleware xác thực tùy chọn (không bắt buộc xác thực)
  */
 export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -166,10 +166,10 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
       const payload = JwtConfig.verifyAccessToken(token);
       req.user = payload;
 
-      // 获取用户详细信息
+      // Lấy thông tin chi tiết người dùng
       const dataSource = getDataSource();
       if (!dataSource) {
-        // 可选认证，数据库未初始化时继续执行
+        // Xác thực tùy chọn, tiếp tục thực thi khi cơ sở dữ liệu chưa được khởi tạo
         return next();
       }
       const userRepository = dataSource.getRepository(User);
@@ -182,8 +182,8 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
       }
     }
   } catch (error) {
-    // 可选认证失败时不阻止请求继续
-    logger.debug('可选认证失败:', error);
+    // Xác thực tùy chọn thất bại không chặn yêu cầu tiếp tục
+    logger.debug('Xác thực tùy chọn thất bại:', error);
   }
 
   next();

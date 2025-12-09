@@ -9,7 +9,7 @@ export class RoleController {
   private get roleRepository(): Repository<Role> {
     const dataSource = getDataSource();
     if (!dataSource) {
-      throw new Error('数据库连接未初始化');
+      throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
     }
     return dataSource.getRepository(Role);
   }
@@ -17,7 +17,7 @@ export class RoleController {
   private get permissionRepository(): TreeRepository<Permission> {
     const dataSource = getDataSource();
     if (!dataSource) {
-      throw new Error('数据库连接未初始化');
+      throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
     }
     return dataSource.getTreeRepository(Permission);
   }
@@ -25,12 +25,12 @@ export class RoleController {
   private get userRepository(): Repository<User> {
     const dataSource = getDataSource();
     if (!dataSource) {
-      throw new Error('数据库连接未初始化');
+      throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
     }
     return dataSource.getRepository(User);
   }
 
-  // 获取角色列表
+  // Lấy danh sách vai trò
   async getRoles(req: Request, res: Response) {
     try {
       const { page = 1, limit = 20, search, status } = req.query;
@@ -52,15 +52,15 @@ export class RoleController {
         .take(Number(limit))
         .getManyAndCount();
 
-      // 计算每个角色的用户数量和权限数量
+      // Tính số lượng người dùng và quyền của mỗi vai trò
       const rolesWithCounts = await Promise.all(
         roles.map(async (role) => {
-          // 通过 roleId 字段查询用户数量
+          // Truy vấn số lượng người dùng qua trường roleId
           const userCount = await this.userRepository.count({
             where: { roleId: role.id }
           });
 
-          // permissions 是 JSON 字段，直接获取长度
+          // permissions là trường JSON, lấy độ dài trực tiếp
           const permissionCount = Array.isArray(role.permissions) ? role.permissions.length : 0;
 
           return {
@@ -84,15 +84,15 @@ export class RoleController {
         }
       });
     } catch (error) {
-      console.error('获取角色列表失败:', error);
+      console.error('Lấy danh sách vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取角色列表失败'
+        message: 'Lấy danh sách vai trò thất bại'
       });
     }
   }
 
-  // 获取角色详情
+  // Lấy chi tiết vai trò
   async getRoleById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -104,12 +104,12 @@ export class RoleController {
       if (!role) {
         res.status(404).json({
           success: false,
-          message: '角色不存在'
+          message: 'Vai trò không tồn tại'
         });
         return;
       }
 
-      // 获取该角色的用户数量
+      // Lấy số lượng người dùng của vai trò này
       const userCount = await this.userRepository.count({
         where: { roleId: role.id }
       });
@@ -123,20 +123,20 @@ export class RoleController {
         }
       });
     } catch (error) {
-      console.error('获取角色详情失败:', error);
+      console.error('Lấy chi tiết vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取角色详情失败'
+        message: 'Lấy chi tiết vai trò thất bại'
       });
     }
   }
 
-  // 创建角色
+  // Tạo vai trò
   async createRole(req: Request, res: Response): Promise<void> {
     try {
       const { name, code, description, status = 'active', level = 0, color, permissions = [] } = req.body;
 
-      // 检查角色名称和编码是否已存在
+      // Kiểm tra tên và mã vai trò đã tồn tại chưa
       const existingRole = await this.roleRepository.findOne({
         where: [
           { name },
@@ -147,15 +147,15 @@ export class RoleController {
       if (existingRole) {
         res.status(400).json({
           success: false,
-          message: existingRole.name === name ? '角色名称已存在' : '角色编码已存在'
+          message: existingRole.name === name ? 'Tên vai trò đã tồn tại' : 'Mã vai trò đã tồn tại'
         });
         return;
       }
 
-      // 生成角色ID
+      // Tạo ID vai trò
       const roleId = `role_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // 创建角色 - permissions 是 JSON 字段
+      // Tạo vai trò - permissions là trường JSON
       const role = this.roleRepository.create({
         id: roleId,
         name,
@@ -172,18 +172,18 @@ export class RoleController {
       res.status(201).json({
         success: true,
         data: savedRole,
-        message: '角色创建成功'
+        message: 'Tạo vai trò thành công'
       });
     } catch (error) {
-      console.error('创建角色失败:', error);
+      console.error('Tạo vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '创建角色失败'
+        message: 'Tạo vai trò thất bại'
       });
     }
   }
 
-  // 更新角色
+  // Cập nhật vai trò
   async updateRole(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -196,18 +196,18 @@ export class RoleController {
       if (!role) {
         res.status(404).json({
           success: false,
-          message: '角色不存在'
+          message: 'Vai trò không tồn tại'
         });
         return;
       }
 
-      // 检查名称和编码是否与其他角色冲突
+      // Kiểm tra tên và mã có xung đột với vai trò khác không
       if (name && name !== role.name) {
         const existingRole = await this.roleRepository.findOne({ where: { name } });
         if (existingRole) {
           res.status(400).json({
             success: false,
-            message: '角色名称已存在'
+            message: 'Tên vai trò đã tồn tại'
           });
           return;
         }
@@ -218,13 +218,13 @@ export class RoleController {
         if (existingRole) {
           res.status(400).json({
             success: false,
-            message: '角色编码已存在'
+            message: 'Mã vai trò đã tồn tại'
           });
           return;
         }
       }
 
-      // 更新基本信息
+      // Cập nhật thông tin cơ bản
       if (name) role.name = name;
       if (code) role.code = code;
       if (description !== undefined) role.description = description;
@@ -232,7 +232,7 @@ export class RoleController {
       if (level !== undefined) role.level = level;
       if (color !== undefined) role.color = color;
 
-      // 更新权限 - permissions 是 JSON 字段
+      // Cập nhật quyền - permissions là trường JSON
       if (permissions !== undefined) {
         role.permissions = Array.isArray(permissions) ? permissions : [];
       }
@@ -242,18 +242,18 @@ export class RoleController {
       res.json({
         success: true,
         data: savedRole,
-        message: '角色更新成功'
+        message: 'Cập nhật vai trò thành công'
       });
     } catch (error) {
-      console.error('更新角色失败:', error);
+      console.error('Cập nhật vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新角色失败'
+        message: 'Cập nhật vai trò thất bại'
       });
     }
   }
 
-  // 删除角色
+  // Xóa vai trò
   async deleteRole(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
@@ -265,12 +265,12 @@ export class RoleController {
       if (!role) {
         res.status(404).json({
           success: false,
-          message: '角色不存在'
+          message: 'Vai trò không tồn tại'
         });
         return;
       }
 
-      // 检查是否有用户使用此角色
+      // Kiểm tra xem có người dùng sử dụng vai trò này không
       const usersWithRole = await this.userRepository.count({
         where: { roleId: String(id) }
       });
@@ -278,7 +278,7 @@ export class RoleController {
       if (usersWithRole > 0) {
         res.status(400).json({
           success: false,
-          message: `该角色下还有${usersWithRole}个用户，无法删除`
+          message: `Vai trò này còn có ${usersWithRole} người dùng, không thể xóa`
         });
         return;
       }
@@ -287,18 +287,18 @@ export class RoleController {
 
       res.json({
         success: true,
-        message: '角色删除成功'
+        message: 'Xóa vai trò thành công'
       });
     } catch (error) {
-      console.error('删除角色失败:', error);
+      console.error('Xóa vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '删除角色失败'
+        message: 'Xóa vai trò thất bại'
       });
     }
   }
 
-  // 获取角色统计
+  // Lấy thống kê vai trò
   async getRoleStats(req: Request, res: Response) {
     try {
       const total = await this.roleRepository.count();
@@ -314,39 +314,39 @@ export class RoleController {
         }
       });
     } catch (error) {
-      console.error('获取角色统计失败:', error);
+      console.error('Lấy thống kê vai trò thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取角色统计失败'
+        message: 'Lấy thống kê vai trò thất bại'
       });
     }
   }
 
-  // 获取角色权限
+  // Lấy quyền của vai trò
   async getRolePermissions(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
-      // 尝试查找角色
+      // Thử tìm vai trò
       const role = await this.roleRepository.findOne({
         where: { id: String(id) }
       });
 
-      // 如果找不到角色，返回默认权限（而不是404）
+      // Nếu không tìm thấy vai trò, trả về quyền mặc định (thay vì 404)
       if (!role) {
-        console.log(`[RoleController] 角色 ${id} 不存在，返回默认权限`);
+        console.log(`[RoleController] Vai trò ${id} không tồn tại, trả về quyền mặc định`);
         res.json({
           success: true,
           data: {
             roleId: String(id),
             roleName: 'default',
-            permissions: []  // 返回空权限数组，前端会使用默认权限
+            permissions: []  // Trả về mảng quyền rỗng, frontend sẽ sử dụng quyền mặc định
           }
         });
         return;
       }
 
-      // permissions 是 JSON 字段，直接返回
+      // permissions là trường JSON, trả về trực tiếp
       const permissions = Array.isArray(role.permissions) ? role.permissions : [];
 
       res.json({
@@ -358,8 +358,8 @@ export class RoleController {
         }
       });
     } catch (error) {
-      console.error('获取角色权限失败:', error);
-      // 出错时也返回默认权限，避免前端报错
+      console.error('Lấy quyền vai trò thất bại:', error);
+      // Khi có lỗi cũng trả về quyền mặc định, tránh frontend báo lỗi
       res.json({
         success: true,
         data: {

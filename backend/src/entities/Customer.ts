@@ -6,141 +6,141 @@ export class Customer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'customer_code', length: 50, nullable: true, comment: '客户编号' })
+  @Column({ name: 'customer_code', length: 50, nullable: true, comment: 'Mã khách hàng' })
   customerNo?: string;
 
-  @Column({ length: 100, comment: '客户姓名' })
+  @Column({ length: 100, comment: 'Tên khách hàng' })
   name: string;
 
-  @Column({ length: 20, nullable: true, comment: '手机号' })
+  @Column({ length: 20, nullable: true, comment: 'Số điện thoại' })
   phone?: string;
 
-  @Column({ length: 100, nullable: true, comment: '微信号' })
+  @Column({ length: 100, nullable: true, comment: 'ID WeChat' })
   wechat?: string;
 
-  @Column({ length: 50, nullable: true, comment: 'QQ号' })
+  @Column({ length: 50, nullable: true, comment: 'ID QQ' })
   qq?: string;
 
-  @Column({ length: 100, nullable: true, comment: '邮箱' })
+  @Column({ length: 100, nullable: true, comment: 'Email' })
   email?: string;
 
   @Column({
     type: 'enum',
     enum: ['male', 'female', 'unknown'],
     default: 'unknown',
-    comment: '性别'
+    comment: 'Giới tính'
   })
   gender: 'male' | 'female' | 'unknown';
 
-  @Column({ type: 'int', nullable: true, comment: '年龄' })
+  @Column({ type: 'int', nullable: true, comment: 'Tuổi' })
   age?: number;
 
-  @Column({ type: 'date', nullable: true, comment: '生日' })
+  @Column({ type: 'date', nullable: true, comment: 'Ngày sinh' })
   birthday?: Date;
 
-  @Column({ name: 'id_card', length: 255, nullable: true, comment: '身份证号' })
+  @Column({ name: 'id_card', length: 255, nullable: true, comment: 'Số CMND/CCCD' })
   idCard?: string;
 
-  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true, comment: '身高(cm)' })
+  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true, comment: 'Chiều cao (cm)' })
   height?: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true, comment: '体重(kg)' })
+  @Column({ type: 'decimal', precision: 5, scale: 1, nullable: true, comment: 'Cân nặng (kg)' })
   weight?: number;
 
-  @Column({ type: 'text', nullable: true, comment: '完整地址' })
+  @Column({ type: 'text', nullable: true, comment: 'Địa chỉ đầy đủ' })
   address?: string;
 
-  @Column({ length: 50, nullable: true, comment: '省份' })
+  @Column({ length: 50, nullable: true, comment: 'Tỉnh/Thành phố' })
   province?: string;
 
-  @Column({ length: 50, nullable: true, comment: '城市' })
+  @Column({ length: 50, nullable: true, comment: 'Thành phố/Quận' })
   city?: string;
 
-  @Column({ length: 50, nullable: true, comment: '区县' })
+  @Column({ length: 50, nullable: true, comment: 'Quận/Huyện' })
   district?: string;
 
-  @Column({ length: 100, nullable: true, comment: '街道' })
+  @Column({ length: 100, nullable: true, comment: 'Đường/Phố' })
   street?: string;
 
-  @Column({ name: 'detail_address', length: 200, nullable: true, comment: '详细地址' })
+  @Column({ name: 'detail_address', length: 200, nullable: true, comment: 'Địa chỉ chi tiết' })
   detailAddress?: string;
 
-  @Column({ name: 'overseas_address', length: 500, nullable: true, comment: '境外地址' })
+  @Column({ name: 'overseas_address', length: 500, nullable: true, comment: 'Địa chỉ nước ngoài' })
   overseasAddress?: string;
 
-  @Column({ length: 200, nullable: true, comment: '公司名称' })
+  @Column({ length: 200, nullable: true, comment: 'Tên công ty' })
   company?: string;
 
-  @Column({ length: 100, nullable: true, comment: '行业' })
+  @Column({ length: 100, nullable: true, comment: 'Ngành nghề' })
   industry?: string;
 
-  @Column({ length: 50, nullable: true, comment: '客户来源' })
+  @Column({ length: 50, nullable: true, comment: 'Nguồn khách hàng' })
   source?: string;
 
-  @Column({ length: 20, default: 'normal', comment: '客户等级' })
+  @Column({ length: 20, default: 'normal', comment: 'Cấp độ khách hàng' })
   level: string;
 
-  @Column({ length: 20, default: 'active', comment: '状态' })
+  @Column({ length: 20, default: 'active', comment: 'Trạng thái' })
   status: string;
 
-  @Column({ name: 'follow_status', length: 20, nullable: true, comment: '跟进状态' })
+  @Column({ name: 'follow_status', length: 20, nullable: true, comment: 'Trạng thái theo dõi' })
   followStatus?: string;
 
-  @Column({ type: 'json', nullable: true, comment: '标签' })
+  @Column({ type: 'json', nullable: true, comment: 'Nhãn' })
   tags?: string[];
 
-  @Column({ type: 'text', nullable: true, comment: '备注' })
+  @Column({ type: 'text', nullable: true, comment: 'Ghi chú' })
   remark?: string;
 
-  @Column({ name: 'medical_history', type: 'text', nullable: true, comment: '疾病史' })
+  @Column({ name: 'medical_history', type: 'text', nullable: true, comment: 'Tiền sử bệnh tật' })
   medicalHistory?: string;
 
-  @Column({ name: 'improvement_goals', type: 'json', nullable: true, comment: '改善目标' })
+  @Column({ name: 'improvement_goals', type: 'json', nullable: true, comment: 'Mục tiêu cải thiện' })
   improvementGoals?: string[];
 
-  @Column({ name: 'other_goals', length: 200, nullable: true, comment: '其他改善目标' })
+  @Column({ name: 'other_goals', length: 200, nullable: true, comment: 'Mục tiêu cải thiện khác' })
   otherGoals?: string;
 
-  @Column({ name: 'order_count', type: 'int', default: 0, comment: '订单数量' })
+  @Column({ name: 'order_count', type: 'int', default: 0, comment: 'Số lượng đơn hàng' })
   orderCount: number;
 
-  @Column({ name: 'return_count', type: 'int', default: 0, comment: '退货次数' })
+  @Column({ name: 'return_count', type: 'int', default: 0, comment: 'Số lần trả hàng' })
   returnCount: number;
 
-  @Column({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2, default: 0, comment: '总消费金额' })
+  @Column({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2, default: 0, comment: 'Tổng số tiền đã chi' })
   totalAmount: number;
 
-  @Column({ name: 'fan_acquisition_time', type: 'datetime', nullable: true, comment: '进粉时间' })
+  @Column({ name: 'fan_acquisition_time', type: 'datetime', nullable: true, comment: 'Thời gian thu hút khách hàng' })
   fanAcquisitionTime?: Date;
 
-  @Column({ name: 'last_order_time', type: 'timestamp', nullable: true, comment: '最后下单时间' })
+  @Column({ name: 'last_order_time', type: 'timestamp', nullable: true, comment: 'Thời gian đặt hàng cuối' })
   lastOrderTime?: Date;
 
-  @Column({ name: 'last_contact_time', type: 'timestamp', nullable: true, comment: '最后联系时间' })
+  @Column({ name: 'last_contact_time', type: 'timestamp', nullable: true, comment: 'Thời gian liên hệ cuối' })
   lastContactTime?: Date;
 
-  @Column({ name: 'next_follow_time', type: 'timestamp', nullable: true, comment: '下次跟进时间' })
+  @Column({ name: 'next_follow_time', type: 'timestamp', nullable: true, comment: 'Thời gian theo dõi tiếp theo' })
   nextFollowTime?: Date;
 
-  @Column({ name: 'sales_person_id', length: 50, nullable: true, comment: '销售员ID' })
+  @Column({ name: 'sales_person_id', length: 50, nullable: true, comment: 'ID nhân viên bán hàng' })
   salesPersonId?: string;
 
-  @Column({ name: 'sales_person_name', length: 50, nullable: true, comment: '销售员姓名' })
+  @Column({ name: 'sales_person_name', length: 50, nullable: true, comment: 'Tên nhân viên bán hàng' })
   salesPersonName?: string;
 
-  @Column({ name: 'created_by', length: 50, comment: '创建人ID' })
+  @Column({ name: 'created_by', length: 50, comment: 'ID người tạo' })
   createdBy: string;
 
-  @Column({ name: 'created_by_name', length: 50, nullable: true, comment: '创建人姓名' })
+  @Column({ name: 'created_by_name', length: 50, nullable: true, comment: 'Tên người tạo' })
   createdByName?: string;
 
-  @CreateDateColumn({ name: 'created_at', comment: '创建时间' })
+  @CreateDateColumn({ name: 'created_at', comment: 'Thời gian tạo' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', comment: '更新时间' })
+  @UpdateDateColumn({ name: 'updated_at', comment: 'Thời gian cập nhật' })
   updatedAt: Date;
 
-  // 关联关系
+  // Quan hệ liên kết
   @OneToMany(() => Order, order => order.customer)
   orders: Order[];
 }

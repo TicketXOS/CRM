@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(authenticateToken);
 
-// 获取短信模板列表
+// Lấy danh sách mẫu tin nhắn SMS
 router.get('/templates', async (req: Request, res: Response) => {
   try {
     const { status, category } = req.query;
@@ -30,12 +30,12 @@ router.get('/templates', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: { templates } });
   } catch (error) {
-    console.error('获取模板失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取模板失败' });
+    console.error('Lấy mẫu thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy mẫu thất bại' });
   }
 });
 
-// 创建短信模板
+// Tạo mẫu tin nhắn SMS
 router.post('/templates', requireAdmin, async (req: Request, res: Response) => {
   try {
     const templateRepository = AppDataSource.getRepository(SmsTemplate);
@@ -57,13 +57,13 @@ router.post('/templates', requireAdmin, async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, code: 200, data: savedTemplate });
   } catch (error) {
-    console.error('创建模板失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '创建模板失败' });
+    console.error('Tạo mẫu thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Tạo mẫu thất bại' });
   }
 });
 
 
-// 审核短信模板
+// Phê duyệt mẫu tin nhắn SMS
 router.post('/templates/:id/approve', requireAdmin, async (req: Request, res: Response) => {
   try {
     const templateRepository = AppDataSource.getRepository(SmsTemplate);
@@ -73,7 +73,7 @@ router.post('/templates/:id/approve', requireAdmin, async (req: Request, res: Re
 
     const template = await templateRepository.findOne({ where: { id: Number(id) } });
     if (!template) {
-      return res.status(404).json({ success: false, code: 404, message: '模板不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Mẫu không tồn tại' });
     }
 
     template.status = approved ? 'approved' : 'rejected';
@@ -84,16 +84,16 @@ router.post('/templates/:id/approve', requireAdmin, async (req: Request, res: Re
 
     res.json({
       success: true, code: 200,
-      message: approved ? '审核通过' : '审核拒绝',
+      message: approved ? 'Phê duyệt thành công' : 'Từ chối phê duyệt',
       data: { id, status: template.status }
     });
   } catch (error) {
-    console.error('审核失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '审核失败' });
+    console.error('Phê duyệt thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Phê duyệt thất bại' });
   }
 });
 
-// 获取短信发送记录
+// Lấy lịch sử gửi tin nhắn SMS
 router.get('/records', async (req: Request, res: Response) => {
   try {
     const { page = 1, pageSize = 20, status } = req.query;
@@ -113,12 +113,12 @@ router.get('/records', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: { records, total } });
   } catch (error) {
-    console.error('获取记录失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取记录失败' });
+    console.error('Lấy lịch sử thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy lịch sử thất bại' });
   }
 });
 
-// 发送短信
+// Gửi tin nhắn SMS
 router.post('/send', async (req: Request, res: Response) => {
   try {
     const recordRepository = AppDataSource.getRepository(SmsRecord);
@@ -127,7 +127,7 @@ router.post('/send', async (req: Request, res: Response) => {
     const { templateId, templateName, recipients, content } = req.body;
 
     if (!recipients || recipients.length === 0) {
-      return res.status(400).json({ success: false, code: 400, message: '接收人不能为空' });
+      return res.status(400).json({ success: false, code: 400, message: 'Người nhận không được để trống' });
     }
 
     const record = recordRepository.create({
@@ -136,7 +136,7 @@ router.post('/send', async (req: Request, res: Response) => {
       content,
       recipients,
       recipientCount: recipients.length,
-      successCount: recipients.length, // 模拟全部成功
+      successCount: recipients.length, // Mô phỏng tất cả thành công
       failCount: 0,
       status: 'completed',
       applicant: currentUser?.userId,
@@ -148,12 +148,12 @@ router.post('/send', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: savedRecord });
   } catch (error) {
-    console.error('发送失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '发送失败' });
+    console.error('Gửi thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Gửi thất bại' });
   }
 });
 
-// 获取短信统计数据
+// Lấy thống kê tin nhắn SMS
 router.get('/statistics', async (req: Request, res: Response) => {
   try {
     const templateRepository = AppDataSource.getRepository(SmsTemplate);
@@ -164,13 +164,13 @@ router.get('/statistics', async (req: Request, res: Response) => {
       .where('template.status = :status', { status: 'pending' })
       .getCount();
 
-    // 总发送量
+    // Tổng số lượng gửi
     const totalSentResult = await recordRepository
       .createQueryBuilder('record')
       .select('SUM(record.successCount)', 'total')
       .getRawOne();
 
-    // 今日发送量
+    // Số lượng gửi hôm nay
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const todaySentResult = await recordRepository
@@ -189,8 +189,8 @@ router.get('/statistics', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取统计失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取统计失败' });
+    console.error('Lấy thống kê thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy thống kê thất bại' });
   }
 });
 

@@ -1,143 +1,220 @@
-# CRM - 智能销售系统
-智能销售系统CRM，私域销售管理的神器！界面简约大气，方便操作，功能全面！
+# CRM - Hệ Thống Bán Hàng Thông Minh
+Hệ thống CRM bán hàng thông minh, công cụ quản lý bán hàng tư nhân tuyệt vời! Giao diện đơn giản, sang trọng, dễ sử dụng, đầy đủ tính năng!
 
-## 🚀 项目简介
+## 🚀 Giới Thiệu Dự Án
 
-这是一个基于 Vue 3 + TypeScript + Node.js 开发的现代化CRM客户关系管理系统，专为中小企业私域销售管理设计。
+Đây là hệ thống quản lý quan hệ khách hàng CRM hiện đại được phát triển dựa trên Vue 3 + TypeScript + Node.js, được thiết kế chuyên biệt cho quản lý bán hàng tư nhân của các doanh nghiệp vừa và nhỏ.
 
-## ✨ 主要功能
+## ✨ Tính Năng Chính
 
-- 🏢 **客户管理** - 完整的客户信息管理、分组、标签系统
-- 📋 **订单管理** - 订单创建、跟踪、状态管理
-- 📊 **数据分析** - 销售数据统计、业绩分析、图表展示
-- 👥 **权限管理** - 多角色权限控制、部门管理
-- 📱 **移动端支持** - 响应式设计，支持移动设备
-- 🔔 **消息通知** - 系统消息、短信通知功能
-- 📞 **通话管理** - 通话记录、录音管理
-- 🚚 **物流管理** - 订单物流跟踪
+- 🏢 **Quản Lý Khách Hàng** - Hệ thống quản lý thông tin khách hàng, nhóm, nhãn đầy đủ
+- 📋 **Quản Lý Đơn Hàng** - Tạo đơn hàng, theo dõi, quản lý trạng thái
+- 📊 **Phân Tích Dữ Liệu** - Thống kê dữ liệu bán hàng, phân tích hiệu suất, hiển thị biểu đồ
+- 👥 **Quản Lý Quyền** - Kiểm soát quyền đa vai trò, quản lý phòng ban
+- 📱 **Hỗ Trợ Di Động** - Thiết kế responsive, hỗ trợ thiết bị di động
+- 🔔 **Thông Báo** - Thông báo hệ thống, chức năng thông báo SMS
+- 📞 **Quản Lý Cuộc Gọi** - Quản lý ghi âm, lịch sử cuộc gọi
+- 🚚 **Quản Lý Logistics** - Theo dõi logistics đơn hàng
 
-## 🛠️ 技术栈
+## 🛠️ Công Nghệ Sử Dụng
 
-### 前端
-- **Vue 3** - 渐进式JavaScript框架
-- **TypeScript** - 类型安全的JavaScript
-- **Element Plus** - Vue 3 UI组件库
-- **Vite** - 现代化构建工具
-- **Pinia** - Vue 状态管理
+### Frontend
+- **Vue 3** - Framework JavaScript tiến bộ
+- **TypeScript** - JavaScript an toàn kiểu
+- **Element Plus** - Thư viện component UI Vue 3
+- **Vite** - Công cụ build hiện đại
+- **Pinia** - Quản lý trạng thái Vue
 
-### 后端
-- **Node.js** - JavaScript运行时
-- **TypeScript** - 类型安全开发
-- **Express** - Web应用框架
-- **TypeORM** - 对象关系映射
-- **MySQL/MariaDB** - 关系型数据库
+### Backend
+- **Node.js** - Runtime JavaScript
+- **TypeScript** - Phát triển an toàn kiểu
+- **Express** - Framework ứng dụng Web
+- **TypeORM** - Ánh xạ quan hệ đối tượng
+- **MySQL/MariaDB** - Cơ sở dữ liệu quan hệ
 
-### 部署
-- **CentOS 7** - 服务器操作系统
-- **宝塔面板** - 服务器管理面板
-- **Nginx** - Web服务器和反向代理
-- **PM2** - Node.js进程管理
+### Triển Khai
+- **CentOS 7** - Hệ điều hành máy chủ
+- **Bảng Điều Khiển Bảo Tháp** - Bảng quản lý máy chủ
+- **Nginx** - Máy chủ Web và reverse proxy
+- **PM2** - Quản lý tiến trình Node.js
 
-## 📦 快速开始
+## 📦 Bắt Đầu Nhanh
 
-### 环境要求
+### Yêu Cầu Môi Trường
 - Node.js 18+
-- MySQL 8.0+ 或 MariaDB 10.6+
+- MySQL 8.0+ hoặc MariaDB 10.6+
 - Git
 
-### 本地开发
+### Phát Triển Local
 
-1. **克隆项目**
+1. **Clone dự án**
 ```bash
-git clone https://github.com/shushuhao01/CRM.git
+git clone https://github.com/mrtinhnguyen/CRM.git
 cd CRM
 ```
 
-2. **安装前端依赖**
+2. **Cài đặt dependencies frontend**
 ```bash
 npm install
 ```
 
-3. **安装后端依赖**
+3. **Cài đặt dependencies backend**
 ```bash
 cd backend
 npm install
 ```
 
-4. **配置环境变量**
+4. **Cấu hình biến môi trường**
 ```bash
-# 复制环境变量文件
+# Sao chép file biến môi trường
 cp backend/.env.example backend/.env
-# 编辑数据库配置
+# Chỉnh sửa cấu hình database
 ```
 
-5. **启动开发服务**
+5. **Khởi động dịch vụ phát triển**
 ```bash
-# 启动前端开发服务
+# Khởi động dịch vụ phát triển frontend
 npm run dev
 
-# 启动后端服务
+# Khởi động dịch vụ backend
 cd backend
 npm run dev
 ```
 
-### 生产部署
+### Triển Khai Production
 
-详细部署指南请参考：
-- [部署指南](./DEPLOYMENT_GUIDE.md)
-- [简化上传指南](./simple-upload-guide.md)
-- [宝塔面板配置](./bt-panel-config.md)
+Vui lòng tham khảo hướng dẫn triển khai chi tiết:
+- [Hướng Dẫn Triển Khai](./deployment-guide.md)
+- [Hướng Dẫn Cập Nhật Code](./update-guide.md)
+- [Hướng Dẫn Cấu Hình Môi Trường](./HUONG_DAN_CAU_HINH_MOI_TRUONG.md)
 
-## 📁 项目结构
+### Triển Khai Database (Remote MySQL)
+
+Hệ thống cung cấp script để triển khai database trên remote MySQL server:
+
+#### Linux/Mac (Bash Script)
+
+```bash
+# Cấp quyền thực thi
+chmod +x database/deploy-mysql.sh
+
+# Chạy schema.sql trên remote MySQL
+./database/deploy-mysql.sh \
+  -h 192.168.1.100 \
+  -u root \
+  -p your_password \
+  -d crm_db \
+  -f schema.sql
+
+# Chạy tất cả file SQL trong thư mục
+./database/deploy-mysql.sh \
+  -h 192.168.1.100 \
+  -u root \
+  -p your_password \
+  -d crm_db \
+  -D database
+
+# Không tạo backup
+./database/deploy-mysql.sh \
+  -h 192.168.1.100 \
+  -u root \
+  -p your_password \
+  -d crm_db \
+  -f schema.sql \
+  --no-backup
+```
+
+#### Windows (PowerShell Script)
+
+```powershell
+# Chạy schema.sql trên remote MySQL
+.\database\deploy-mysql.ps1 `
+  -DbHost 192.168.1.100 `
+  -User root `
+  -Password your_password `
+  -Database crm_db `
+  -File schema.sql
+
+# Chạy tất cả file SQL trong thư mục
+.\database\deploy-mysql.ps1 `
+  -DbHost 192.168.1.100 `
+  -User root `
+  -Password your_password `
+  -Database crm_db `
+  -Dir database
+
+# Không tạo backup
+.\database\deploy-mysql.ps1 `
+  -Host 192.168.1.100 `
+  -User root `
+  -Password your_password `
+  -Database crm_db `
+  -File schema.sql `
+  -NoBackup
+```
+
+#### Tính Năng Script
+
+- ✅ Kết nối remote MySQL server
+- ✅ Tự động tạo database nếu chưa tồn tại
+- ✅ Tự động backup trước khi chạy migration
+- ✅ Hỗ trợ chạy file SQL đơn lẻ hoặc thư mục
+- ✅ Log chi tiết và xử lý lỗi
+- ✅ Hỗ trợ cả Linux/Mac và Windows
+
+Xem thêm chi tiết: [Tài Liệu Database](./database/README.md)
+
+## 📁 Cấu Trúc Dự Án
 
 ```
 CRM/
-├── src/                    # 前端源码
-│   ├── components/         # Vue组件
-│   ├── views/             # 页面视图
-│   ├── api/               # API接口
-│   ├── stores/            # 状态管理
-│   └── utils/             # 工具函数
-├── backend/               # 后端源码
-│   ├── src/               # TypeScript源码
-│   ├── database/          # 数据库脚本
-│   └── uploads/           # 文件上传目录
-├── dist/                  # 前端构建产物
-├── deploy.sh              # Linux部署脚本
-├── centos7-setup.sh       # CentOS 7环境准备
-└── docs/                  # 项目文档
+├── src/                    # Mã nguồn frontend
+│   ├── components/         # Component Vue
+│   ├── views/             # View trang
+│   ├── api/               # Interface API
+│   ├── stores/            # Quản lý trạng thái
+│   └── utils/             # Hàm tiện ích
+├── backend/               # Mã nguồn backend
+│   ├── src/               # Mã nguồn TypeScript
+│   ├── database/          # Script database
+│   └── uploads/           # Thư mục upload file
+├── dist/                  # Sản phẩm build frontend
+├── deploy.sh              # Script triển khai Linux
+├── centos7-setup.sh       # Chuẩn bị môi trường CentOS 7
+└── docs/                  # Tài liệu dự án
 ```
 
-## 🔧 开发命令
+## 🔧 Lệnh Phát Triển
 
 ```bash
-# 前端开发
-npm run dev              # 启动开发服务器
-npm run build            # 构建生产版本
-npm run lint             # 代码检查
+# Phát triển frontend
+npm run dev              # Khởi động máy chủ phát triển
+npm run build            # Build phiên bản production
+npm run lint             # Kiểm tra code
 
-# 后端开发
+# Phát triển backend
 cd backend
-npm run dev              # 启动开发服务器
-npm run build            # 编译TypeScript
-npm start                # 启动生产服务
+npm run dev              # Khởi động máy chủ phát triển
+npm run build            # Biên dịch TypeScript
+npm start                # Khởi động dịch vụ production
 ```
 
-## 📖 文档
+## 📖 Tài Liệu
 
-- [API文档](./API_INTEGRATION.md)
-- [数据迁移计划](./DATA_MIGRATION_PLAN.md)
-- [数据持久化](./DATA_PERSISTENCE.md)
-- [部署指南](./DEPLOYMENT_GUIDE.md)
+- [Hướng Dẫn Triển Khai](./deployment-guide.md)
+- [Hướng Dẫn Cập Nhật Code](./update-guide.md)
+- [Hướng Dẫn Cấu Hình Môi Trường](./HUONG_DAN_CAU_HINH_MOI_TRUONG.md)
+- [Tài Liệu Backend API](./backend/README.md)
+- [Tài Liệu Database](./database/README.md)
 
-## 🤝 贡献
+## 🤝 Đóng Góp
 
-欢迎提交 Issue 和 Pull Request！
+Chào mừng gửi Issue và Pull Request!
 
-## 📄 许可证
+## 📄 Giấy Phép
 
 MIT License
 
-## 📞 技术支持
+## 📞 Hỗ Trợ Kỹ Thuật
 
-如有问题，请提交 Issue 或联系开发团队。
+Nếu có vấn đề, vui lòng gửi Issue hoặc liên hệ đội phát triển.

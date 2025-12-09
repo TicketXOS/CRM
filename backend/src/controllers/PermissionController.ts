@@ -8,7 +8,7 @@ export class PermissionController {
     return AppDataSource!.getTreeRepository(Permission);
   }
 
-  // 获取权限树
+  // Lấy cây quyền
   async getPermissionTree(req: Request, res: Response) {
     try {
       const permissions = await this.permissionRepository.findTrees();
@@ -18,15 +18,15 @@ export class PermissionController {
         data: permissions
       });
     } catch (error) {
-      console.error('获取权限树失败:', error);
+      console.error('Lấy cây quyền thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取权限树失败'
+        message: 'Lấy cây quyền thất bại'
       });
     }
   }
 
-  // 获取权限列表（平铺）
+  // Lấy danh sách quyền (phẳng)
   async getPermissions(req: Request, res: Response) {
     try {
       const { type, module, status } = req.query;
@@ -54,15 +54,15 @@ export class PermissionController {
         data: permissions
       });
     } catch (error) {
-      console.error('获取权限列表失败:', error);
+      console.error('Lấy danh sách quyền thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取权限列表失败'
+        message: 'Lấy danh sách quyền thất bại'
       });
     }
   }
 
-  // 创建权限
+  // Tạo quyền
   async createPermission(req: Request, res: Response): Promise<any> {
     try {
       const {
@@ -78,7 +78,7 @@ export class PermissionController {
         parentId
       } = req.body;
 
-      // 检查权限编码是否已存在
+      // Kiểm tra mã quyền đã tồn tại chưa
       const existingPermission = await this.permissionRepository.findOne({
         where: { code }
       });
@@ -86,11 +86,11 @@ export class PermissionController {
       if (existingPermission) {
         return res.status(400).json({
           success: false,
-          message: '权限编码已存在'
+          message: 'Mã quyền đã tồn tại'
         });
       }
 
-      // 获取父权限
+      // Lấy quyền cha
       let parent: Permission | undefined = undefined;
       if (parentId) {
         const foundParent = await this.permissionRepository.findOne({
@@ -99,13 +99,13 @@ export class PermissionController {
         if (!foundParent) {
           return res.status(400).json({
             success: false,
-            message: '父权限不存在'
+            message: 'Quyền cha không tồn tại'
           });
         }
         parent = foundParent;
       }
 
-      // 创建权限
+      // Tạo quyền
       const permissionData: any = {
         name,
         code,
@@ -129,18 +129,18 @@ export class PermissionController {
       res.status(201).json({
         success: true,
         data: savedPermission,
-        message: '权限创建成功'
+        message: 'Tạo quyền thành công'
       });
     } catch (error) {
-      console.error('创建权限失败:', error);
+      console.error('Tạo quyền thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '创建权限失败'
+        message: 'Tạo quyền thất bại'
       });
     }
   }
 
-  // 更新权限
+  // Cập nhật quyền
   async updatePermission(req: Request, res: Response): Promise<any> {
     try {
       const { id } = req.params;
@@ -153,22 +153,22 @@ export class PermissionController {
       if (!permission) {
         return res.status(404).json({
           success: false,
-          message: '权限不存在'
+          message: 'Quyền không tồn tại'
         });
       }
 
-      // 检查编码是否与其他权限冲突
+      // Kiểm tra mã có xung đột với quyền khác không
       if (code && code !== permission.code) {
         const existingPermission = await this.permissionRepository.findOne({ where: { code } });
         if (existingPermission) {
           return res.status(400).json({
             success: false,
-            message: '权限编码已存在'
+            message: 'Mã quyền đã tồn tại'
           });
         }
       }
 
-      // 更新基本信息
+      // Cập nhật thông tin cơ bản
       if (name) permission.name = name;
       if (code) permission.code = code;
       if (description !== undefined) permission.description = description;
@@ -179,7 +179,7 @@ export class PermissionController {
       if (sort !== undefined) permission.sort = sort;
       if (status) permission.status = status;
 
-      // 更新父权限
+      // Cập nhật quyền cha
       if (parentId !== undefined) {
         if (parentId) {
           const parent = await this.permissionRepository.findOne({
@@ -188,7 +188,7 @@ export class PermissionController {
           if (!parent) {
             return res.status(400).json({
               success: false,
-              message: '父权限不存在'
+              message: 'Quyền cha không tồn tại'
             });
           }
           (permission as any).parent = parent;
@@ -202,18 +202,18 @@ export class PermissionController {
       res.json({
         success: true,
         data: savedPermission,
-        message: '权限更新成功'
+        message: 'Cập nhật quyền thành công'
       });
     } catch (error) {
-      console.error('更新权限失败:', error);
+      console.error('Cập nhật quyền thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新权限失败'
+        message: 'Cập nhật quyền thất bại'
       });
     }
   }
 
-  // 删除权限
+  // Xóa quyền
   async deletePermission(req: Request, res: Response): Promise<any> {
     try {
       const { id } = req.params;
@@ -225,16 +225,16 @@ export class PermissionController {
       if (!permission) {
         return res.status(404).json({
           success: false,
-          message: '权限不存在'
+          message: 'Quyền không tồn tại'
         });
       }
 
-      // 检查是否有子权限
+      // Kiểm tra xem có quyền con không
       const children = await this.permissionRepository.findDescendants(permission);
-      if (children.length > 1) { // 包含自己，所以大于1表示有子权限
+      if (children.length > 1) { // Bao gồm chính nó, nên lớn hơn 1 có nghĩa là có quyền con
         return res.status(400).json({
           success: false,
-          message: '该权限下还有子权限，无法删除'
+          message: 'Quyền này còn có quyền con, không thể xóa'
         });
       }
 
@@ -242,13 +242,13 @@ export class PermissionController {
 
       res.json({
         success: true,
-        message: '权限删除成功'
+        message: 'Xóa quyền thành công'
       });
     } catch (error) {
-      console.error('删除权限失败:', error);
+      console.error('Xóa quyền thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '删除权限失败'
+        message: 'Xóa quyền thất bại'
       });
     }
   }

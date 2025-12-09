@@ -7,113 +7,113 @@ import { catchAsync } from '../middleware/errorHandler';
 const router = Router();
 
 /**
- * SDK下载接口
+ * API tải xuống SDK
  * GET /api/v1/sdk/download/:platform
  */
 router.get('/download/:platform', catchAsync(async (req: Request, res: Response): Promise<Response | void> => {
   const { platform } = req.params;
-  
-  // 验证平台参数
+
+  // Xác thực tham số nền tảng
   if (!platform || !['android', 'ios'].includes(platform.toLowerCase())) {
     return res.status(400).json({
       success: false,
-      message: '无效的平台参数，支持的平台: android, ios',
+      message: 'Tham số nền tảng không hợp lệ, các nền tảng được hỗ trợ: android, ios',
       code: 'INVALID_PLATFORM'
     });
   }
 
-  // 确定文件路径和名称
-  const fileName = platform.toLowerCase() === 'android' 
+  // Xác định đường dẫn và tên file
+  const fileName = platform.toLowerCase() === 'android'
     ? 'CRM-Mobile-SDK-1.0.0-release.apk'
     : 'crm-mobile-sdk-ios.ipa';
-  
-  // 从前端项目的public/downloads目录获取文件
-  const filePath = path.join(process.cwd(), '..', 'public', 'downloads', fileName);
-  
-  logger.info(`SDK下载请求: ${platform}, 文件路径: ${filePath}`);
 
-  // 检查文件是否存在
+  // Lấy file từ thư mục public/downloads của dự án frontend
+  const filePath = path.join(process.cwd(), '..', 'public', 'downloads', fileName);
+
+  logger.info(`Yêu cầu tải xuống SDK: ${platform}, đường dẫn file: ${filePath}`);
+
+  // Kiểm tra file có tồn tại không
   if (!fs.existsSync(filePath)) {
-    logger.error(`SDK文件不存在: ${filePath}`);
+    logger.error(`File SDK không tồn tại: ${filePath}`);
     return res.status(404).json({
       success: false,
-      message: `${platform.toUpperCase()} SDK文件不存在`,
+      message: `File SDK ${platform.toUpperCase()} không tồn tại`,
       code: 'SDK_FILE_NOT_FOUND'
     });
   }
 
   try {
-    // 获取文件信息
+    // Lấy thông tin file
     const stats = fs.statSync(filePath);
     const fileSize = stats.size;
-    
-    // 设置响应头
+
+    // Thiết lập header phản hồi
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Content-Length', fileSize.toString());
     res.setHeader('Cache-Control', 'no-cache');
-    
-    // 记录下载日志
-    logger.info(`开始下载SDK: ${platform}, 文件大小: ${fileSize} bytes, IP: ${req.ip}`);
-    
-    // 创建文件流并发送
+
+    // Ghi log tải xuống
+    logger.info(`Bắt đầu tải xuống SDK: ${platform}, kích thước file: ${fileSize} bytes, IP: ${req.ip}`);
+
+    // Tạo luồng file và gửi
     const fileStream = fs.createReadStream(filePath);
-    
+
     fileStream.on('error', (error) => {
-      logger.error(`SDK文件流读取错误: ${error.message}`);
+      logger.error(`Lỗi đọc luồng file SDK: ${error.message}`);
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          message: '文件读取失败',
+          message: 'Đọc file thất bại',
           code: 'FILE_READ_ERROR'
         });
       }
     });
 
     fileStream.on('end', () => {
-      logger.info(`SDK下载完成: ${platform}, IP: ${req.ip}`);
+      logger.info(`Tải xuống SDK hoàn tất: ${platform}, IP: ${req.ip}`);
     });
 
-    // 管道传输文件
+    // Truyền file qua pipeline
     return fileStream.pipe(res);
 
   } catch (error: any) {
-    logger.error(`SDK下载处理错误: ${error.message}`);
+    logger.error(`Lỗi xử lý tải xuống SDK: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: '服务器内部错误',
+      message: 'Lỗi máy chủ nội bộ',
       code: 'INTERNAL_SERVER_ERROR'
     });
   }
 }));
 
 /**
- * 获取SDK信息接口
+ * API lấy thông tin SDK
  * GET /api/v1/sdk/info/:platform
  */
 router.get('/info/:platform', catchAsync(async (req: Request, res: Response): Promise<Response | void> => {
   const { platform } = req.params;
-  
-  // 验证平台参数
+
+  // Xác thực tham số nền tảng
   if (!platform || !['android', 'ios'].includes(platform.toLowerCase())) {
     return res.status(400).json({
       success: false,
-      message: '无效的平台参数，支持的平台: android, ios',
+      message: 'Tham số nền tảng không hợp lệ, các nền tảng được hỗ trợ: android, ios',
       code: 'INVALID_PLATFORM'
     });
   }
 
-  const fileName = platform.toLowerCase() === 'android' 
+  const fileName = platform.toLowerCase() === 'android'
     ? 'CRM-Mobile-SDK-1.0.0-release.apk'
     : 'crm-mobile-sdk-ios.ipa';
-  
+
   const filePath = path.join(process.cwd(), '..', 'public', 'downloads', fileName);
-  
+
   try {
     if (fs.existsSync(filePath)) {
       const stats = fs.statSync(filePath);
-      
-      // 格式化文件大小
+
+      // Định dạng kích thước file
       const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 B';
         const k = 1024;
@@ -121,7 +121,7 @@ router.get('/info/:platform', catchAsync(async (req: Request, res: Response): Pr
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
       };
-      
+
       res.json({
         success: true,
         data: {
@@ -145,29 +145,29 @@ router.get('/info/:platform', catchAsync(async (req: Request, res: Response): Pr
           platform: platform.toLowerCase(),
           fileName,
           available: false,
-          message: 'SDK文件暂不可用'
+          message: 'File SDK tạm thời không khả dụng'
         }
       });
     }
   } catch (error: any) {
-    logger.error(`获取SDK信息错误: ${error.message}`);
+    logger.error(`Lỗi lấy thông tin SDK: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: '获取SDK信息失败',
+      message: 'Lấy thông tin SDK thất bại',
       code: 'GET_SDK_INFO_ERROR'
     });
   }
 }));
 
 /**
- * 获取所有可用SDK列表
+ * Lấy danh sách tất cả SDK khả dụng
  * GET /api/v1/sdk/list
  */
 router.get('/list', catchAsync(async (req: Request, res: Response): Promise<Response | void> => {
   const platforms = ['android', 'ios'];
   const sdkList = [];
 
-  // 格式化文件大小的辅助函数
+  // Hàm hỗ trợ định dạng kích thước file
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -177,12 +177,12 @@ router.get('/list', catchAsync(async (req: Request, res: Response): Promise<Resp
   };
 
   for (const platform of platforms) {
-    const fileName = platform === 'android' 
+    const fileName = platform === 'android'
       ? 'CRM-Mobile-SDK-1.0.0-release.apk'
       : 'crm-mobile-sdk-ios.ipa';
-    
+
     const filePath = path.join(process.cwd(), '..', 'public', 'downloads', fileName);
-    
+
     try {
       if (fs.existsSync(filePath)) {
         const stats = fs.statSync(filePath);
@@ -204,7 +204,7 @@ router.get('/list', catchAsync(async (req: Request, res: Response): Promise<Resp
           platform,
           fileName,
           available: false,
-          message: 'SDK文件暂不可用'
+          message: 'File SDK tạm thời không khả dụng'
         });
       }
     } catch (error) {
@@ -212,7 +212,7 @@ router.get('/list', catchAsync(async (req: Request, res: Response): Promise<Resp
         platform,
         fileName,
         available: false,
-        error: 'SDK信息获取失败'
+        error: 'Lấy thông tin SDK thất bại'
       });
     }
   }

@@ -1,670 +1,670 @@
-# 数据库说明文档
+# Tài Liệu Hướng Dẫn Database
 
-## 📋 概述
+## 📋 Tổng Quan
 
-本目录包含 CRM 系统的数据库初始化脚本和相关文档。
+Thư mục này chứa script khởi tạo database và tài liệu liên quan của hệ thống CRM.
 
-## 📁 文件说明
+## 📁 Mô Tả File
 
-### schema.sql（推荐使用）
-- **最新版本**：1.8.0
-- **更新时间**：2024-11-23
-- **说明**：完整的数据库结构和初始化数据
-- **包含内容**：
-  - 29个核心数据表
-  - 5个预设用户账号
-  - 3个默认部门
-  - 5个默认角色
-  - 4个产品分类
-  - 7个系统配置
+### schema.sql（Khuyến nghị sử dụng）
+- **Phiên bản mới nhất**：1.8.0
+- **Thời gian cập nhật**：2024-11-23
+- **Mô tả**：Cấu trúc database đầy đủ và dữ liệu khởi tạo
+- **Nội dung bao gồm**：
+  - 29 bảng dữ liệu core
+  - 5 tài khoản người dùng mặc định
+  - 3 phòng ban mặc định
+  - 5 vai trò mặc định
+  - 4 danh mục sản phẩm
+  - 7 cấu hình hệ thống
 
-### bt_panel_setup.sql（旧版本）
-- **版本**：1.0
-- **更新时间**：2024-01-15
-- **说明**：旧版数据库脚本，仅供参考
-- **不推荐使用**：数据结构已过时
-
----
-
-## 🗄️ 数据库表结构
-
-### 1. 核心表（5个）
-
-#### departments - 部门表
-```sql
-- id: 部门ID (VARCHAR(50))
-- name: 部门名称
-- description: 部门描述
-- parent_id: 上级部门ID
-- manager_id: 部门经理ID
-- level: 部门层级
-- member_count: 成员数量
-- status: 状态 (active/inactive)
-```
-
-#### roles - 角色表
-```sql
-- id: 角色ID (VARCHAR(50))
-- name: 角色名称
-- code: 角色代码 (唯一)
-- description: 角色描述
-- permissions: 权限列表 (JSON)
-- user_count: 用户数量
-- status: 状态
-```
-
-#### users - 用户表
-```sql
-- id: 用户ID (VARCHAR(50))
-- username: 用户名 (唯一)
-- password: 密码
-- name: 姓名
-- email: 邮箱
-- phone: 手机号
-- role: 角色
-- role_id: 角色ID
-- department_id: 部门ID
-- position: 职位
-- employee_number: 工号
-- status: 状态
-```
-
-#### customers - 客户表
-```sql
-- id: 客户ID (VARCHAR(50))
-- name: 客户姓名
-- phone: 手机号
-- wechat: 微信号
-- email: 邮箱
-- address: 地址
-- level: 客户等级 (normal/silver/gold)
-- status: 状态
-- tags: 标签 (JSON)
-- sales_person_id: 销售员ID
-- order_count: 订单数量
-- total_amount: 总消费金额
-```
-
-#### orders - 订单表
-```sql
-- id: 订单ID (VARCHAR(50))
-- order_number: 订单号 (唯一)
-- customer_id: 客户ID
-- service_wechat: 客服微信号 ✨新增
-- order_source: 订单来源 ✨新增
-- products: 商品列表 (JSON)
-- total_amount: 订单总金额
-- deposit_amount: 定金金额 ✨新增
-- deposit_screenshots: 定金截图 (JSON) ✨新增
-- final_amount: 实付金额
-- status: 订单状态
-- payment_status: 支付状态
-- shipping_address: 收货地址
-- express_company: 快递公司 ✨新增
-- mark_type: 订单标记类型 ✨新增
-- custom_fields: 自定义字段 (JSON) ✨新增
-```
-
-### 2. 业务表（5个）
-
-- **product_categories** - 产品分类表
-- **products** - 产品表
-- **logistics** - 物流表
-- **service_records** - 售后服务表
-- **data_records** - 资料表
-
-### 3. 统计表（2个）
-
-- **performance_records** - 业绩表
-- **operation_logs** - 操作日志表
-
-### 4. 配置表（3个）
-
-- **customer_tags** - 客户标签表
-- **customer_groups** - 客户分组表
-- **system_configs** - 系统配置表
-
-### 5. 通话管理表（2个）✨新增
-
-#### call_records - 通话记录表
-```sql
-- id: 通话ID (VARCHAR(50))
-- customer_id: 客户ID
-- customer_name: 客户姓名
-- customer_phone: 客户电话
-- call_type: 通话类型 (outbound/inbound)
-- call_status: 通话状态 (connected/missed/busy/failed/rejected)
-- start_time: 开始时间
-- end_time: 结束时间
-- duration: 通话时长(秒)
-- recording_url: 录音文件URL
-- notes: 通话备注
-- follow_up_required: 是否需要跟进
-- user_id: 操作员ID
-- user_name: 操作员姓名
-- department: 所属部门
-```
-
-#### follow_up_records - 跟进记录表
-```sql
-- id: 跟进ID (VARCHAR(50))
-- call_id: 关联通话ID
-- customer_id: 客户ID
-- customer_name: 客户姓名
-- follow_up_type: 跟进方式 (call/visit/email/message)
-- content: 跟进内容
-- next_follow_up_date: 下次跟进时间
-- priority: 优先级 (low/medium/high/urgent)
-- status: 状态 (pending/completed/cancelled)
-- user_id: 跟进人ID
-- user_name: 跟进人姓名
-```
-
-### 6. 短信管理表（2个）✨新增
-
-#### sms_templates - 短信模板表
-```sql
-- id: 模板ID (VARCHAR(50))
-- name: 模板名称
-- category: 模板分类
-- content: 模板内容
-- variables: 变量列表 (JSON)
-- description: 模板描述
-- applicant: 申请人ID
-- applicant_name: 申请人姓名
-- applicant_dept: 申请人部门
-- status: 审核状态 (pending/approved/rejected)
-- approved_by: 审核人ID
-- approved_at: 审核时间
-- is_system: 是否系统模板
-```
-
-#### sms_records - 短信发送记录表
-```sql
-- id: 记录ID (VARCHAR(50))
-- template_id: 模板ID
-- template_name: 模板名称
-- content: 短信内容
-- recipients: 接收人列表 (JSON)
-- recipient_count: 接收人数量
-- success_count: 成功数量
-- fail_count: 失败数量
-- status: 发送状态 (pending/sending/completed/failed)
-- send_details: 发送详情 (JSON)
-- applicant: 申请人ID
-- applicant_name: 申请人姓名
-- applicant_dept: 申请人部门
-- approved_by: 审核人ID
-- approved_at: 审核时间
-- sent_at: 发送时间
-- remark: 备注
-```
-
-### 7. 消息通知表（2个）✨新增
-
-#### notifications - 消息通知表
-```sql
-- id: 通知ID (VARCHAR(50))
-- user_id: 接收用户ID
-- type: 消息类型
-- title: 消息标题
-- content: 消息内容
-- category: 消息分类
-- priority: 优先级 (low/normal/high/urgent)
-- is_read: 是否已读
-- read_at: 阅读时间
-- related_id: 关联业务ID
-- related_type: 关联业务类型
-- action_url: 操作链接
-- icon: 图标
-- color: 颜色
-```
-
-#### system_announcements - 系统公告表
-```sql
-- id: 公告ID (VARCHAR(50))
-- title: 公告标题
-- content: 公告内容
-- type: 公告类型 (system/maintenance/update/notice)
-- priority: 优先级
-- status: 状态 (draft/published/archived)
-- target_users: 目标用户 (JSON)
-- target_roles: 目标角色 (JSON)
-- target_departments: 目标部门 (JSON)
-- publish_time: 发布时间
-- expire_time: 过期时间
-- is_popup: 是否弹窗显示
-- is_top: 是否置顶
-- read_count: 阅读次数
-- attachments: 附件列表 (JSON)
-- created_by: 创建人ID
-- created_by_name: 创建人姓名
-```
-
-### 8. 订单审核表（1个）✨新增
-
-#### order_audits - 订单审核记录表
-```sql
-- id: 审核ID (VARCHAR(50))
-- order_id: 订单ID
-- order_number: 订单号
-- audit_type: 审核类型 (create/modify/cancel/return)
-- audit_status: 审核状态 (pending/approved/rejected)
-- audit_level: 审核级别
-- auditor_id: 审核人ID
-- auditor_name: 审核人姓名
-- audit_time: 审核时间
-- audit_result: 审核结果
-- audit_remark: 审核备注
-- before_data: 修改前数据 (JSON)
-- after_data: 修改后数据 (JSON)
-- applicant_id: 申请人ID
-- applicant_name: 申请人姓名
-- apply_reason: 申请原因
-- apply_time: 申请时间
-```
-
-### 9. 业绩分享表（2个）✨新增
-
-#### performance_shares - 业绩分享记录表
-```sql
-- id: 分享ID (VARCHAR(50))
-- share_number: 分享编号
-- order_id: 订单ID
-- order_number: 订单号
-- order_amount: 订单金额
-- total_share_amount: 总分享金额
-- share_count: 分享人数
-- status: 状态 (active/completed/cancelled)
-- description: 分享说明
-- created_by: 创建人ID
-- created_by_name: 创建人姓名
-- completed_at: 完成时间
-- cancelled_at: 取消时间
-```
-
-#### performance_share_members - 业绩分享成员表
-```sql
-- id: 成员ID (VARCHAR(50))
-- share_id: 分享记录ID
-- user_id: 用户ID
-- user_name: 用户姓名
-- department: 所属部门
-- share_percentage: 分享比例
-- share_amount: 分享金额
-- status: 确认状态 (pending/confirmed/rejected)
-- confirm_time: 确认时间
-- reject_reason: 拒绝原因
-```
-
-### 10. 物流扩展表（4个）✨新增
-
-#### logistics_companies - 物流公司表
-```sql
-- id: 公司ID (VARCHAR(50))
-- code: 公司代码
-- name: 公司名称
-- short_name: 公司简称
-- logo: Logo URL
-- website: 官网地址
-- tracking_url: 跟踪查询地址
-- api_url: API接口地址
-- api_key: API密钥
-- api_secret: API密钥
-- contact_phone: 联系电话
-- contact_email: 联系邮箱
-- service_area: 服务区域
-- price_info: 价格信息 (JSON)
-- status: 状态 (active/inactive)
-- sort_order: 排序
-- remark: 备注
-```
-
-#### logistics_status_history - 物流状态历史表
-```sql
-- id: 历史ID (VARCHAR(50))
-- logistics_id: 物流记录ID
-- order_id: 订单ID
-- order_number: 订单号
-- tracking_number: 物流单号
-- old_status: 原状态
-- new_status: 新状态
-- status_text: 状态描述
-- location: 当前位置
-- operator: 操作人
-- operator_name: 操作人姓名
-- update_source: 更新来源 (manual/auto/api)
-- remark: 备注
-```
-
-#### logistics_exceptions - 物流异常记录表
-```sql
-- id: 异常ID (VARCHAR(50))
-- logistics_id: 物流记录ID
-- order_id: 订单ID
-- order_number: 订单号
-- tracking_number: 物流单号
-- exception_type: 异常类型
-- exception_desc: 异常描述
-- exception_time: 异常时间
-- status: 处理状态 (pending/processing/resolved/closed)
-- handler_id: 处理人ID
-- handler_name: 处理人姓名
-- handle_time: 处理时间
-- handle_result: 处理结果
-- solution: 解决方案
-- images: 相关图片 (JSON)
-```
-
-#### logistics_todos - 物流待办事项表
-```sql
-- id: 待办ID (VARCHAR(50))
-- logistics_id: 物流记录ID
-- order_id: 订单ID
-- order_number: 订单号
-- tracking_number: 物流单号
-- todo_type: 待办类型
-- todo_title: 待办标题
-- todo_content: 待办内容
-- priority: 优先级 (low/normal/high/urgent)
-- status: 状态 (pending/processing/completed/cancelled)
-- assigned_to: 负责人ID
-- assigned_to_name: 负责人姓名
-- due_date: 截止时间
-- remind_time: 提醒时间
-- completed_time: 完成时间
-- remark: 备注
-- created_by: 创建人ID
-- created_by_name: 创建人姓名
-```
-
-### 11. 订单配置表（1个）✨新增
-
-#### order_field_configs - 订单字段配置表
-```sql
-- id: 配置ID (VARCHAR(50))
-- field_key: 字段键名
-- field_name: 字段名称
-- field_type: 字段类型 (text/number/date/datetime/select/radio/checkbox)
-- field_options: 字段选项 (JSON)
-- default_value: 默认值
-- placeholder: 占位符
-- is_required: 是否必填
-- is_visible: 是否可见
-- show_in_list: 列表显示
-- show_in_detail: 详情显示
-- sort_order: 排序
-- validation_rules: 验证规则 (JSON)
-- description: 字段描述
-```
+### bt_panel_setup.sql（Phiên bản cũ）
+- **Phiên bản**：1.0
+- **Thời gian cập nhật**：2024-01-15
+- **Mô tả**：Script database phiên bản cũ，chỉ để tham khảo
+- **Không khuyến nghị sử dụng**：Cấu trúc dữ liệu đã lỗi thời
 
 ---
 
-## 👥 预设账号
+## 🗄️ Cấu Trúc Bảng Database
 
-系统预设了 5 个测试账号，密码为明文存储（生产环境请修改）：
+### 1. Bảng Core（5 bảng）
 
-| 用户名 | 密码 | 角色 | 部门 | 说明 |
+#### departments - Bảng phòng ban
+```sql
+- id: ID phòng ban (VARCHAR(50))
+- name: Tên phòng ban
+- description: Mô tả phòng ban
+- parent_id: ID phòng ban cấp trên
+- manager_id: ID trưởng phòng ban
+- level: Cấp độ phòng ban
+- member_count: Số lượng thành viên
+- status: Trạng thái (active/inactive)
+```
+
+#### roles - Bảng vai trò
+```sql
+- id: ID vai trò (VARCHAR(50))
+- name: Tên vai trò
+- code: Mã vai trò (duy nhất)
+- description: Mô tả vai trò
+- permissions: Danh sách quyền (JSON)
+- user_count: Số lượng người dùng
+- status: Trạng thái
+```
+
+#### users - Bảng người dùng
+```sql
+- id: ID người dùng (VARCHAR(50))
+- username: Tên đăng nhập (duy nhất)
+- password: Mật khẩu
+- name: Họ tên
+- email: Email
+- phone: Số điện thoại
+- role: Vai trò
+- role_id: ID vai trò
+- department_id: ID phòng ban
+- position: Chức vụ
+- employee_number: Mã nhân viên
+- status: Trạng thái
+```
+
+#### customers - Bảng khách hàng
+```sql
+- id: ID khách hàng (VARCHAR(50))
+- name: Tên khách hàng
+- phone: Số điện thoại
+- wechat: WeChat ID
+- email: Email
+- address: Địa chỉ
+- level: Cấp độ khách hàng (normal/silver/gold)
+- status: Trạng thái
+- tags: Nhãn (JSON)
+- sales_person_id: ID nhân viên bán hàng
+- order_count: Số lượng đơn hàng
+- total_amount: Tổng số tiền đã chi
+```
+
+#### orders - Bảng đơn hàng
+```sql
+- id: ID đơn hàng (VARCHAR(50))
+- order_number: Số đơn hàng (duy nhất)
+- customer_id: ID khách hàng
+- service_wechat: WeChat ID dịch vụ khách hàng ✨Mới
+- order_source: Nguồn đơn hàng ✨Mới
+- products: Danh sách sản phẩm (JSON)
+- total_amount: Tổng tiền đơn hàng
+- deposit_amount: Số tiền đặt cọc ✨Mới
+- deposit_screenshots: Ảnh chụp đặt cọc (JSON) ✨Mới
+- final_amount: Số tiền thực tế thanh toán
+- status: Trạng thái đơn hàng
+- payment_status: Trạng thái thanh toán
+- shipping_address: Địa chỉ nhận hàng
+- express_company: Công ty vận chuyển ✨Mới
+- mark_type: Loại đánh dấu đơn hàng ✨Mới
+- custom_fields: Trường tùy chỉnh (JSON) ✨Mới
+```
+
+### 2. Bảng Nghiệp Vụ（5 bảng）
+
+- **product_categories** - Bảng danh mục sản phẩm
+- **products** - Bảng sản phẩm
+- **logistics** - Bảng logistics
+- **service_records** - Bảng dịch vụ sau bán hàng
+- **data_records** - Bảng dữ liệu
+
+### 3. Bảng Thống Kê（2 bảng）
+
+- **performance_records** - Bảng thành tích
+- **operation_logs** - Bảng log thao tác
+
+### 4. Bảng Cấu Hình（3 bảng）
+
+- **customer_tags** - Bảng nhãn khách hàng
+- **customer_groups** - Bảng nhóm khách hàng
+- **system_configs** - Bảng cấu hình hệ thống
+
+### 5. Bảng Quản Lý Cuộc Gọi（2 bảng）✨Mới
+
+#### call_records - Bảng ghi chép cuộc gọi
+```sql
+- id: ID cuộc gọi (VARCHAR(50))
+- customer_id: ID khách hàng
+- customer_name: Tên khách hàng
+- customer_phone: Số điện thoại khách hàng
+- call_type: Loại cuộc gọi (outbound/inbound)
+- call_status: Trạng thái cuộc gọi (connected/missed/busy/failed/rejected)
+- start_time: Thời gian bắt đầu
+- end_time: Thời gian kết thúc
+- duration: Thời lượng cuộc gọi(giây)
+- recording_url: URL file ghi âm
+- notes: Ghi chú cuộc gọi
+- follow_up_required: Có cần theo dõi không
+- user_id: ID người vận hành
+- user_name: Tên người vận hành
+- department: Phòng ban
+```
+
+#### follow_up_records - Bảng ghi chép theo dõi
+```sql
+- id: ID theo dõi (VARCHAR(50))
+- call_id: ID cuộc gọi liên quan
+- customer_id: ID khách hàng
+- customer_name: Tên khách hàng
+- follow_up_type: Cách thức theo dõi (call/visit/email/message)
+- content: Nội dung theo dõi
+- next_follow_up_date: Thời gian theo dõi tiếp theo
+- priority: Mức độ ưu tiên (low/medium/high/urgent)
+- status: Trạng thái (pending/completed/cancelled)
+- user_id: ID người theo dõi
+- user_name: Tên người theo dõi
+```
+
+### 6. Bảng Quản Lý SMS（2 bảng）✨Mới
+
+#### sms_templates - Bảng mẫu SMS
+```sql
+- id: ID mẫu (VARCHAR(50))
+- name: Tên mẫu
+- category: Phân loại mẫu
+- content: Nội dung mẫu
+- variables: Danh sách biến (JSON)
+- description: Mô tả mẫu
+- applicant: ID người đăng ký
+- applicant_name: Tên người đăng ký
+- applicant_dept: Phòng ban người đăng ký
+- status: Trạng thái phê duyệt (pending/approved/rejected)
+- approved_by: ID người phê duyệt
+- approved_at: Thời gian phê duyệt
+- is_system: Có phải mẫu hệ thống không
+```
+
+#### sms_records - Bảng ghi chép gửi SMS
+```sql
+- id: ID ghi chép (VARCHAR(50))
+- template_id: ID mẫu
+- template_name: Tên mẫu
+- content: Nội dung SMS
+- recipients: Danh sách người nhận (JSON)
+- recipient_count: Số lượng người nhận
+- success_count: Số lượng thành công
+- fail_count: Số lượng thất bại
+- status: Trạng thái gửi (pending/sending/completed/failed)
+- send_details: Chi tiết gửi (JSON)
+- applicant: ID người đăng ký
+- applicant_name: Tên người đăng ký
+- applicant_dept: Phòng ban người đăng ký
+- approved_by: ID người phê duyệt
+- approved_at: Thời gian phê duyệt
+- sent_at: Thời gian gửi
+- remark: Ghi chú
+```
+
+### 7. Bảng Thông Báo（2 bảng）✨Mới
+
+#### notifications - Bảng thông báo
+```sql
+- id: ID thông báo (VARCHAR(50))
+- user_id: ID người dùng nhận
+- type: Loại tin nhắn
+- title: Tiêu đề tin nhắn
+- content: Nội dung tin nhắn
+- category: Phân loại tin nhắn
+- priority: Mức độ ưu tiên (low/normal/high/urgent)
+- is_read: Đã đọc chưa
+- read_at: Thời gian đọc
+- related_id: ID nghiệp vụ liên quan
+- related_type: Loại nghiệp vụ liên quan
+- action_url: Link thao tác
+- icon: Icon
+- color: Màu sắc
+```
+
+#### system_announcements - Bảng thông báo hệ thống
+```sql
+- id: ID thông báo (VARCHAR(50))
+- title: Tiêu đề thông báo
+- content: Nội dung thông báo
+- type: Loại thông báo (system/maintenance/update/notice)
+- priority: Mức độ ưu tiên
+- status: Trạng thái (draft/published/archived)
+- target_users: Người dùng mục tiêu (JSON)
+- target_roles: Vai trò mục tiêu (JSON)
+- target_departments: Phòng ban mục tiêu (JSON)
+- publish_time: Thời gian phát hành
+- expire_time: Thời gian hết hạn
+- is_popup: Có hiển thị popup không
+- is_top: Có ghim không
+- read_count: Số lần đọc
+- attachments: Danh sách đính kèm (JSON)
+- created_by: ID người tạo
+- created_by_name: Tên người tạo
+```
+
+### 8. Bảng Phê Duyệt Đơn Hàng（1 bảng）✨Mới
+
+#### order_audits - Bảng ghi chép phê duyệt đơn hàng
+```sql
+- id: ID phê duyệt (VARCHAR(50))
+- order_id: ID đơn hàng
+- order_number: Số đơn hàng
+- audit_type: Loại phê duyệt (create/modify/cancel/return)
+- audit_status: Trạng thái phê duyệt (pending/approved/rejected)
+- audit_level: Cấp độ phê duyệt
+- auditor_id: ID người phê duyệt
+- auditor_name: Tên người phê duyệt
+- audit_time: Thời gian phê duyệt
+- audit_result: Kết quả phê duyệt
+- audit_remark: Ghi chú phê duyệt
+- before_data: Dữ liệu trước khi sửa (JSON)
+- after_data: Dữ liệu sau khi sửa (JSON)
+- applicant_id: ID người đăng ký
+- applicant_name: Tên người đăng ký
+- apply_reason: Lý do đăng ký
+- apply_time: Thời gian đăng ký
+```
+
+### 9. Bảng Chia Sẻ Thành Tích（2 bảng）✨Mới
+
+#### performance_shares - Bảng ghi chép chia sẻ thành tích
+```sql
+- id: ID chia sẻ (VARCHAR(50))
+- share_number: Số chia sẻ
+- order_id: ID đơn hàng
+- order_number: Số đơn hàng
+- order_amount: Số tiền đơn hàng
+- total_share_amount: Tổng số tiền chia sẻ
+- share_count: Số người chia sẻ
+- status: Trạng thái (active/completed/cancelled)
+- description: Mô tả chia sẻ
+- created_by: ID người tạo
+- created_by_name: Tên người tạo
+- completed_at: Thời gian hoàn thành
+- cancelled_at: Thời gian hủy
+```
+
+#### performance_share_members - Bảng thành viên chia sẻ thành tích
+```sql
+- id: ID thành viên (VARCHAR(50))
+- share_id: ID ghi chép chia sẻ
+- user_id: ID người dùng
+- user_name: Tên người dùng
+- department: Phòng ban
+- share_percentage: Tỷ lệ chia sẻ
+- share_amount: Số tiền chia sẻ
+- status: Trạng thái xác nhận (pending/confirmed/rejected)
+- confirm_time: Thời gian xác nhận
+- reject_reason: Lý do từ chối
+```
+
+### 10. Bảng Mở Rộng Logistics（4 bảng）✨Mới
+
+#### logistics_companies - Bảng công ty logistics
+```sql
+- id: ID công ty (VARCHAR(50))
+- code: Mã công ty
+- name: Tên công ty
+- short_name: Tên viết tắt công ty
+- logo: URL Logo
+- website: Địa chỉ website
+- tracking_url: Địa chỉ tra cứu theo dõi
+- api_url: Địa chỉ API
+- api_key: API key
+- api_secret: API secret
+- contact_phone: Số điện thoại liên hệ
+- contact_email: Email liên hệ
+- service_area: Khu vực dịch vụ
+- price_info: Thông tin giá (JSON)
+- status: Trạng thái (active/inactive)
+- sort_order: Sắp xếp
+- remark: Ghi chú
+```
+
+#### logistics_status_history - Bảng lịch sử trạng thái logistics
+```sql
+- id: ID lịch sử (VARCHAR(50))
+- logistics_id: ID ghi chép logistics
+- order_id: ID đơn hàng
+- order_number: Số đơn hàng
+- tracking_number: Số đơn logistics
+- old_status: Trạng thái cũ
+- new_status: Trạng thái mới
+- status_text: Mô tả trạng thái
+- location: Vị trí hiện tại
+- operator: Người vận hành
+- operator_name: Tên người vận hành
+- update_source: Nguồn cập nhật (manual/auto/api)
+- remark: Ghi chú
+```
+
+#### logistics_exceptions - Bảng ghi chép ngoại lệ logistics
+```sql
+- id: ID ngoại lệ (VARCHAR(50))
+- logistics_id: ID ghi chép logistics
+- order_id: ID đơn hàng
+- order_number: Số đơn hàng
+- tracking_number: Số đơn logistics
+- exception_type: Loại ngoại lệ
+- exception_desc: Mô tả ngoại lệ
+- exception_time: Thời gian ngoại lệ
+- status: Trạng thái xử lý (pending/processing/resolved/closed)
+- handler_id: ID người xử lý
+- handler_name: Tên người xử lý
+- handle_time: Thời gian xử lý
+- handle_result: Kết quả xử lý
+- solution: Giải pháp
+- images: Ảnh liên quan (JSON)
+```
+
+#### logistics_todos - Bảng công việc cần làm logistics
+```sql
+- id: ID công việc (VARCHAR(50))
+- logistics_id: ID ghi chép logistics
+- order_id: ID đơn hàng
+- order_number: Số đơn hàng
+- tracking_number: Số đơn logistics
+- todo_type: Loại công việc
+- todo_title: Tiêu đề công việc
+- todo_content: Nội dung công việc
+- priority: Mức độ ưu tiên (low/normal/high/urgent)
+- status: Trạng thái (pending/processing/completed/cancelled)
+- assigned_to: ID người phụ trách
+- assigned_to_name: Tên người phụ trách
+- due_date: Thời hạn
+- remind_time: Thời gian nhắc nhở
+- completed_time: Thời gian hoàn thành
+- remark: Ghi chú
+- created_by: ID người tạo
+- created_by_name: Tên người tạo
+```
+
+### 11. Bảng Cấu Hình Đơn Hàng（1 bảng）✨Mới
+
+#### order_field_configs - Bảng cấu hình trường đơn hàng
+```sql
+- id: ID cấu hình (VARCHAR(50))
+- field_key: Tên khóa trường
+- field_name: Tên trường
+- field_type: Loại trường (text/number/date/datetime/select/radio/checkbox)
+- field_options: Tùy chọn trường (JSON)
+- default_value: Giá trị mặc định
+- placeholder: Placeholder
+- is_required: Có bắt buộc không
+- is_visible: Có hiển thị không
+- show_in_list: Hiển thị trong danh sách
+- show_in_detail: Hiển thị trong chi tiết
+- sort_order: Sắp xếp
+- validation_rules: Quy tắc xác thực (JSON)
+- description: Mô tả trường
+```
+
+---
+
+## 👥 Tài Khoản Mặc Định
+
+Hệ thống đã thiết lập sẵn 5 tài khoản test，mật khẩu được lưu dạng plaintext（môi trường production vui lòng sửa đổi）：
+
+| Tên đăng nhập | Mật khẩu | Vai trò | Phòng ban | Mô tả |
 |--------|------|------|------|------|
-| superadmin | super123456 | 超级管理员 | 系统管理部 | 拥有所有权限 |
-| admin | admin123 | 管理员 | 管理部 | 拥有所有权限 |
-| manager | manager123 | 部门经理 | 销售部 | 管理部门业务 |
-| sales | sales123 | 销售员 | 销售部 | 客户和订单管理 |
-| service | service123 | 客服 | 客服部 | 订单和售后处理 |
+| superadmin | super123456 | Siêu quản trị viên | Phòng quản lý hệ thống | Có tất cả quyền |
+| admin | admin123 | Quản trị viên | Phòng quản lý | Có tất cả quyền |
+| manager | manager123 | Trưởng phòng ban | Phòng bán hàng | Quản lý nghiệp vụ phòng ban |
+| sales | sales123 | Nhân viên bán hàng | Phòng bán hàng | Quản lý khách hàng và đơn hàng |
+| service | service123 | Dịch vụ khách hàng | Phòng dịch vụ khách hàng | Xử lý đơn hàng và dịch vụ sau bán hàng |
 
-**安全提示**：
-- 生产环境请立即修改所有预设账号的密码
-- 密码应使用 bcrypt 加密存储
-- 建议密码长度至少 8 位，包含大小写字母、数字和特殊字符
+**Lưu ý bảo mật**：
+- Môi trường production vui lòng sửa đổi mật khẩu của tất cả tài khoản mặc định ngay lập tức
+- Mật khẩu nên được lưu trữ bằng bcrypt encryption
+- Khuyến nghị mật khẩu ít nhất 8 ký tự，bao gồm chữ hoa，chữ thường，số và ký tự đặc biệt
 
 ---
 
-## 🏢 预设部门
+## 🏢 Phòng Ban Mặc Định
 
-| 部门ID | 部门名称 | 说明 | 成员数 |
+| ID Phòng ban | Tên phòng ban | Mô tả | Số thành viên |
 |--------|----------|------|--------|
-| dept_001 | 系统管理部 | 系统管理和维护 | 2 |
-| dept_002 | 销售部 | 产品销售和客户维护 | 2 |
-| dept_003 | 客服部 | 客户服务和售后支持 | 1 |
+| dept_001 | Phòng quản lý hệ thống | Quản lý và bảo trì hệ thống | 2 |
+| dept_002 | Phòng bán hàng | Bán sản phẩm và duy trì khách hàng | 2 |
+| dept_003 | Phòng dịch vụ khách hàng | Dịch vụ khách hàng và hỗ trợ sau bán hàng | 1 |
 
 ---
 
-## 🎭 预设角色
+## 🎭 Vai Trò Mặc Định
 
-| 角色ID | 角色名称 | 角色代码 | 权限范围 |
+| ID Vai trò | Tên vai trò | Mã vai trò | Phạm vi quyền |
 |--------|----------|----------|----------|
-| super_admin | 超级管理员 | super_admin | 所有权限 (*) |
-| admin | 管理员 | admin | 所有权限 (*) |
-| department_manager | 部门经理 | department_manager | 部门业务管理 |
-| sales_staff | 销售员 | sales_staff | 客户和订单管理 |
-| customer_service | 客服 | customer_service | 订单和售后处理 |
+| super_admin | Siêu quản trị viên | super_admin | Tất cả quyền (*) |
+| admin | Quản trị viên | admin | Tất cả quyền (*) |
+| department_manager | Trưởng phòng ban | department_manager | Quản lý nghiệp vụ phòng ban |
+| sales_staff | Nhân viên bán hàng | sales_staff | Quản lý khách hàng và đơn hàng |
+| customer_service | Dịch vụ khách hàng | customer_service | Xử lý đơn hàng và dịch vụ sau bán hàng |
 
 ---
 
-## 📦 使用方法
+## 📦 Cách Sử Dụng
 
-### 方式一：宝塔面板导入（推荐）
+### Cách 1：Import qua Bảng Điều Khiển Bảo Tháp（Khuyến nghị）
 
-1. 登录宝塔面板
-2. 进入"数据库"
-3. 选择你的数据库（如 `crm_db`）
-4. 点击"管理"
-5. 点击"导入"
-6. 上传 `schema.sql` 文件
-7. 点击"导入"按钮
+1. Đăng nhập bảng điều khiển Bảo Tháp
+2. Vào "Database"
+3. Chọn database của bạn（ví dụ `crm_db`）
+4. Click "Quản lý"
+5. Click "Import"
+6. Upload file `schema.sql`
+7. Click nút "Import"
 
-### 方式二：命令行导入
+### Cách 2：Import qua Command Line
 
 ```bash
-# 方法1：使用 mysql 命令
+# Phương pháp 1：Sử dụng lệnh mysql
 mysql -u crm_user -p crm_db < database/schema.sql
 
-# 方法2：登录后导入
+# Phương pháp 2：Đăng nhập rồi import
 mysql -u crm_user -p
 use crm_db;
 source /path/to/database/schema.sql;
 ```
 
-### 方式三：phpMyAdmin 导入
+### Cách 3：Import qua phpMyAdmin
 
-1. 登录 phpMyAdmin
-2. 选择数据库 `crm_db`
-3. 点击"导入"标签
-4. 选择 `schema.sql` 文件
-5. 点击"执行"
+1. Đăng nhập phpMyAdmin
+2. Chọn database `crm_db`
+3. Click tab "Import"
+4. Chọn file `schema.sql`
+5. Click "Thực thi"
 
 ---
 
-## ⚙️ 数据库配置建议
+## ⚙️ Khuyến Nghị Cấu Hình Database
 
-### MySQL 配置优化
+### Tối Ưu Cấu Hình MySQL
 
 ```ini
 [mysqld]
-# 字符集配置
+# Cấu hình character set
 character-set-server=utf8mb4
 collation-server=utf8mb4_unicode_ci
 
-# 性能配置
+# Cấu hình hiệu suất
 innodb_buffer_pool_size=128M
 max_connections=200
 query_cache_size=32M
 
-# 时区配置
+# Cấu hình múi giờ
 default-time-zone='+08:00'
 
-# 日志配置
+# Cấu hình log
 slow_query_log=1
 slow_query_log_file=/var/log/mysql/slow.log
 long_query_time=2
 ```
 
-### 宝塔面板配置
+### Cấu Hình Bảng Điều Khiển Bảo Tháp
 
-1. **字符集**：utf8mb4
-2. **排序规则**：utf8mb4_unicode_ci
-3. **时区**：Asia/Shanghai
-4. **最大连接数**：200
-5. **缓冲池大小**：128M（根据服务器内存调整）
+1. **Character set**：utf8mb4
+2. **Collation**：utf8mb4_unicode_ci
+3. **Múi giờ**：Asia/Shanghai
+4. **Số kết nối tối đa**：200
+5. **Kích thước buffer pool**：128M（điều chỉnh theo bộ nhớ server）
 
 ---
 
-## 🔒 安全建议
+## 🔒 Khuyến Nghị Bảo Mật
 
-### 1. 数据库用户权限
+### 1. Quyền Người Dùng Database
 
 ```sql
--- 创建专用数据库用户（不要使用 root）
-CREATE USER 'crm_user'@'localhost' IDENTIFIED BY '强密码';
+-- Tạo người dùng database chuyên dụng（không sử dụng root）
+CREATE USER 'crm_user'@'localhost' IDENTIFIED BY 'Mật khẩu mạnh';
 
--- 授予必要权限
+-- Cấp quyền cần thiết
 GRANT SELECT, INSERT, UPDATE, DELETE ON crm_db.* TO 'crm_user'@'localhost';
 
--- 刷新权限
+-- Làm mới quyền
 FLUSH PRIVILEGES;
 ```
 
-### 2. 密码安全
+### 2. Bảo Mật Mật Khẩu
 
-- ✅ 使用强密码（至少 12 位）
-- ✅ 定期更换密码
-- ✅ 不要在代码中硬编码密码
-- ✅ 使用环境变量存储密码
+- ✅ Sử dụng mật khẩu mạnh（ít nhất 12 ký tự）
+- ✅ Đổi mật khẩu định kỳ
+- ✅ Không hardcode mật khẩu trong code
+- ✅ Sử dụng biến môi trường để lưu trữ mật khẩu
 
-### 3. 访问控制
+### 3. Kiểm Soát Truy Cập
 
-- ✅ 限制远程访问
-- ✅ 使用防火墙规则
-- ✅ 启用 SSL 连接
-- ✅ 定期审查访问日志
+- ✅ Giới hạn truy cập từ xa
+- ✅ Sử dụng quy tắc firewall
+- ✅ Bật kết nối SSL
+- ✅ Xem xét log truy cập định kỳ
 
 ---
 
-## 💾 备份建议
+## 💾 Khuyến Nghị Backup
 
-### 自动备份配置
+### Cấu Hình Backup Tự Động
 
-1. **备份频率**：每天凌晨 2:00
-2. **保留天数**：30 天
-3. **备份位置**：/www/backup/database/
-4. **备份方式**：完整备份
+1. **Tần suất backup**：2:00 sáng mỗi ngày
+2. **Số ngày lưu trữ**：30 ngày
+3. **Vị trí backup**：/www/backup/database/
+4. **Phương thức backup**：Full backup
 
-### 手动备份命令
+### Lệnh Backup Thủ Công
 
 ```bash
-# 备份整个数据库
+# Backup toàn bộ database
 mysqldump -u crm_user -p crm_db > backup_$(date +%Y%m%d).sql
 
-# 备份指定表
+# Backup bảng chỉ định
 mysqldump -u crm_user -p crm_db users customers orders > backup_core_$(date +%Y%m%d).sql
 
-# 压缩备份
+# Backup nén
 mysqldump -u crm_user -p crm_db | gzip > backup_$(date +%Y%m%d).sql.gz
 ```
 
-### 恢复数据
+### Khôi Phục Dữ Liệu
 
 ```bash
-# 恢复数据库
+# Khôi phục database
 mysql -u crm_user -p crm_db < backup_20241123.sql
 
-# 恢复压缩备份
+# Khôi phục backup nén
 gunzip < backup_20241123.sql.gz | mysql -u crm_user -p crm_db
 ```
 
 ---
 
-## 🔧 维护命令
+## 🔧 Lệnh Bảo Trì
 
-### 优化表
+### Tối Ưu Bảng
 
 ```sql
--- 优化所有表
+-- Tối ưu tất cả bảng
 OPTIMIZE TABLE customers, orders, products, users;
 
--- 分析表统计信息
+-- Phân tích thống kê bảng
 ANALYZE TABLE customers, orders, products, users;
 
--- 检查表
+-- Kiểm tra bảng
 CHECK TABLE customers, orders, products, users;
 
--- 修复表
+-- Sửa chữa bảng
 REPAIR TABLE customers, orders, products, users;
 ```
 
-### 查看表信息
+### Xem Thông Tin Bảng
 
 ```sql
--- 查看表大小
+-- Xem kích thước bảng
 SELECT 
-  table_name AS '表名',
-  ROUND(((data_length + index_length) / 1024 / 1024), 2) AS '大小(MB)'
+  table_name AS 'Tên bảng',
+  ROUND(((data_length + index_length) / 1024 / 1024), 2) AS 'Kích thước(MB)'
 FROM information_schema.TABLES 
 WHERE table_schema = 'crm_db'
 ORDER BY (data_length + index_length) DESC;
 
--- 查看表行数
+-- Xem số dòng bảng
 SELECT 
-  table_name AS '表名',
-  table_rows AS '行数'
+  table_name AS 'Tên bảng',
+  table_rows AS 'Số dòng'
 FROM information_schema.TABLES 
 WHERE table_schema = 'crm_db'
 ORDER BY table_rows DESC;
 
--- 查看索引使用情况
+-- Xem tình trạng sử dụng index
 SHOW INDEX FROM customers;
 ```
 
 ---
 
-## 📊 性能监控
+## 📊 Giám Sát Hiệu Suất
 
-### 慢查询监控
+### Giám Sát Slow Query
 
 ```sql
--- 查看慢查询日志
+-- Xem slow query log
 SELECT * FROM mysql.slow_log ORDER BY start_time DESC LIMIT 10;
 
--- 查看当前连接
+-- Xem kết nối hiện tại
 SHOW PROCESSLIST;
 
--- 查看表锁定情况
+-- Xem tình trạng khóa bảng
 SHOW OPEN TABLES WHERE In_use > 0;
 ```
 
-### 性能分析
+### Phân Tích Hiệu Suất
 
 ```sql
--- 分析查询性能
+-- Phân tích hiệu suất truy vấn
 EXPLAIN SELECT * FROM customers WHERE phone = '13800138000';
 
--- 查看查询缓存
+-- Xem query cache
 SHOW STATUS LIKE 'Qcache%';
 
--- 查看 InnoDB 状态
+-- Xem trạng thái InnoDB
 SHOW ENGINE INNODB STATUS;
 ```
 
 ---
 
-## 🆘 常见问题
+## 🆘 Câu Hỏi Thường Gặp
 
-### Q1: 导入失败，提示字符集错误？
-**A**: 确保数据库字符集为 utf8mb4：
+### Q1: Import thất bại，báo lỗi character set？
+**A**: Đảm bảo character set của database là utf8mb4：
 ```sql
 ALTER DATABASE crm_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### Q2: 导入失败，提示外键约束错误？
-**A**: 脚本已包含 `SET FOREIGN_KEY_CHECKS = 0;`，如果还有问题，手动执行：
+### Q2: Import thất bại，báo lỗi foreign key constraint？
+**A**: Script đã bao gồm `SET FOREIGN_KEY_CHECKS = 0;`，nếu vẫn có vấn đề，thực thi thủ công：
 ```sql
 SET FOREIGN_KEY_CHECKS = 0;
 SOURCE schema.sql;
 SET FOREIGN_KEY_CHECKS = 1;
 ```
 
-### Q3: 如何重置数据库？
-**A**: 删除所有表后重新导入：
+### Q3: Làm thế nào để reset database？
+**A**: Xóa tất cả bảng rồi import lại：
 ```sql
 DROP DATABASE crm_db;
 CREATE DATABASE crm_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -672,38 +672,38 @@ USE crm_db;
 SOURCE schema.sql;
 ```
 
-### Q4: 如何修改预设账号密码？
+### Q4: Làm thế nào để sửa mật khẩu tài khoản mặc định？
 **A**: 
 ```sql
--- 在生产环境中，密码应该使用 bcrypt 加密
--- 这里仅作示例，实际应该通过应用程序修改
-UPDATE users SET password = '新密码' WHERE username = 'admin';
+-- Trong môi trường production，mật khẩu nên được mã hóa bằng bcrypt
+-- Đây chỉ là ví dụ，thực tế nên sửa qua ứng dụng
+UPDATE users SET password = 'Mật khẩu mới' WHERE username = 'admin';
 ```
 
 ---
 
-## 📝 更新日志
+## 📝 Changelog
 
 ### v1.8.0 (2024-11-23)
-- ✅ 更新所有表结构，使用 VARCHAR(50) 作为主键
-- ✅ 添加完整的预设账号（5个）
-- ✅ 添加预设角色（5个）
-- ✅ 添加预设部门（3个）
-- ✅ 优化索引结构
-- ✅ 添加 JSON 字段支持
-- ✅ 完善注释说明
+- ✅ Cập nhật cấu trúc tất cả bảng，sử dụng VARCHAR(50) làm primary key
+- ✅ Thêm tài khoản mặc định đầy đủ（5 tài khoản）
+- ✅ Thêm vai trò mặc định（5 vai trò）
+- ✅ Thêm phòng ban mặc định（3 phòng ban）
+- ✅ Tối ưu cấu trúc index
+- ✅ Thêm hỗ trợ trường JSON
+- ✅ Hoàn thiện mô tả comment
 
 ### v1.0 (2024-01-15)
-- 初始版本
+- Phiên bản ban đầu
 
 ---
 
-## 📞 技术支持
+## 📞 Hỗ Trợ Kỹ Thuật
 
-如遇到数据库相关问题，请提供：
-1. MySQL 版本（`SELECT VERSION();`）
-2. 错误信息
-3. 操作步骤
-4. 数据库配置
+Nếu gặp vấn đề liên quan đến database，vui lòng cung cấp：
+1. Phiên bản MySQL（`SELECT VERSION();`）
+2. Thông tin lỗi
+3. Các bước thao tác
+4. Cấu hình database
 
-GitHub Issues: https://github.com/shushuhao01/CRM/issues
+GitHub Issues: https://github.com/mrtinhnguyen/CRM/issues

@@ -5,16 +5,16 @@ import { CustomerShare } from '../entities/CustomerShare';
 import { Customer } from '../entities/Customer';
 import { User } from '../entities/User';
 import { v4 as uuidv4 } from 'uuid';
-import { LessThan, In } from 'typeorm';
+import { LessThan } from 'typeorm';
 
 const router = Router();
 
-// 所有客户分享路由都需要认证
+// Tất cả route chia sẻ khách hàng đều cần xác thực
 router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/customer-share/history
- * @desc 获取分享历史
+ * @desc Lấy lịch sử chia sẻ
  */
 router.get('/history', async (req: Request, res: Response) => {
   try {
@@ -24,7 +24,7 @@ router.get('/history', async (req: Request, res: Response) => {
     const shareRepository = AppDataSource.getRepository(CustomerShare);
     const queryBuilder = shareRepository.createQueryBuilder('share');
 
-    // 只能看到自己分享的或分享给自己的
+    // Chỉ có thể xem những gì mình chia sẻ hoặc được chia sẻ cho mình
     queryBuilder.where('(share.sharedBy = :userId OR share.sharedTo = :userId)', {
       userId: currentUser.userId
     });
@@ -49,15 +49,15 @@ router.get('/history', async (req: Request, res: Response) => {
       data: { list, total, page: Number(page), pageSize: Number(pageSize) }
     });
   } catch (error) {
-    console.error('获取分享历史失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取分享历史失败' });
+    console.error('Lấy lịch sử chia sẻ thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy lịch sử chia sẻ thất bại' });
   }
 });
 
 
 /**
  * @route POST /api/v1/customer-share/share
- * @desc 分享客户
+ * @desc Chia sẻ khách hàng
  */
 router.post('/share', async (req: Request, res: Response) => {
   try {
@@ -65,26 +65,26 @@ router.post('/share', async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
 
     if (!customerId || !sharedTo) {
-      return res.status(400).json({ success: false, code: 400, message: '参数不完整' });
+      return res.status(400).json({ success: false, code: 400, message: 'Tham số không đầy đủ' });
     }
 
     const customerRepository = AppDataSource.getRepository(Customer);
     const userRepository = AppDataSource.getRepository(User);
     const shareRepository = AppDataSource.getRepository(CustomerShare);
 
-    // 获取客户信息
+    // Lấy thông tin khách hàng
     const customer = await customerRepository.findOne({ where: { id: customerId } });
     if (!customer) {
-      return res.status(404).json({ success: false, code: 404, message: '客户不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Khách hàng không tồn tại' });
     }
 
-    // 获取接收人信息
+    // Lấy thông tin người nhận
     const targetUser = await userRepository.findOne({ where: { id: sharedTo } });
     if (!targetUser) {
-      return res.status(404).json({ success: false, code: 404, message: '接收人不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Người nhận không tồn tại' });
     }
 
-    // 创建分享记录
+    // Tạo bản ghi chia sẻ
     const share = new CustomerShare();
     share.id = uuidv4();
     share.customerId = customerId;
@@ -98,7 +98,7 @@ router.post('/share', async (req: Request, res: Response) => {
     share.status = 'active';
     share.originalOwner = customer.salesPersonId || customer.createdBy;
 
-    // 计算过期时间
+    // Tính toán thời gian hết hạn
     if (timeLimit && timeLimit > 0) {
       const expireTime = new Date();
       expireTime.setDate(expireTime.getDate() + timeLimit);
@@ -110,18 +110,18 @@ router.post('/share', async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       code: 200,
-      message: '客户分享成功',
+      message: 'Chia sẻ khách hàng thành công',
       data: share
     });
   } catch (error) {
-    console.error('分享客户失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '分享客户失败' });
+    console.error('Chia sẻ khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Chia sẻ khách hàng thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/customer-share/recall
- * @desc 回收客户
+ * @desc Thu hồi khách hàng
  */
 router.post('/recall', async (req: Request, res: Response) => {
   try {
@@ -129,19 +129,19 @@ router.post('/recall', async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
 
     if (!shareId) {
-      return res.status(400).json({ success: false, code: 400, message: '分享ID不能为空' });
+      return res.status(400).json({ success: false, code: 400, message: 'ID chia sẻ không được để trống' });
     }
 
     const shareRepository = AppDataSource.getRepository(CustomerShare);
     const share = await shareRepository.findOne({ where: { id: shareId } });
 
     if (!share) {
-      return res.status(404).json({ success: false, code: 404, message: '分享记录不存在' });
+      return res.status(404).json({ success: false, code: 404, message: 'Bản ghi chia sẻ không tồn tại' });
     }
 
-    // 只有分享人可以回收
+    // Chỉ người chia sẻ mới có thể thu hồi
     if (share.sharedBy !== currentUser.userId) {
-      return res.status(403).json({ success: false, code: 403, message: '无权回收此分享' });
+      return res.status(403).json({ success: false, code: 403, message: 'Không có quyền thu hồi chia sẻ này' });
     }
 
     share.status = 'recalled';
@@ -150,16 +150,16 @@ router.post('/recall', async (req: Request, res: Response) => {
 
     await shareRepository.save(share);
 
-    res.json({ success: true, code: 200, message: '客户回收成功' });
+    res.json({ success: true, code: 200, message: 'Thu hồi khách hàng thành công' });
   } catch (error) {
-    console.error('回收客户失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '回收客户失败' });
+    console.error('Thu hồi khách hàng thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Thu hồi khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customer-share/my-shared
- * @desc 获取我分享的客户
+ * @desc Lấy khách hàng tôi đã chia sẻ
  */
 router.get('/my-shared', async (req: Request, res: Response) => {
   try {
@@ -173,21 +173,21 @@ router.get('/my-shared', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: shares });
   } catch (error) {
-    console.error('获取我分享的客户失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取失败' });
+    console.error('Lấy khách hàng tôi đã chia sẻ thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy dữ liệu thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customer-share/shared-to-me
- * @desc 获取分享给我的客户
+ * @desc Lấy khách hàng được chia sẻ cho tôi
  */
 router.get('/shared-to-me', async (req: Request, res: Response) => {
   try {
     const currentUser = (req as any).user;
     const shareRepository = AppDataSource.getRepository(CustomerShare);
 
-    // 更新过期状态
+    // Cập nhật trạng thái hết hạn
     await shareRepository.update(
       { sharedTo: currentUser.userId, status: 'active', expireTime: LessThan(new Date()) },
       { status: 'expired' }
@@ -200,21 +200,21 @@ router.get('/shared-to-me', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: shares });
   } catch (error) {
-    console.error('获取分享给我的客户失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取失败' });
+    console.error('Lấy khách hàng được chia sẻ cho tôi thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy dữ liệu thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/customer-share/shareable-users
- * @desc 获取可分享的用户列表
+ * @desc Lấy danh sách người dùng có thể chia sẻ
  */
 router.get('/shareable-users', async (req: Request, res: Response) => {
   try {
     const currentUser = (req as any).user;
     const userRepository = AppDataSource.getRepository(User);
 
-    // 获取所有活跃用户（排除自己）
+    // Lấy tất cả người dùng đang hoạt động (loại trừ chính mình)
     const users = await userRepository.find({
       where: { status: 'active' },
       select: ['id', 'username', 'realName', 'departmentId', 'departmentName', 'position']
@@ -231,8 +231,8 @@ router.get('/shareable-users', async (req: Request, res: Response) => {
 
     res.json({ success: true, code: 200, data: shareableUsers });
   } catch (error) {
-    console.error('获取可分享用户失败:', error);
-    res.status(500).json({ success: false, code: 500, message: '获取失败' });
+    console.error('Lấy danh sách người dùng có thể chia sẻ thất bại:', error);
+    res.status(500).json({ success: false, code: 500, message: 'Lấy dữ liệu thất bại' });
   }
 });
 

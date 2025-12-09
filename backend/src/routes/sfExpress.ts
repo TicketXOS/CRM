@@ -4,7 +4,7 @@ import sfExpressService from '../services/sfExpressService'
 const router = express.Router()
 
 /**
- * 测试连接
+ * Kiểm tra kết nối
  */
 router.post('/test-connection', async (req, res) => {
   try {
@@ -13,7 +13,7 @@ router.post('/test-connection', async (req, res) => {
     if (!appId || !checkWord || !apiUrl) {
       return res.status(400).json({
         success: false,
-        message: '缺少必要参数'
+        message: 'Thiếu tham số bắt buộc'
       })
     }
 
@@ -25,16 +25,16 @@ router.post('/test-connection', async (req, res) => {
 
     return res.json(result)
   } catch (error: any) {
-    console.error('测试连接失败:', error)
+    console.error('Kiểm tra kết nối thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '测试连接失败'
+      message: error.message || 'Kiểm tra kết nối thất bại'
     })
   }
 })
 
 /**
- * 设置配置
+ * Thiết lập cấu hình
  */
 router.post('/config', async (req, res) => {
   try {
@@ -43,7 +43,7 @@ router.post('/config', async (req, res) => {
     if (!appId || !checkWord || !apiUrl) {
       return res.status(400).json({
         success: false,
-        message: '缺少必要参数'
+        message: 'Thiếu tham số bắt buộc'
       })
     }
 
@@ -55,19 +55,19 @@ router.post('/config', async (req, res) => {
 
     return res.json({
       success: true,
-      message: '配置保存成功'
+      message: 'Lưu cấu hình thành công'
     })
   } catch (error: any) {
-    console.error('保存配置失败:', error)
+    console.error('Lưu cấu hình thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '保存配置失败'
+      message: error.message || 'Lưu cấu hình thất bại'
     })
   }
 })
 
 /**
- * 获取配置
+ * Lấy cấu hình
  */
 router.get('/config', async (req, res) => {
   try {
@@ -76,11 +76,11 @@ router.get('/config', async (req, res) => {
     if (!config) {
       return res.json({
         success: false,
-        message: '未配置'
+        message: 'Chưa được cấu hình'
       })
     }
 
-    // 不返回敏感信息
+    // Không trả về thông tin nhạy cảm
     return res.json({
       success: true,
       data: {
@@ -90,16 +90,16 @@ router.get('/config', async (req, res) => {
       }
     })
   } catch (error: any) {
-    console.error('获取配置失败:', error)
+    console.error('Lấy cấu hình thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '获取配置失败'
+      message: error.message || 'Lấy cấu hình thất bại'
     })
   }
 })
 
 /**
- * 查询物流轨迹
+ * Truy vấn lịch sử vận chuyển
  */
 router.post('/track', async (req, res) => {
   try {
@@ -108,7 +108,7 @@ router.post('/track', async (req, res) => {
     if (!trackingNumber) {
       return res.status(400).json({
         success: false,
-        message: '物流单号不能为空'
+        message: 'Số đơn vận chuyển không được để trống'
       })
     }
 
@@ -122,16 +122,16 @@ router.post('/track', async (req, res) => {
       data: result
     })
   } catch (error: any) {
-    console.error('查询物流轨迹失败:', error)
+    console.error('Truy vấn lịch sử vận chuyển thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '查询失败'
+      message: error.message || 'Truy vấn thất bại'
     })
   }
 })
 
 /**
- * 订单筛选
+ * Lọc đơn hàng
  */
 router.post('/filter-orders', async (req, res) => {
   try {
@@ -142,16 +142,16 @@ router.post('/filter-orders', async (req, res) => {
       data: result
     })
   } catch (error: any) {
-    console.error('订单筛选失败:', error)
+    console.error('Lọc đơn hàng thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '查询失败'
+      message: error.message || 'Truy vấn thất bại'
     })
   }
 })
 
 /**
- * 创建订单
+ * Tạo đơn hàng
  */
 router.post('/create-order', async (req, res) => {
   try {
@@ -162,44 +162,44 @@ router.post('/create-order', async (req, res) => {
       data: result
     })
   } catch (error: any) {
-    console.error('创建订单失败:', error)
+    console.error('Tạo đơn hàng thất bại:', error)
     return res.status(500).json({
       success: false,
-      message: error.message || '创建订单失败'
+      message: error.message || 'Tạo đơn hàng thất bại'
     })
   }
 })
 
 /**
- * 启用Mock模式
+ * Bật chế độ Mock
  */
 router.post('/enable-mock', async (req, res) => {
   try {
     sfExpressService.enableMockMode()
     return res.json({
       success: true,
-      message: 'Mock模式已启用'
+      message: 'Chế độ Mock đã được bật'
     })
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      message: error.message || '启用Mock模式失败'
+      message: error.message || 'Bật chế độ Mock thất bại'
     })
   }
 })
 
 /**
- * 禁用Mock模式
+ * Tắt chế độ Mock
  */
 router.post('/disable-mock', async (req, res) => {
   try {
     sfExpressService.disableMockMode()
     return res.json({
       success: true,
-      message: 'Mock模式已禁用'
+      message: 'Chế độ Mock đã được tắt'
     })
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : '禁用Mock模式失败'
+    const errorMessage = error instanceof Error ? error.message : 'Tắt chế độ Mock thất bại'
     return res.status(500).json({
       success: false,
       message: errorMessage
@@ -208,7 +208,7 @@ router.post('/disable-mock', async (req, res) => {
 })
 
 /**
- * 获取Mock模式状态
+ * Lấy trạng thái chế độ Mock
  */
 router.get('/mock-status', async (req, res) => {
   try {
@@ -220,7 +220,7 @@ router.get('/mock-status', async (req, res) => {
   } catch (error: unknown) {
     return res.status(500).json({
       success: false,
-      message: error instanceof Error ? error.message : '获取Mock模式状态失败'
+      message: error instanceof Error ? error.message : 'Lấy trạng thái chế độ Mock thất bại'
     })
   }
 })

@@ -463,8 +463,8 @@ location /api {
 **解决方案 B**：使用本地构建方案
 ```bash
 # 按 Ctrl+C 取消当前部署
-# 查看本地构建指南
-cat 本地构建部署指南.md
+# Xem hướng dẫn local build
+cat local-build-deployment-guide.md
 ```
 
 **解决方案 C**：添加 Swap 虚拟内存

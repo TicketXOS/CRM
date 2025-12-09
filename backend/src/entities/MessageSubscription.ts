@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Department } from './Department';
 
-// 消息类型枚举
+// Liệt kê loại tin nhắn
 export enum MessageType {
   ORDER_CREATED = 'order_created',
   ORDER_SIGNED = 'order_signed',
@@ -16,7 +16,7 @@ export enum MessageType {
   SYSTEM_MAINTENANCE = 'system_maintenance'
 }
 
-// 通知方式枚举
+// Liệt kê phương thức thông báo
 export enum NotificationMethod {
   DINGTALK = 'dingtalk',
   WECHAT_WORK = 'wechat_work',
@@ -34,52 +34,52 @@ export class MessageSubscription {
   @Column({
     type: 'varchar',
     length: 50,
-    comment: '消息类型'
+    comment: 'Loại tin nhắn'
   })
   messageType: MessageType;
 
   @Column({
     type: 'varchar',
     length: 100,
-    comment: '消息名称'
+    comment: 'Tên tin nhắn'
   })
   name: string;
 
   @Column({
     type: 'text',
     nullable: true,
-    comment: '消息描述'
+    comment: 'Mô tả tin nhắn'
   })
   description: string;
 
   @Column({
     type: 'varchar',
     length: 50,
-    comment: '消息分类'
+    comment: 'Phân loại tin nhắn'
   })
   category: string;
 
   @Column({
     type: 'boolean',
     default: false,
-    comment: '是否全局启用'
+    comment: 'Có bật toàn cục không'
   })
   isGlobalEnabled: boolean;
 
   @Column({
     type: 'json',
     nullable: true,
-    comment: '全局通知方式'
+    comment: 'Phương thức thông báo toàn cục'
   })
   globalNotificationMethods: NotificationMethod[];
 
   @CreateDateColumn({
-    comment: '创建时间'
+    comment: 'Thời gian tạo'
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    comment: '更新时间'
+    comment: 'Thời gian cập nhật'
   })
   updatedAt: Date;
 }
@@ -92,21 +92,21 @@ export class DepartmentSubscriptionConfig {
   @Column({
     type: 'varchar',
     length: 50,
-    comment: '消息类型'
+    comment: 'Loại tin nhắn'
   })
   messageType: MessageType;
 
   @Column({
     type: 'boolean',
     default: false,
-    comment: '是否启用'
+    comment: 'Có bật không'
   })
   isEnabled: boolean;
 
   @Column({
     type: 'json',
     nullable: true,
-    comment: '通知方式'
+    comment: 'Phương thức thông báo'
   })
   notificationMethods: NotificationMethod[];
 
@@ -115,12 +115,12 @@ export class DepartmentSubscriptionConfig {
   department: Department;
 
   @CreateDateColumn({
-    comment: '创建时间'
+    comment: 'Thời gian tạo'
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    comment: '更新时间'
+    comment: 'Thời gian cập nhật'
   })
   updatedAt: Date;
 }

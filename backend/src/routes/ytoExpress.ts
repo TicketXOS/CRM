@@ -4,27 +4,27 @@ import { ytoExpressService } from '../services/ytoExpressService'
 const router = express.Router()
 
 /**
- * 测试连接
+ * Kiểm tra kết nối
  */
 router.post('/test-connection', async (req, res) => {
   try {
     const { userId, appKey, apiUrl } = req.body
 
-    // 验证参数
+    // Xác thực tham số
     if (!userId || !appKey || !apiUrl) {
       return res.status(400).json({
         success: false,
-        message: '缺少必要参数: userId, appKey, apiUrl'
+        message: 'Thiếu tham số bắt buộc: userId, appKey, apiUrl'
       })
     }
 
-    // 调用服务测试连接
+    // Gọi dịch vụ kiểm tra kết nối
     const result = await ytoExpressService.testConnection(userId, appKey, apiUrl)
 
     res.json(result)
   } catch (error: unknown) {
-    console.error('圆通API测试连接错误:', error)
-    const errorMessage = error instanceof Error ? error.message : '服务器内部错误'
+    console.error('Lỗi kiểm tra kết nối API YTO:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Lỗi máy chủ nội bộ'
     res.status(500).json({
       success: false,
       message: errorMessage
@@ -33,27 +33,27 @@ router.post('/test-connection', async (req, res) => {
 })
 
 /**
- * 查询物流轨迹
+ * Truy vấn lịch sử vận chuyển
  */
 router.post('/query-tracking', async (req, res) => {
   try {
     const { userId, appKey, apiUrl, waybillNo } = req.body
 
-    // 验证参数
+    // Xác thực tham số
     if (!userId || !appKey || !apiUrl || !waybillNo) {
       return res.status(400).json({
         success: false,
-        message: '缺少必要参数: userId, appKey, apiUrl, waybillNo'
+        message: 'Thiếu tham số bắt buộc: userId, appKey, apiUrl, waybillNo'
       })
     }
 
-    // 调用服务查询物流
+    // Gọi dịch vụ truy vấn logistics
     const result = await ytoExpressService.queryTracking(userId, appKey, apiUrl, waybillNo)
 
     res.json(result)
   } catch (error: unknown) {
-    console.error('圆通物流查询错误:', error)
-    const errorMessage = error instanceof Error ? error.message : '服务器内部错误'
+    console.error('Lỗi truy vấn logistics YTO:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Lỗi máy chủ nội bộ'
     res.status(500).json({
       success: false,
       message: errorMessage

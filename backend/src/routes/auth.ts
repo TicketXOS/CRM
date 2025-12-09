@@ -7,104 +7,104 @@ import { authenticateToken } from '../middleware/auth';
 const router = Router();
 const userController = new UserController();
 
-// 登录验证规则
+// Quy tắc xác thực đăng nhập
 const loginSchema = {
   body: Joi.object({
     username: commonValidations.username,
     password: Joi.string().min(1).max(128).required().messages({
-      'string.base': '密码必须是字符串',
-      'string.min': '密码不能为空',
-      'string.max': '密码最多128个字符',
-      'any.required': '密码是必需的'
+      'string.base': 'Mật khẩu phải là chuỗi',
+      'string.min': 'Mật khẩu không được để trống',
+      'string.max': 'Mật khẩu tối đa 128 ký tự',
+      'any.required': 'Mật khẩu là bắt buộc'
     })
   })
 };
 
-// 刷新令牌验证规则
+// Quy tắc xác thực làm mới mã thông báo
 const refreshTokenSchema = {
   body: Joi.object({
     refreshToken: Joi.string().required().messages({
-      'string.base': '刷新令牌必须是字符串',
-      'any.required': '刷新令牌是必需的'
+      'string.base': 'Mã làm mới phải là chuỗi',
+      'any.required': 'Mã làm mới là bắt buộc'
     })
   })
 };
 
-// 修改密码验证规则
+// Quy tắc xác thực đổi mật khẩu
 const changePasswordSchema = {
   body: Joi.object({
     currentPassword: Joi.string().required().messages({
-      'string.base': '当前密码必须是字符串',
-      'any.required': '当前密码是必需的'
+      'string.base': 'Mật khẩu hiện tại phải là chuỗi',
+      'any.required': 'Mật khẩu hiện tại là bắt buộc'
     }),
     newPassword: commonValidations.password
   })
 };
 
-// 更新用户信息验证规则
+// Quy tắc xác thực cập nhật thông tin người dùng
 const updateUserSchema = {
   body: Joi.object({
     realName: Joi.string().min(1).max(50).optional().messages({
-      'string.base': '真实姓名必须是字符串',
-      'string.min': '真实姓名不能为空',
-      'string.max': '真实姓名最多50个字符'
+      'string.base': 'Tên thật phải là chuỗi',
+      'string.min': 'Tên thật không được để trống',
+      'string.max': 'Tên thật tối đa 50 ký tự'
     }),
     email: commonValidations.optionalEmail,
     phone: commonValidations.phone.optional(),
     avatar: Joi.string().uri().max(200).optional().messages({
-      'string.base': '头像必须是字符串',
-      'string.uri': '头像必须是有效的URL',
-      'string.max': '头像URL最多200个字符'
+      'string.base': 'Ảnh đại diện phải là chuỗi',
+      'string.uri': 'Ảnh đại diện phải là URL hợp lệ',
+      'string.max': 'URL ảnh đại diện tối đa 200 ký tự'
     })
   })
 };
 
 /**
  * @route POST /api/v1/auth/login
- * @desc 用户登录
+ * @desc Đăng nhập người dùng
  * @access Public
  */
 router.post('/login', validate(loginSchema), userController.login);
 
 /**
  * @route POST /api/v1/auth/refresh
- * @desc 刷新访问令牌
+ * @desc Làm mới mã truy cập
  * @access Public
  */
 router.post('/refresh', validate(refreshTokenSchema), userController.refreshToken);
 
 /**
  * @route GET /api/v1/auth/me
- * @desc 获取当前用户信息
+ * @desc Lấy thông tin người dùng hiện tại
  * @access Private
  */
 router.get('/me', authenticateToken, userController.getCurrentUser);
 
 /**
  * @route PUT /api/v1/auth/me
- * @desc 更新当前用户信息
+ * @desc Cập nhật thông tin người dùng hiện tại
  * @access Private
  */
 router.put('/me', authenticateToken, validate(updateUserSchema), userController.updateCurrentUser);
 
 /**
  * @route PUT /api/v1/auth/password
- * @desc 修改密码
+ * @desc Đổi mật khẩu
  * @access Private
  */
 router.put('/password', authenticateToken, validate(changePasswordSchema), userController.changePassword);
 
 /**
  * @route POST /api/v1/auth/logout
- * @desc 用户登出（客户端处理，服务端记录日志）
+ * @desc Đăng xuất người dùng (phía khách hàng xử lý, phía máy chủ ghi log)
  * @access Private
  */
 router.post('/logout', authenticateToken, (req, res) => {
-  // 在实际应用中，这里可以将令牌加入黑名单
-  // 目前只是返回成功响应，客户端负责清除令牌
+  // Trong ứng dụng thực tế, ở đây có thể thêm mã thông báo vào danh sách đen
+  // Hiện tại chỉ trả về phản hồi thành công, phía khách hàng chịu trách nhiệm xóa mã thông báo
   res.json({
     success: true,
-    message: '登出成功'
+    message: 'Đăng xuất thành công'
   });
 });
 

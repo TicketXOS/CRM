@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { User } from '../entities/User';
 
-// 确保环境变量被加载
+// Đảm bảo biến môi trường được tải
 dotenv.config();
 import { Customer } from '../entities/Customer';
 import { Order } from '../entities/Order';
@@ -35,21 +35,20 @@ import { UserPermission } from '../entities/UserPermission';
 import { CustomerShare } from '../entities/CustomerShare';
 import path from 'path';
 
-// 根据环境变量选择数据库配置
+// Chọn cấu hình cơ sở dữ liệu theo biến môi trường
 const dbType = process.env.DB_TYPE || (process.env.NODE_ENV === 'production' ? 'mysql' : 'sqlite');
-const isProduction = process.env.NODE_ENV === 'production';
 
 const AppDataSource = new DataSource(
   dbType === 'mysql'
     ? {
-        // MySQL配置
+        // Cấu hình MySQL
         type: 'mysql',
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT || '3306'),
         username: process.env.DB_USERNAME || process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_DATABASE || process.env.DB_NAME || 'crm',
-        synchronize: false, // 生产环境不自动同步
+        synchronize: false, // Môi trường sản xuất không tự động đồng bộ
         logging: process.env.NODE_ENV === 'development',
         entities: [
           User,
@@ -87,7 +86,7 @@ const AppDataSource = new DataSource(
         subscribers: [],
       }
     : {
-        // 开发环境使用SQLite
+        // Môi trường phát triển sử dụng SQLite
         type: 'sqlite',
         database: path.join(process.cwd(), 'data', 'crm.db'),
         synchronize: true,
@@ -129,43 +128,43 @@ const AppDataSource = new DataSource(
       }
 );
 
-// 导出 AppDataSource
+// Xuất AppDataSource
 export { AppDataSource };
 
-// 获取数据源实例
+// Lấy phiên bản nguồn dữ liệu
 export const getDataSource = (): DataSource | null => {
   return AppDataSource;
 };
 
-// 初始化数据库连接
+// Khởi tạo kết nối cơ sở dữ liệu
 export const initializeDatabase = async (): Promise<void> => {
   try {
     await AppDataSource.initialize();
-    console.log('✅ 数据库连接成功');
+    console.log('✅ Kết nối cơ sở dữ liệu thành công');
 
-    // 开发环境下同步数据库结构
+    // Trong môi trường phát triển, đồng bộ cấu trúc cơ sở dữ liệu
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔄 开发环境：同步数据库结构...');
+      console.log('🔄 Môi trường phát triển: Đang đồng bộ cấu trúc cơ sở dữ liệu...');
     }
 
-    // 角色权限初始化已禁用 - 数据库中已有预设数据，无需自动初始化
-    // 如需初始化，请手动执行 database/schema.sql 中的 INSERT 语句
-    console.log('ℹ️ 角色权限初始化已禁用（使用数据库预设数据）');
+    // Khởi tạo quyền vai trò đã bị vô hiệu hóa - Cơ sở dữ liệu đã có dữ liệu mặc định, không cần tự động khởi tạo
+    // Nếu cần khởi tạo, vui lòng thực thi thủ công các câu lệnh INSERT trong database/schema.sql
+    console.log('ℹ️ Khởi tạo quyền vai trò đã bị vô hiệu hóa (sử dụng dữ liệu mặc định trong cơ sở dữ liệu)');
   } catch (error) {
-    console.error('❌ 数据库连接失败:', error);
+    console.error('❌ Kết nối cơ sở dữ liệu thất bại:', error);
     throw error;
   }
 };
 
-// 关闭数据库连接
+// Đóng kết nối cơ sở dữ liệu
 export const closeDatabase = async (): Promise<void> => {
   try {
     if (AppDataSource?.isInitialized) {
       await AppDataSource.destroy();
-      console.log('✅ 数据库连接已关闭');
+      console.log('✅ Kết nối cơ sở dữ liệu đã đóng');
     }
   } catch (error) {
-    console.error('❌ 关闭数据库连接失败:', error);
+    console.error('❌ Đóng kết nối cơ sở dữ liệu thất bại:', error);
     throw error;
   }
 };

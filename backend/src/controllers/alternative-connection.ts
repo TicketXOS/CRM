@@ -29,7 +29,7 @@ export class AlternativeConnectionController {
   private networkService: ConnectionService = { enabled: false }
   private digitalPairingService: ConnectionService = { enabled: false }
 
-  // 蓝牙连接相关方法
+  // Các phương thức liên quan đến kết nối Bluetooth
   async startBluetoothService(req: Request, res: Response) {
     try {
       const { deviceName = 'CRM-Server' } = req.body
@@ -42,17 +42,17 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '蓝牙服务已启动',
+        message: 'Dịch vụ Bluetooth đã được khởi động',
         data: {
           deviceName: this.bluetoothService.deviceName,
           pairingCode: this.bluetoothService.pairingCode
         }
       })
     } catch (error) {
-      console.error('启动蓝牙服务失败:', error)
+      console.error('Khởi động dịch vụ Bluetooth thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '启动蓝牙服务失败'
+        message: 'Khởi động dịch vụ Bluetooth thất bại'
       })
     }
   }
@@ -61,7 +61,7 @@ export class AlternativeConnectionController {
     try {
       this.bluetoothService = { enabled: false }
 
-      // 断开所有蓝牙设备
+      // Ngắt kết nối tất cả thiết bị Bluetooth
       for (const [deviceId, device] of this.connectedDevices) {
         if (device.connectionType === 'bluetooth') {
           device.status = 'disconnected'
@@ -71,13 +71,13 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '蓝牙服务已停止'
+        message: 'Dịch vụ Bluetooth đã được dừng'
       })
     } catch (error) {
-      console.error('停止蓝牙服务失败:', error)
+      console.error('Dừng dịch vụ Bluetooth thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '停止蓝牙服务失败'
+        message: 'Dừng dịch vụ Bluetooth thất bại'
       })
     }
   }
@@ -89,10 +89,10 @@ export class AlternativeConnectionController {
         data: this.bluetoothService
       })
     } catch (error) {
-      console.error('获取蓝牙状态失败:', error)
+      console.error('Lấy trạng thái Bluetooth thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '获取蓝牙状态失败'
+        message: 'Lấy trạng thái Bluetooth thất bại'
       })
     }
   }
@@ -104,14 +104,14 @@ export class AlternativeConnectionController {
       if (!this.bluetoothService.enabled) {
         return res.status(400).json({
           success: false,
-          message: '蓝牙服务未启动'
+          message: 'Dịch vụ Bluetooth chưa được khởi động'
         })
       }
 
       if (pairingCode !== this.bluetoothService.pairingCode) {
         return res.status(400).json({
           success: false,
-          message: '配对码错误'
+          message: 'Mã ghép đôi không đúng'
         })
       }
 
@@ -119,7 +119,7 @@ export class AlternativeConnectionController {
       const device: ConnectedDevice = {
         id: deviceId,
         deviceId: deviceInfo.deviceId || deviceId,
-        deviceName: deviceInfo.deviceName || '未知设备',
+        deviceName: deviceInfo.deviceName || 'Thiết bị không xác định',
         deviceType: deviceInfo.deviceType || 'mobile',
         connectionType: 'bluetooth',
         connectedAt: new Date().toISOString(),
@@ -132,19 +132,19 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '蓝牙设备配对成功',
+        message: 'Ghép đôi thiết bị Bluetooth thành công',
         data: device
       })
     } catch (error) {
-      console.error('蓝牙设备配对失败:', error)
+      console.error('Ghép đôi thiết bị Bluetooth thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '蓝牙设备配对失败'
+        message: 'Ghép đôi thiết bị Bluetooth thất bại'
       })
     }
   }
 
-  // 同网络连接相关方法
+  // Các phương thức liên quan đến kết nối cùng mạng
   async startNetworkDiscovery(req: Request, res: Response) {
     try {
       const { port = 8080, broadcastInterval = 10 } = req.body
@@ -157,17 +157,17 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '网络发现已启动',
+        message: 'Phát hiện mạng đã được khởi động',
         data: {
           port: this.networkService.port,
           broadcastInterval: this.networkService.broadcastInterval
         }
       })
     } catch (error) {
-      console.error('启动网络发现失败:', error)
+      console.error('Khởi động phát hiện mạng thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '启动网络发现失败'
+        message: 'Khởi động phát hiện mạng thất bại'
       })
     }
   }
@@ -176,7 +176,7 @@ export class AlternativeConnectionController {
     try {
       this.networkService = { enabled: false }
 
-      // 断开所有网络设备
+      // Ngắt kết nối tất cả thiết bị mạng
       for (const [deviceId, device] of this.connectedDevices) {
         if (device.connectionType === 'network') {
           device.status = 'disconnected'
@@ -186,13 +186,13 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '网络发现已停止'
+        message: 'Phát hiện mạng đã được dừng'
       })
     } catch (error) {
-      console.error('停止网络发现失败:', error)
+      console.error('Dừng phát hiện mạng thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '停止网络发现失败'
+        message: 'Dừng phát hiện mạng thất bại'
       })
     }
   }
@@ -204,10 +204,10 @@ export class AlternativeConnectionController {
         data: this.networkService
       })
     } catch (error) {
-      console.error('获取网络状态失败:', error)
+      console.error('Lấy trạng thái mạng thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '获取网络状态失败'
+        message: 'Lấy trạng thái mạng thất bại'
       })
     }
   }
@@ -219,7 +219,7 @@ export class AlternativeConnectionController {
       if (!this.networkService.enabled) {
         return res.status(400).json({
           success: false,
-          message: '网络发现服务未启动'
+          message: 'Dịch vụ phát hiện mạng chưa được khởi động'
         })
       }
 
@@ -227,7 +227,7 @@ export class AlternativeConnectionController {
       const device: ConnectedDevice = {
         id: deviceId,
         deviceId: deviceInfo.deviceId || deviceId,
-        deviceName: deviceInfo.deviceName || '未知设备',
+        deviceName: deviceInfo.deviceName || 'Thiết bị không xác định',
         deviceType: deviceInfo.deviceType || 'mobile',
         connectionType: 'network',
         connectedAt: new Date().toISOString(),
@@ -240,19 +240,19 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '网络设备连接成功',
+        message: 'Kết nối thiết bị mạng thành công',
         data: device
       })
     } catch (error) {
-      console.error('网络设备连接失败:', error)
+      console.error('Kết nối thiết bị mạng thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '网络设备连接失败'
+        message: 'Kết nối thiết bị mạng thất bại'
       })
     }
   }
 
-  // 数字配对相关方法
+  // Các phương thức liên quan đến ghép đôi số
   async startDigitalPairing(req: Request, res: Response) {
     try {
       const { expireTime = 10 } = req.body
@@ -265,17 +265,17 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '数字配对已启动',
+        message: 'Ghép đôi số đã được khởi động',
         data: {
           currentCode: this.digitalPairingService.currentCode,
           expireTime: this.digitalPairingService.expireTime
         }
       })
     } catch (error) {
-      console.error('启动数字配对失败:', error)
+      console.error('Khởi động ghép đôi số thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '启动数字配对失败'
+        message: 'Khởi động ghép đôi số thất bại'
       })
     }
   }
@@ -286,13 +286,13 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '数字配对已停止'
+        message: 'Ghép đôi số đã được dừng'
       })
     } catch (error) {
-      console.error('停止数字配对失败:', error)
+      console.error('Dừng ghép đôi số thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '停止数字配对失败'
+        message: 'Dừng ghép đôi số thất bại'
       })
     }
   }
@@ -304,10 +304,10 @@ export class AlternativeConnectionController {
         data: this.digitalPairingService
       })
     } catch (error) {
-      console.error('获取数字配对状态失败:', error)
+      console.error('Lấy trạng thái ghép đôi số thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '获取数字配对状态失败'
+        message: 'Lấy trạng thái ghép đôi số thất bại'
       })
     }
   }
@@ -319,14 +319,14 @@ export class AlternativeConnectionController {
       if (!this.digitalPairingService.enabled) {
         return res.status(400).json({
           success: false,
-          message: '数字配对服务未启动'
+          message: 'Dịch vụ ghép đôi số chưa được khởi động'
         })
       }
 
       if (pairingCode !== this.digitalPairingService.currentCode) {
         return res.status(400).json({
           success: false,
-          message: '配对码错误'
+          message: 'Mã ghép đôi không đúng'
         })
       }
 
@@ -334,7 +334,7 @@ export class AlternativeConnectionController {
       const device: ConnectedDevice = {
         id: deviceId,
         deviceId: deviceInfo.deviceId || deviceId,
-        deviceName: deviceInfo.deviceName || '未知设备',
+        deviceName: deviceInfo.deviceName || 'Thiết bị không xác định',
         deviceType: deviceInfo.deviceType || 'mobile',
         connectionType: 'digital',
         connectedAt: new Date().toISOString(),
@@ -347,14 +347,14 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '数字配对成功',
+        message: 'Ghép đôi số thành công',
         data: device
       })
     } catch (error) {
-      console.error('数字配对失败:', error)
+      console.error('Ghép đôi số thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '数字配对失败'
+        message: 'Ghép đôi số thất bại'
       })
     }
   }
@@ -364,7 +364,7 @@ export class AlternativeConnectionController {
       if (!this.digitalPairingService.enabled) {
         return res.status(400).json({
           success: false,
-          message: '数字配对服务未启动'
+          message: 'Dịch vụ ghép đôi số chưa được khởi động'
         })
       }
 
@@ -372,21 +372,21 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '配对码已更新',
+        message: 'Mã ghép đôi đã được cập nhật',
         data: {
           currentCode: this.digitalPairingService.currentCode
         }
       })
     } catch (error) {
-      console.error('生成配对码失败:', error)
+      console.error('Tạo mã ghép đôi thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '生成配对码失败'
+        message: 'Tạo mã ghép đôi thất bại'
       })
     }
   }
 
-  // 通用连接管理方法
+  // Các phương thức quản lý kết nối chung
   async getAllConnectedDevices(req: Request, res: Response) {
     try {
       const devices = Array.from(this.connectedDevices.values())
@@ -397,10 +397,10 @@ export class AlternativeConnectionController {
         data: devices
       })
     } catch (error) {
-      console.error('获取连接设备列表失败:', error)
+      console.error('Lấy danh sách thiết bị kết nối thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '获取连接设备列表失败'
+        message: 'Lấy danh sách thiết bị kết nối thất bại'
       })
     }
   }
@@ -413,7 +413,7 @@ export class AlternativeConnectionController {
       if (!device) {
         return res.status(404).json({
           success: false,
-          message: '设备不存在'
+          message: 'Thiết bị không tồn tại'
         })
       }
 
@@ -422,13 +422,13 @@ export class AlternativeConnectionController {
 
       return res.json({
         success: true,
-        message: '设备已断开连接'
+        message: 'Thiết bị đã được ngắt kết nối'
       })
     } catch (error) {
-      console.error('断开设备连接失败:', error)
+      console.error('Ngắt kết nối thiết bị thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '断开设备连接失败'
+        message: 'Ngắt kết nối thiết bị thất bại'
       })
     }
   }
@@ -443,7 +443,7 @@ export class AlternativeConnectionController {
         bluetooth: devices.filter(d => d.connectionType === 'bluetooth').length,
         network: devices.filter(d => d.connectionType === 'network').length,
         digital: devices.filter(d => d.connectionType === 'digital').length,
-        qr: 0, // 这里可以从二维码连接服务获取
+        qr: 0, // Có thể lấy từ dịch vụ kết nối mã QR
         services: {
           bluetooth: this.bluetoothService.enabled,
           network: this.networkService.enabled,
@@ -456,15 +456,15 @@ export class AlternativeConnectionController {
         data: stats
       })
     } catch (error) {
-      console.error('获取连接统计失败:', error)
+      console.error('Lấy thống kê kết nối thất bại:', error)
       return res.status(500).json({
         success: false,
-        message: '获取连接统计失败'
+        message: 'Lấy thống kê kết nối thất bại'
       })
     }
   }
 
-  // 工具方法
+  // Phương thức tiện ích
   private generateRandomCode(length: number): string {
     const chars = '0123456789'
     let result = ''

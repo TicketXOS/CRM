@@ -8,7 +8,7 @@ const router = Router();
 
 router.use(authenticateToken);
 
-// 获取通话统计数据
+// Lấy dữ liệu thống kê cuộc gọi
 router.get('/statistics', async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
@@ -31,7 +31,7 @@ router.get('/statistics', async (req: Request, res: Response) => {
       .andWhere('call.status IN (:...statuses)', { statuses: ['failed', 'missed', 'busy'] })
       .getCount();
 
-    // 计算平均通话时长
+    // Tính thời lượng cuộc gọi trung bình
     const avgResult = await queryBuilder.clone()
       .select('AVG(call.duration)', 'avgDuration')
       .getRawOne();
@@ -46,16 +46,16 @@ router.get('/statistics', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取通话统计数据失败:', error);
+    console.error('Lấy dữ liệu thống kê cuộc gọi thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取通话统计数据失败'
+      message: 'Lấy dữ liệu thống kê cuộc gọi thất bại'
     });
   }
 });
 
 
-// 获取通话记录列表
+// Lấy danh sách bản ghi cuộc gọi
 router.get('/', async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, status, startDate, endDate, keyword } = req.query;
@@ -96,15 +96,15 @@ router.get('/', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取通话记录列表失败:', error);
+    console.error('Lấy danh sách bản ghi cuộc gọi thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取通话记录列表失败'
+      message: 'Lấy danh sách bản ghi cuộc gọi thất bại'
     });
   }
 });
 
-// 创建通话记录
+// Tạo bản ghi cuộc gọi
 router.post('/', async (req: Request, res: Response) => {
   try {
     const callRepository = AppDataSource.getRepository(Call);
@@ -124,19 +124,19 @@ router.post('/', async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: '通话记录创建成功',
+      message: 'Tạo bản ghi cuộc gọi thành công',
       data: savedCall
     });
   } catch (error) {
-    console.error('创建通话记录失败:', error);
+    console.error('Tạo bản ghi cuộc gọi thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '创建通话记录失败'
+      message: 'Tạo bản ghi cuộc gọi thất bại'
     });
   }
 });
 
-// 导出通话记录
+// Xuất bản ghi cuộc gọi
 router.get('/export', async (req: Request, res: Response) => {
   try {
     res.json({
@@ -147,10 +147,10 @@ router.get('/export', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('导出通话记录失败:', error);
+    console.error('Xuất bản ghi cuộc gọi thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '导出通话记录失败'
+      message: 'Xuất bản ghi cuộc gọi thất bại'
     });
   }
 });

@@ -3,14 +3,14 @@ import { Order } from './Order';
 import { LogisticsTrace } from './LogisticsTrace';
 
 export enum LogisticsStatus {
-  PENDING = 'pending',           // 待发货
-  PICKED_UP = 'picked_up',       // 已揽件
-  IN_TRANSIT = 'in_transit',     // 运输中
-  OUT_FOR_DELIVERY = 'out_for_delivery', // 派送中
-  DELIVERED = 'delivered',       // 已签收
-  EXCEPTION = 'exception',       // 包裹异常
-  REJECTED = 'rejected',         // 拒收
-  RETURNED = 'returned'          // 退回
+  PENDING = 'pending',           // Chờ giao hàng
+  PICKED_UP = 'picked_up',       // Đã nhận hàng
+  IN_TRANSIT = 'in_transit',     // Đang vận chuyển
+  OUT_FOR_DELIVERY = 'out_for_delivery', // Đang giao hàng
+  DELIVERED = 'delivered',       // Đã ký nhận
+  EXCEPTION = 'exception',       // Bưu kiện bất thường
+  REJECTED = 'rejected',         // Từ chối
+  RETURNED = 'returned'          // Trả lại
 }
 
 @Entity('logistics_tracking')
@@ -18,66 +18,66 @@ export class LogisticsTracking {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50, comment: '订单ID' })
+  @Column({ type: 'varchar', length: 50, comment: 'ID đơn hàng' })
   orderId: string;
 
-  @Column({ length: 100, comment: '物流单号' })
+  @Column({ length: 100, comment: 'Số đơn logistics' })
   trackingNo: string;
 
-  @Column({ length: 50, comment: '物流公司代码' })
+  @Column({ length: 50, comment: 'Mã công ty logistics' })
   companyCode: string;
 
-  @Column({ length: 100, comment: '物流公司名称' })
+  @Column({ length: 100, comment: 'Tên công ty logistics' })
   companyName: string;
 
   @Column({
     type: 'varchar',
     length: 50,
     default: LogisticsStatus.PENDING,
-    comment: '物流状态'
+    comment: 'Trạng thái logistics'
   })
   status: LogisticsStatus;
 
-  @Column({ length: 200, nullable: true, comment: '当前位置' })
+  @Column({ length: 200, nullable: true, comment: 'Vị trí hiện tại' })
   currentLocation?: string;
 
-  @Column({ type: 'text', nullable: true, comment: '状态描述' })
+  @Column({ type: 'text', nullable: true, comment: 'Mô tả trạng thái' })
   statusDescription?: string;
 
-  @Column({ type: 'datetime', nullable: true, comment: '最后更新时间' })
+  @Column({ type: 'datetime', nullable: true, comment: 'Thời gian cập nhật cuối' })
   lastUpdateTime?: Date;
 
-  @Column({ type: 'datetime', nullable: true, comment: '预计送达时间' })
+  @Column({ type: 'datetime', nullable: true, comment: 'Thời gian dự kiến giao hàng' })
   estimatedDeliveryTime?: Date;
 
-  @Column({ type: 'datetime', nullable: true, comment: '实际送达时间' })
+  @Column({ type: 'datetime', nullable: true, comment: 'Thời gian thực tế giao hàng' })
   actualDeliveryTime?: Date;
 
-  @Column({ length: 100, nullable: true, comment: '签收人' })
+  @Column({ length: 100, nullable: true, comment: 'Người nhận' })
   signedBy?: string;
 
-  @Column({ type: 'json', nullable: true, comment: '扩展信息' })
+  @Column({ type: 'json', nullable: true, comment: 'Thông tin bổ sung' })
   extraInfo?: Record<string, any>;
 
-  @Column({ type: 'boolean', default: true, comment: '是否启用自动同步' })
+  @Column({ type: 'boolean', default: true, comment: 'Có bật đồng bộ tự động không' })
   autoSyncEnabled: boolean;
 
-  @Column({ type: 'datetime', nullable: true, comment: '下次同步时间' })
+  @Column({ type: 'datetime', nullable: true, comment: 'Thời gian đồng bộ tiếp theo' })
   nextSyncTime?: Date;
 
-  @Column({ type: 'int', default: 0, comment: '同步失败次数' })
+  @Column({ type: 'int', default: 0, comment: 'Số lần đồng bộ thất bại' })
   syncFailureCount: number;
 
-  @Column({ type: 'text', nullable: true, comment: '最后同步错误信息' })
+  @Column({ type: 'text', nullable: true, comment: 'Thông tin lỗi đồng bộ cuối cùng' })
   lastSyncError?: string;
 
-  @CreateDateColumn({ comment: '创建时间' })
+  @CreateDateColumn({ comment: 'Thời gian tạo' })
   createdAt: Date;
 
-  @UpdateDateColumn({ comment: '更新时间' })
+  @UpdateDateColumn({ comment: 'Thời gian cập nhật' })
   updatedAt: Date;
 
-  // 关联关系
+  // Quan hệ liên kết
   @ManyToOne(() => Order, order => order.logisticsTracking)
   @JoinColumn({ name: 'orderId' })
   order: Order;

@@ -5,149 +5,149 @@ import { ProductController } from '../controllers/ProductController';
 const router = Router();
 
 /**
- * 产品管理路由
+ * Route quản lý sản phẩm
  */
 
-// 所有产品路由都需要认证
+// Tất cả các route sản phẩm đều cần xác thực
 router.use(authenticateToken);
 
-// ==================== 产品相关路由 ====================
+// ==================== Route liên quan đến sản phẩm ====================
 
 /**
  * @route GET /api/v1/products
- * @desc 获取产品列表
+ * @desc Lấy danh sách sản phẩm
  * @access Private
  */
 router.get('/', ProductController.getProducts);
 
 /**
  * @route POST /api/v1/products
- * @desc 创建产品
+ * @desc Tạo sản phẩm
  * @access Private
  */
 router.post('/', ProductController.createProduct);
 
 /**
  * @route PUT /api/v1/products/:id
- * @desc 更新产品
+ * @desc Cập nhật sản phẩm
  * @access Private
  */
 router.put('/:id', ProductController.updateProduct);
 
 /**
  * @route DELETE /api/v1/products/:id
- * @desc 删除产品
+ * @desc Xóa sản phẩm
  * @access Private
  */
 router.delete('/:id', ProductController.deleteProduct);
 
 /**
  * @route GET /api/v1/products/:id
- * @desc 获取产品详情
+ * @desc Lấy chi tiết sản phẩm
  * @access Private
  */
 router.get('/:id', ProductController.getProductDetail);
 
 /**
  * @route GET /api/v1/products/:id/stats
- * @desc 获取商品相关统计数据（根据用户角色权限过滤）
+ * @desc Lấy thống kê liên quan đến sản phẩm (lọc theo quyền vai trò người dùng)
  * @access Private
  */
 router.get('/:id/stats', ProductController.getProductStats);
 
 /**
  * @route POST /api/v1/products/batch-import
- * @desc 批量导入产品
+ * @desc Nhập khẩu hàng loạt sản phẩm
  * @access Private
  */
 router.post('/batch-import', ProductController.batchImportProducts);
 
 /**
  * @route GET /api/v1/products/export
- * @desc 导出产品数据
+ * @desc Xuất dữ liệu sản phẩm
  * @access Private
  */
 router.get('/export', ProductController.exportProducts);
 
-// ==================== 库存管理相关路由 ====================
+// ==================== Route liên quan đến quản lý tồn kho ====================
 
 /**
  * @route GET /api/v1/products/stock/statistics
- * @desc 获取库存统计信息
+ * @desc Lấy thông tin thống kê tồn kho
  * @access Private
  */
 router.get('/stock/statistics', ProductController.getStockStatistics);
 
 /**
  * @route POST /api/v1/products/stock/adjust
- * @desc 库存调整
+ * @desc Điều chỉnh tồn kho
  * @access Private
  */
 router.post('/stock/adjust', ProductController.adjustStock);
 
 /**
  * @route GET /api/v1/products/stock/adjustments
- * @desc 获取库存调整记录
+ * @desc Lấy bản ghi điều chỉnh tồn kho
  * @access Private
  */
 router.get('/stock/adjustments', ProductController.getStockAdjustments);
 
-// ==================== 产品分类相关路由 ====================
+// ==================== Route liên quan đến phân loại sản phẩm ====================
 
 /**
  * @route GET /api/v1/products/categories
- * @desc 获取产品分类列表（扁平结构）
+ * @desc Lấy danh sách phân loại sản phẩm (cấu trúc phẳng)
  * @access Private
  */
 router.get('/categories', ProductController.getCategories);
 
 /**
  * @route GET /api/v1/products/categories/tree
- * @desc 获取产品分类树形结构
+ * @desc Lấy cấu trúc cây phân loại sản phẩm
  * @access Private
  */
 router.get('/categories/tree', ProductController.getCategoryTree);
 
 /**
  * @route GET /api/v1/products/categories/:id
- * @desc 获取产品分类详情
+ * @desc Lấy chi tiết phân loại sản phẩm
  * @access Private
  */
 router.get('/categories/:id', ProductController.getCategoryDetail);
 
 /**
  * @route POST /api/v1/products/categories
- * @desc 创建产品分类
+ * @desc Tạo phân loại sản phẩm
  * @access Private
  */
 router.post('/categories', ProductController.createCategory);
 
 /**
  * @route PUT /api/v1/products/categories/:id
- * @desc 更新产品分类
+ * @desc Cập nhật phân loại sản phẩm
  * @access Private
  */
 router.put('/categories/:id', ProductController.updateCategory);
 
 /**
  * @route DELETE /api/v1/products/categories/:id
- * @desc 删除产品分类
+ * @desc Xóa phân loại sản phẩm
  * @access Private
  */
 router.delete('/categories/:id', ProductController.deleteCategory);
 
-// ==================== 销售统计相关路由 ====================
+// ==================== Route liên quan đến thống kê bán hàng ====================
 
 /**
  * @route GET /api/v1/products/sales/statistics
- * @desc 获取销售统计数据
+ * @desc Lấy dữ liệu thống kê bán hàng
  * @access Private
  */
 router.get('/sales/statistics', async (req, res) => {
   try {
     const { startDate, endDate, productId, categoryId } = req.query;
 
-    // 返回模拟数据，实际应从数据库查询
+    // Trả về dữ liệu mô phỏng, thực tế nên truy vấn từ cơ sở dữ liệu
     res.json({
       success: true,
       data: {
@@ -159,24 +159,24 @@ router.get('/sales/statistics', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取销售统计失败:', error);
+    console.error('Lấy thống kê bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取销售统计失败'
+      message: 'Lấy thống kê bán hàng thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/products/sales/trend
- * @desc 获取销售趋势数据
+ * @desc Lấy dữ liệu xu hướng bán hàng
  * @access Private
  */
 router.get('/sales/trend', async (req, res) => {
   try {
     const { startDate, endDate, productId, groupBy = 'day' } = req.query;
 
-    // 生成模拟趋势数据
+    // Tạo dữ liệu xu hướng mô phỏng
     const trendData = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
@@ -193,17 +193,17 @@ router.get('/sales/trend', async (req, res) => {
       data: trendData
     });
   } catch (error) {
-    console.error('获取销售趋势失败:', error);
+    console.error('Lấy xu hướng bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取销售趋势失败'
+      message: 'Lấy xu hướng bán hàng thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/products/sales/category
- * @desc 获取分类销售数据
+ * @desc Lấy dữ liệu bán hàng theo phân loại
  * @access Private
  */
 router.get('/sales/category', async (req, res) => {
@@ -213,24 +213,24 @@ router.get('/sales/category', async (req, res) => {
     res.json({
       success: true,
       data: [
-        { categoryId: '1', categoryName: '电子产品', sales: 50000, percentage: 40 },
-        { categoryId: '2', categoryName: '服装', sales: 30000, percentage: 24 },
-        { categoryId: '3', categoryName: '食品', sales: 25000, percentage: 20 },
-        { categoryId: '4', categoryName: '其他', sales: 20000, percentage: 16 }
+        { categoryId: '1', categoryName: 'Điện tử', sales: 50000, percentage: 40 },
+        { categoryId: '2', categoryName: 'Quần áo', sales: 30000, percentage: 24 },
+        { categoryId: '3', categoryName: 'Thực phẩm', sales: 25000, percentage: 20 },
+        { categoryId: '4', categoryName: 'Khác', sales: 20000, percentage: 16 }
       ]
     });
   } catch (error) {
-    console.error('获取分类销售数据失败:', error);
+    console.error('Lấy dữ liệu bán hàng theo phân loại thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取分类销售数据失败'
+      message: 'Lấy dữ liệu bán hàng theo phân loại thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/products/sales/top
- * @desc 获取热销产品排行
+ * @desc Lấy bảng xếp hạng sản phẩm bán chạy
  * @access Private
  */
 router.get('/sales/top', async (req, res) => {
@@ -241,24 +241,24 @@ router.get('/sales/top', async (req, res) => {
       success: true,
       data: Array.from({ length: Number(limit) }, (_, i) => ({
         productId: `${i + 1}`,
-        productName: `热销产品${i + 1}`,
+        productName: `Sản phẩm bán chạy ${i + 1}`,
         sales: Math.floor(Math.random() * 10000) + 5000,
         quantity: Math.floor(Math.random() * 100) + 50,
         rank: i + 1
       }))
     });
   } catch (error) {
-    console.error('获取热销产品排行失败:', error);
+    console.error('Lấy bảng xếp hạng sản phẩm bán chạy thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取热销产品排行失败'
+      message: 'Lấy bảng xếp hạng sản phẩm bán chạy thất bại'
     });
   }
 });
 
 /**
  * @route GET /api/v1/products/inventory/warning
- * @desc 获取库存预警数据
+ * @desc Lấy dữ liệu cảnh báo tồn kho
  * @access Private
  */
 router.get('/inventory/warning', async (req, res) => {
@@ -270,17 +270,17 @@ router.get('/inventory/warning', async (req, res) => {
       data: {
         warningCount: 5,
         products: [
-          { productId: '1', productName: '产品A', currentStock: 5, minStock: 10 },
-          { productId: '2', productName: '产品B', currentStock: 3, minStock: 10 },
-          { productId: '3', productName: '产品C', currentStock: 8, minStock: 15 }
+          { productId: '1', productName: 'Sản phẩm A', currentStock: 5, minStock: 10 },
+          { productId: '2', productName: 'Sản phẩm B', currentStock: 3, minStock: 10 },
+          { productId: '3', productName: 'Sản phẩm C', currentStock: 8, minStock: 15 }
         ]
       }
     });
   } catch (error) {
-    console.error('获取库存预警数据失败:', error);
+    console.error('Lấy dữ liệu cảnh báo tồn kho thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取库存预警数据失败'
+      message: 'Lấy dữ liệu cảnh báo tồn kho thất bại'
     });
   }
 });

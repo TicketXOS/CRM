@@ -29,24 +29,24 @@ export class QRConnectionController {
   private connectionSessions: Map<string, ConnectionSession> = new Map();
   private connectedDevices: Map<string, ConnectedDevice> = new Map();
 
-  // 生成连接二维码
+  // Tạo mã QR kết nối
   async generateQRCode(req: Request, res: Response) {
     try {
       const { userId, permissions = ['call', 'sms', 'sync'] } = req.body;
-      
+
       if (!userId) {
         return res.status(400).json({
           success: false,
-          message: '用户ID不能为空'
+          message: 'ID người dùng không được để trống'
         });
       }
 
       const connectionId = uuidv4();
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5分钟过期
-      
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // Hết hạn sau 5 phút
+
       const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
-      
+
       const session: ConnectionSession = {
         id: connectionId,
         token,
@@ -60,7 +60,7 @@ export class QRConnectionController {
 
       this.connectionSessions.set(connectionId, session);
 
-      // 生成二维码数据
+      // Tạo dữ liệu mã QR
       const qrData = {
         connectionId,
         token,
@@ -69,7 +69,7 @@ export class QRConnectionController {
         expiresAt: expiresAt.getTime()
       };
 
-      // 清理过期的会话
+      // Dọn dẹp các phiên đã hết hạn
       this.cleanExpiredSessions();
 
       return res.json({
@@ -80,20 +80,20 @@ export class QRConnectionController {
            expiresAt,
            permissions
          },
-         message: '二维码生成成功'
+         message: 'Tạo mã QR thành công'
        });
 
     } catch (error) {
-      console.error('生成二维码失败:', error);
+      console.error('Tạo mã QR thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '生成二维码失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Tạo mã QR thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
 
-  // 验证扫码并建立连接
+  // Xác thực quét mã và thiết lập kết nối
   async connectDevice(req: Request, res: Response) {
     try {
       const { connectionId, token, deviceInfo } = req.body;
@@ -101,30 +101,30 @@ export class QRConnectionController {
       if (!connectionId || !token || !deviceInfo) {
         return res.status(400).json({
           success: false,
-          message: '连接参数不完整'
+          message: 'Tham số kết nối không đầy đủ'
         });
       }
 
       const session = this.connectionSessions.get(connectionId);
-      
+
       if (!session) {
         return res.status(404).json({
           success: false,
-          message: '连接会话不存在'
+          message: 'Phiên kết nối không tồn tại'
         });
       }
 
       if (session.status !== 'pending') {
         return res.status(400).json({
           success: false,
-          message: '连接会话已失效'
+          message: 'Phiên kết nối đã hết hiệu lực'
         });
       }
 
       if (session.token !== token) {
         return res.status(401).json({
           success: false,
-          message: '连接令牌无效'
+          message: 'Token kết nối không hợp lệ'
         });
       }
 
@@ -132,19 +132,19 @@ export class QRConnectionController {
         session.status = 'expired';
         return res.status(410).json({
           success: false,
-          message: '连接会话已过期'
+          message: 'Phiên kết nối đã hết hạn'
         });
       }
 
-      // 生成设备连接令牌
+      // Tạo token kết nối thiết bị
       const deviceConnectionToken = crypto.randomBytes(32).toString('hex');
       const deviceId = deviceInfo.deviceId || uuidv4();
 
-      // 创建连接设备记录
+      // Tạo bản ghi thiết bị kết nối
       const connectedDevice: ConnectedDevice = {
         id: uuidv4(),
         deviceId,
-        deviceName: deviceInfo.deviceName || '未知设备',
+        deviceName: deviceInfo.deviceName || 'Thiết bị không xác định',
         userId: session.userId!,
         connectionToken: deviceConnectionToken,
         lastConnected: new Date(),
@@ -165,20 +165,20 @@ export class QRConnectionController {
            permissions: session.permissions,
            userId: session.userId
          },
-         message: '设备连接成功'
+         message: 'Kết nối thiết bị thành công'
        });
 
     } catch (error) {
-      console.error('设备连接失败:', error);
+      console.error('Kết nối thiết bị thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '设备连接失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Kết nối thiết bị thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
 
-  // 获取连接状态
+  // Lấy trạng thái kết nối
   async getConnectionStatus(req: Request, res: Response) {
     try {
       const { connectionId } = req.params;
@@ -187,7 +187,7 @@ export class QRConnectionController {
       if (!session) {
         return res.status(404).json({
           success: false,
-          message: '连接会话不存在'
+          message: 'Phiên kết nối không tồn tại'
         });
       }
 
@@ -199,20 +199,20 @@ export class QRConnectionController {
            expiresAt: session.expiresAt,
            deviceInfo: session.deviceInfo
          },
-         message: '连接状态获取成功'
+         message: 'Lấy trạng thái kết nối thành công'
        });
 
     } catch (error) {
-      console.error('获取连接状态失败:', error);
+      console.error('Lấy trạng thái kết nối thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '获取连接状态失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Lấy trạng thái kết nối thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
 
-  // 断开设备连接
+  // Ngắt kết nối thiết bị
   async disconnectDevice(req: Request, res: Response) {
     try {
       const { connectionId } = req.params;
@@ -232,26 +232,26 @@ export class QRConnectionController {
 
       return res.json({
          success: true,
-         message: '设备已断开连接'
+         message: 'Thiết bị đã được ngắt kết nối'
        });
 
     } catch (error) {
-      console.error('断开设备连接失败:', error);
+      console.error('Ngắt kết nối thiết bị thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '断开设备连接失败',
-        error: error instanceof Error ? error.message : '未知错误'
+        message: 'Ngắt kết nối thiết bị thất bại',
+        error: error instanceof Error ? error.message : 'Lỗi không xác định'
       });
     }
   }
 
-  // 获取已连接设备列表
+  // Lấy danh sách thiết bị đã kết nối
   async getConnectedDevices(req: Request, res: Response) {
     try {
       const { userId } = req.query;
-      
+
       let devices = Array.from(this.connectedDevices.values());
-      
+
       if (userId) {
         devices = devices.filter(device => device.userId === userId);
       }
@@ -268,15 +268,15 @@ export class QRConnectionController {
          }))
        });
     } catch (error) {
-      console.error('获取设备列表失败:', error);
+      console.error('Lấy danh sách thiết bị thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '获取设备列表失败'
+        message: 'Lấy danh sách thiết bị thất bại'
       });
     }
   }
 
-  // 重新连接设备
+  // Kết nối lại thiết bị
   async reconnectDevice(req: Request, res: Response) {
     try {
       const { deviceId, connectionToken } = req.body;
@@ -284,27 +284,27 @@ export class QRConnectionController {
       if (!deviceId || !connectionToken) {
         return res.status(400).json({
           success: false,
-          message: '设备ID和连接令牌不能为空'
+          message: 'ID thiết bị và token kết nối không được để trống'
         });
       }
 
       const device = this.connectedDevices.get(deviceId);
-      
+
       if (!device) {
         return res.status(404).json({
           success: false,
-          message: '设备不存在'
+          message: 'Thiết bị không tồn tại'
         });
       }
 
       if (device.connectionToken !== connectionToken) {
         return res.status(401).json({
           success: false,
-          message: '连接令牌无效'
+          message: 'Token kết nối không hợp lệ'
         });
       }
 
-      // 更新设备状态
+      // Cập nhật trạng thái thiết bị
       device.status = 'online';
       device.lastConnected = new Date();
 
@@ -316,24 +316,24 @@ export class QRConnectionController {
            permissions: device.permissions,
            userId: device.userId
          },
-         message: '设备重连成功'
+         message: 'Kết nối lại thiết bị thành công'
        });
     } catch (error) {
-      console.error('设备重连失败:', error);
+      console.error('Kết nối lại thiết bị thất bại:', error);
       return res.status(500).json({
         success: false,
-        message: '设备重连失败'
+        message: 'Kết nối lại thiết bị thất bại'
       });
     }
   }
 
-  // 清理过期的会话
+  // Dọn dẹp các phiên đã hết hạn
   private cleanExpiredSessions() {
     const now = new Date();
     for (const [id, session] of this.connectionSessions.entries()) {
       if (now > session.expiresAt) {
         session.status = 'expired';
-        // 可以选择删除过期会话，或保留一段时间用于日志
+        // Có thể chọn xóa phiên đã hết hạn, hoặc giữ lại một thời gian để ghi nhật ký
         // this.connectionSessions.delete(id);
       }
     }

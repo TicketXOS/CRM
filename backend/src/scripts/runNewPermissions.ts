@@ -5,25 +5,25 @@ import { logger } from '../config/logger';
 
 async function main() {
   try {
-    logger.info('🚀 开始执行新的权限配置...');
-    
-    // 初始化数据库连接
+    logger.info('🚀 Bắt đầu thực thi cấu hình quyền hạn mới...');
+
+    // Khởi tạo kết nối cơ sở dữ liệu
     if (!AppDataSource?.isInitialized) {
       await AppDataSource?.initialize();
-      logger.info('✅ 数据库连接已建立');
+      logger.info('✅ Kết nối cơ sở dữ liệu đã được thiết lập');
     }
 
-    // 执行新的权限配置
+    // Thực thi cấu hình quyền hạn mới
     await initNewRolesAndPermissions();
-    
-    logger.info('🎉 新的权限配置执行完成！');
+
+    logger.info('🎉 Thực thi cấu hình quyền hạn mới hoàn tất!');
   } catch (error) {
-    logger.error('❌ 执行失败:', error);
+    logger.error('❌ Thực thi thất bại:', error);
     process.exit(1);
   } finally {
     if (AppDataSource?.isInitialized) {
       await AppDataSource?.destroy();
-      logger.info('📦 数据库连接已关闭');
+      logger.info('📦 Kết nối cơ sở dữ liệu đã đóng');
     }
   }
 }

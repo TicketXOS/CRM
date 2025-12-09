@@ -5,42 +5,42 @@ export class SystemConfig {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100, comment: '配置键名' })
+  @Column({ length: 100, comment: 'Tên khóa cấu hình' })
   configKey: string;
 
-  @Column({ type: 'text', comment: '配置值' })
+  @Column({ type: 'text', comment: 'Giá trị cấu hình' })
   configValue: string;
 
   @Column({
     type: 'varchar',
     length: 50,
     default: 'string',
-    comment: '值类型'
+    comment: 'Loại giá trị'
   })
   valueType: 'string' | 'number' | 'boolean' | 'json' | 'text';
 
-  @Column({ length: 100, comment: '配置分组' })
+  @Column({ length: 100, comment: 'Nhóm cấu hình' })
   configGroup: string;
 
-  @Column({ length: 200, nullable: true, comment: '配置描述' })
+  @Column({ length: 200, nullable: true, comment: 'Mô tả cấu hình' })
   description?: string;
 
-  @Column({ type: 'boolean', default: true, comment: '是否启用' })
+  @Column({ type: 'boolean', default: true, comment: 'Có bật không' })
   isEnabled: boolean;
 
-  @Column({ type: 'boolean', default: false, comment: '是否为系统配置（不可删除）' })
+  @Column({ type: 'boolean', default: false, comment: 'Có phải cấu hình hệ thống (không thể xóa)' })
   isSystem: boolean;
 
-  @Column({ type: 'int', default: 0, comment: '排序权重' })
+  @Column({ type: 'int', default: 0, comment: 'Trọng số sắp xếp' })
   sortOrder: number;
 
-  @CreateDateColumn({ comment: '创建时间' })
+  @CreateDateColumn({ comment: 'Thời gian tạo' })
   createdAt: Date;
 
-  @UpdateDateColumn({ comment: '更新时间' })
+  @UpdateDateColumn({ comment: 'Thời gian cập nhật' })
   updatedAt: Date;
 
-  // 获取解析后的值
+  // Lấy giá trị đã được phân tích
   getParsedValue(): any {
     try {
       switch (this.valueType) {
@@ -58,7 +58,7 @@ export class SystemConfig {
     }
   }
 
-  // 设置值（自动转换为字符串）
+  // Đặt giá trị (tự động chuyển đổi sang chuỗi)
   setParsedValue(value: any): void {
     if (this.valueType === 'json') {
       this.configValue = JSON.stringify(value);

@@ -9,7 +9,7 @@ const router = Router();
  * @swagger
  * /api/v1/logs/system:
  *   get:
- *     summary: 获取系统日志
+ *     summary: Lấy nhật ký hệ thống
  *     tags: [Logs]
  *     parameters:
  *       - in: query
@@ -17,16 +17,16 @@ const router = Router();
  *         schema:
  *           type: integer
  *           default: 100
- *         description: 返回日志条数限制
+ *         description: Giới hạn số lượng nhật ký trả về
  *       - in: query
  *         name: level
  *         schema:
  *           type: string
  *           enum: [error, warn, info, debug]
- *         description: 日志级别过滤
+ *         description: Lọc theo mức độ nhật ký
  *     responses:
  *       200:
- *         description: 系统日志列表
+ *         description: Danh sách nhật ký hệ thống
  *         content:
  *           application/json:
  *             schema:
@@ -56,8 +56,8 @@ router.get('/system', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit as string) || 100;
     const levelFilter = req.query.level as string;
-    
-    logger.info('获取系统日志', {
+
+    logger.info('Lấy nhật ký hệ thống', {
       limit,
       levelFilter,
       ip: req.ip,
@@ -73,71 +73,71 @@ router.get('/system', async (req, res) => {
 
     let allLogs: any[] = [];
 
-    // 读取所有日志文件
+    // Đọc tất cả các tệp nhật ký
     for (const logFile of logFiles) {
       if (fs.existsSync(logFile)) {
         try {
           const content = fs.readFileSync(logFile, 'utf8');
           const lines = content.split('\n').filter(line => line.trim());
-          
+
           for (const line of lines) {
             try {
-              // 尝试解析JSON格式的日志
+              // Thử phân tích nhật ký định dạng JSON
               if (line.includes('{') && line.includes('}')) {
                 const jsonStart = line.indexOf('{');
                 const jsonPart = line.substring(jsonStart);
                 const logData = JSON.parse(jsonPart);
-                
+
                 if (logData.timestamp && logData.level && logData.message) {
                   allLogs.push({
                     id: `${logData.timestamp}_${Math.random().toString(36).substr(2, 9)}`,
                     timestamp: logData.timestamp,
                     level: logData.level.toUpperCase(),
-                    module: logData.service || '系统',
+                    module: logData.service || 'Hệ thống',
                     message: logData.message,
                     details: JSON.stringify(logData, null, 2)
                   });
                 }
               } else {
-                // 解析文本格式的日志
+                // Phân tích nhật ký định dạng văn bản
                 const timestampMatch = line.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
                 const levelMatch = line.match(/\[(ERROR|WARN|INFO|DEBUG)\]/);
-                
+
                 if (timestampMatch && levelMatch) {
                   const timestamp = timestampMatch[1];
                   const level = levelMatch[1];
                   const messageStart = line.indexOf(']:') + 2;
                   const message = line.substring(messageStart).trim();
-                  
+
                   allLogs.push({
                     id: `${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
                     timestamp,
                     level,
-                    module: '系统',
+                    module: 'Hệ thống',
                     message,
                     details: line
                   });
                 }
               }
             } catch (parseError) {
-              // 忽略解析错误的行
+              // Bỏ qua các dòng lỗi phân tích
             }
           }
         } catch (fileError) {
-          logger.warn(`读取日志文件失败: ${logFile}`, { error: fileError instanceof Error ? fileError.message : String(fileError) });
+          logger.warn(`Đọc tệp nhật ký thất bại: ${logFile}`, { error: fileError instanceof Error ? fileError.message : String(fileError) });
         }
       }
     }
 
-    // 按时间戳排序（最新的在前）
+    // Sắp xếp theo dấu thời gian (mới nhất trước)
     allLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    // 应用级别过滤
+    // Áp dụng lọc theo mức độ
     if (levelFilter) {
       allLogs = allLogs.filter(log => log.level.toLowerCase() === levelFilter.toLowerCase());
     }
 
-    // 限制返回数量
+    // Giới hạn số lượng trả về
     allLogs = allLogs.slice(0, limit);
 
     res.json({
@@ -147,7 +147,7 @@ router.get('/system', async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('获取系统日志失败', {
+    logger.error('Lấy nhật ký hệ thống thất bại', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       ip: req.ip
@@ -155,7 +155,7 @@ router.get('/system', async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: '获取系统日志失败',
+      message: 'Lấy nhật ký hệ thống thất bại',
       error: error instanceof Error ? error.message : String(error)
     });
   }
@@ -165,15 +165,15 @@ router.get('/system', async (req, res) => {
  * @swagger
  * /api/v1/logs/clear:
  *   delete:
- *     summary: 清空系统日志
+ *     summary: Xóa nhật ký hệ thống
  *     tags: [Logs]
  *     responses:
  *       200:
- *         description: 清空成功
+ *         description: Xóa thành công
  */
 router.delete('/clear', async (req, res) => {
   try {
-    logger.info('清空系统日志请求', {
+    logger.info('Yêu cầu xóa nhật ký hệ thống', {
       ip: req.ip,
       userAgent: req.get('User-Agent')
     });
@@ -194,29 +194,29 @@ router.delete('/clear', async (req, res) => {
           fs.writeFileSync(logFile, '');
           clearedCount++;
         } catch (error) {
-          logger.warn(`清空日志文件失败: ${logFile}`, { error: error instanceof Error ? error.message : String(error) });
+          logger.warn(`Xóa tệp nhật ký thất bại: ${logFile}`, { error: error instanceof Error ? error.message : String(error) });
         }
       }
     }
 
-    logger.info('系统日志已清空', { clearedFiles: clearedCount });
+    logger.info('Nhật ký hệ thống đã được xóa', { clearedFiles: clearedCount });
 
     res.json({
       success: true,
-      message: `已清空 ${clearedCount} 个日志文件`,
+      message: `Đã xóa ${clearedCount} tệp nhật ký`,
       clearedFiles: clearedCount
     });
 
   } catch (error) {
-      logger.error('清空系统日志失败', {
+      logger.error('Xóa nhật ký hệ thống thất bại', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
         ip: req.ip
       });
-      
+
       res.status(500).json({
         success: false,
-        message: '清空系统日志失败',
+        message: 'Xóa nhật ký hệ thống thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }

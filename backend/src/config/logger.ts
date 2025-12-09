@@ -1,10 +1,10 @@
 import winston from 'winston';
 import path from 'path';
 
-// 日志级别
+// Cấp độ nhật ký
 const logLevel = process.env.LOG_LEVEL || 'info';
 
-// 日志格式
+// Định dạng nhật ký
 const logFormat = winston.format.combine(
   winston.format.timestamp({
     format: 'YYYY-MM-DD HH:mm:ss'
@@ -13,65 +13,65 @@ const logFormat = winston.format.combine(
   winston.format.json(),
   winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
     let log = `${timestamp} [${level.toUpperCase()}]: ${message}`;
-    
-    // 添加堆栈信息（如果有错误）
+
+    // Thêm thông tin ngăn xếp (nếu có lỗi)
     if (stack) {
       log += `\n${stack}`;
     }
-    
-    // 添加元数据
+
+    // Thêm siêu dữ liệu
     if (Object.keys(meta).length > 0) {
       log += `\n${JSON.stringify(meta, null, 2)}`;
     }
-    
+
     return log;
   })
 );
 
-// 创建日志目录
+// Tạo thư mục nhật ký
 const logsDir = path.join(process.cwd(), 'logs');
 
-// 创建logger实例
+// Tạo phiên bản logger
 export const logger = winston.createLogger({
   level: logLevel,
   format: logFormat,
   defaultMeta: { service: 'crm-api' },
   transports: [
-    // 错误日志文件
+    // Tệp nhật ký lỗi
     new winston.transports.File({
       filename: path.join(logsDir, 'error.log'),
       level: 'error',
       maxsize: 20 * 1024 * 1024, // 20MB
-      maxFiles: 14, // 保留14天
+      maxFiles: 14, // Giữ lại 14 ngày
       tailable: true
     }),
-    
-    // 组合日志文件
+
+    // Tệp nhật ký kết hợp
     new winston.transports.File({
       filename: path.join(logsDir, 'combined.log'),
       maxsize: 20 * 1024 * 1024, // 20MB
-      maxFiles: 14, // 保留14天
+      maxFiles: 14, // Giữ lại 14 ngày
       tailable: true
     }),
-    
-    // 访问日志文件
+
+    // Tệp nhật ký truy cập
     new winston.transports.File({
       filename: path.join(logsDir, 'access.log'),
       level: 'http',
       maxsize: 20 * 1024 * 1024, // 20MB
-      maxFiles: 7, // 保留7天
+      maxFiles: 7, // Giữ lại 7 ngày
       tailable: true
     })
   ],
-  
-  // 异常处理
+
+  // Xử lý ngoại lệ
   exceptionHandlers: [
     new winston.transports.File({
       filename: path.join(logsDir, 'exceptions.log')
     })
   ],
-  
-  // 拒绝处理
+
+  // Xử lý từ chối
   rejectionHandlers: [
     new winston.transports.File({
       filename: path.join(logsDir, 'rejections.log')
@@ -79,31 +79,31 @@ export const logger = winston.createLogger({
   ]
 });
 
-// 开发环境添加控制台输出
+// Môi trường phát triển thêm đầu ra console
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
         let log = `${timestamp} [${level}]: ${message}`;
-        
-        // 添加堆栈信息（如果有错误）
+
+        // Thêm thông tin ngăn xếp (nếu có lỗi)
         if (stack) {
           log += `\n${stack}`;
         }
-        
-        // 添加元数据
+
+        // Thêm siêu dữ liệu
         if (Object.keys(meta).length > 0) {
           log += `\n${JSON.stringify(meta, null, 2)}`;
         }
-        
+
         return log;
       })
     )
   }));
 }
 
-// 操作日志记录器
+// Bộ ghi nhật ký thao tác
 export const operationLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -114,13 +114,13 @@ export const operationLogger = winston.createLogger({
     new winston.transports.File({
       filename: path.join(logsDir, 'operations.log'),
       maxsize: 50 * 1024 * 1024, // 50MB
-      maxFiles: 30, // 保留30天
+      maxFiles: 30, // Giữ lại 30 ngày
       tailable: true
     })
   ]
 });
 
-// 性能日志记录器
+// Bộ ghi nhật ký hiệu suất
 export const performanceLogger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -131,11 +131,11 @@ export const performanceLogger = winston.createLogger({
     new winston.transports.File({
       filename: path.join(logsDir, 'performance.log'),
       maxsize: 20 * 1024 * 1024, // 20MB
-      maxFiles: 7, // 保留7天
+      maxFiles: 7, // Giữ lại 7 ngày
       tailable: true
     })
   ]
 });
 
-// 导出默认logger
+// Xuất logger mặc định
 export default logger;

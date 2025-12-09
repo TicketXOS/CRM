@@ -5,28 +5,28 @@ import { authenticateToken, optionalAuth } from '../middleware/auth';
 const router = Router();
 const roleController = new RoleController();
 
-// 获取角色列表 - 使用可选认证
+// Lấy danh sách vai trò - sử dụng xác thực tùy chọn
 router.get('/', optionalAuth, (req, res) => roleController.getRoles(req, res));
 
-// 获取角色统计 - 使用可选认证
+// Lấy thống kê vai trò - sử dụng xác thực tùy chọn
 router.get('/stats', optionalAuth, (req, res) => roleController.getRoleStats(req, res));
 
-// 获取角色权限 - 使用可选认证
+// Lấy quyền hạn vai trò - sử dụng xác thực tùy chọn
 router.get('/:id/permissions', optionalAuth, (req, res) => roleController.getRolePermissions(req, res));
 
-// 获取单个角色 - 使用可选认证
+// Lấy một vai trò - sử dụng xác thực tùy chọn
 router.get('/:id', optionalAuth, (req, res) => roleController.getRoleById(req, res));
 
-// 以下操作需要认证
+// Các thao tác sau đây cần xác thực
 router.use(authenticateToken);
 
-// 创建角色
+// Tạo vai trò
 router.post('/', (req, res) => roleController.createRole(req, res));
 
-// 更新角色
+// Cập nhật vai trò
 router.put('/:id', (req, res) => roleController.updateRole(req, res));
 
-// 删除角色
+// Xóa vai trò
 router.delete('/:id', (req, res) => roleController.deleteRole(req, res));
 
 export default router;

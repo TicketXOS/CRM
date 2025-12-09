@@ -5,178 +5,178 @@ import { authenticateToken, requireManagerOrAdmin } from '../middleware/auth';
 const router = Router();
 const messageController = new MessageController();
 
-// 暂时禁用身份验证以便测试
+// Tạm thời tắt xác thực để kiểm thử
 // router.use(authenticateToken, requireManagerOrAdmin);
 
 /**
  * @route GET /api/v1/message/subscriptions
- * @desc 获取消息订阅列表
+ * @desc Lấy danh sách đăng ký tin nhắn
  * @access Private (Manager/Admin)
  */
 router.get('/subscriptions', messageController.getSubscriptions.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/subscriptions/:id
- * @desc 更新消息订阅设置
+ * @desc Cập nhật cài đặt đăng ký tin nhắn
  * @access Private (Manager/Admin)
  */
 router.put('/subscriptions/:id', messageController.updateSubscription.bind(messageController));
 
 /**
  * @route GET /api/v1/message/subscriptions/departments
- * @desc 获取部门级别的订阅配置
+ * @desc Lấy cấu hình đăng ký cấp phòng ban
  * @access Private (Manager/Admin)
  */
 router.get('/subscriptions/departments', messageController.getDepartmentSubscriptions.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/subscriptions/:subscriptionId/departments/:departmentId
- * @desc 更新部门级别的订阅配置
+ * @desc Cập nhật cấu hình đăng ký cấp phòng ban
  * @access Private (Manager/Admin)
  */
 router.put('/subscriptions/:subscriptionId/departments/:departmentId', messageController.updateDepartmentSubscription.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/subscriptions/:subscriptionId/departments/batch
- * @desc 批量更新部门订阅配置
+ * @desc Cập nhật hàng loạt cấu hình đăng ký phòng ban
  * @access Private (Manager/Admin)
  */
 router.put('/subscriptions/:subscriptionId/departments/batch', messageController.batchUpdateDepartmentSubscriptions.bind(messageController));
 
 /**
  * @route POST /api/v1/message/subscriptions/initialize
- * @desc 初始化默认消息订阅配置
+ * @desc Khởi tạo cấu hình đăng ký tin nhắn mặc định
  * @access Private (Manager/Admin)
  */
 router.post('/subscriptions/initialize', messageController.initializeDefaultSubscriptions.bind(messageController));
 
-// 公告管理相关路由
+// Route quản lý thông báo
 /**
  * @route GET /api/v1/message/announcements
- * @desc 获取公告列表
+ * @desc Lấy danh sách thông báo
  * @access Private (Manager/Admin)
  */
 router.get('/announcements', messageController.getAnnouncements.bind(messageController));
 
 /**
  * @route POST /api/v1/message/announcements
- * @desc 创建新公告
+ * @desc Tạo thông báo mới
  * @access Private (Manager/Admin)
  */
 router.post('/announcements', messageController.createAnnouncement.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/announcements/:id
- * @desc 更新公告
+ * @desc Cập nhật thông báo
  * @access Private (Manager/Admin)
  */
 router.put('/announcements/:id', messageController.updateAnnouncement.bind(messageController));
 
 /**
  * @route DELETE /api/v1/message/announcements/:id
- * @desc 删除公告
+ * @desc Xóa thông báo
  * @access Private (Manager/Admin)
  */
 router.delete('/announcements/:id', messageController.deleteAnnouncement.bind(messageController));
 
 /**
  * @route POST /api/v1/message/announcements/:id/publish
- * @desc 发布公告
+ * @desc Xuất bản thông báo
  * @access Private (Manager/Admin)
  */
 router.post('/announcements/:id/publish', messageController.publishAnnouncement.bind(messageController));
 
-// 订阅规则管理相关路由
+// Route quản lý quy tắc đăng ký
 /**
  * @route GET /api/v1/message/subscription-rules
- * @desc 获取订阅规则列表
+ * @desc Lấy danh sách quy tắc đăng ký
  * @access Private (Manager/Admin)
  */
 router.get('/subscription-rules', messageController.getSubscriptionRules.bind(messageController));
 
 /**
  * @route POST /api/v1/message/subscription-rules
- * @desc 创建新的订阅规则
+ * @desc Tạo quy tắc đăng ký mới
  * @access Private (Manager/Admin)
  */
 router.post('/subscription-rules', messageController.createSubscriptionRule.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/subscription-rules/:id
- * @desc 更新订阅规则
+ * @desc Cập nhật quy tắc đăng ký
  * @access Private (Manager/Admin)
  */
 router.put('/subscription-rules/:id', messageController.updateSubscriptionRule.bind(messageController));
 
 /**
  * @route DELETE /api/v1/message/subscription-rules/:id
- * @desc 删除订阅规则
+ * @desc Xóa quy tắc đăng ký
  * @access Private (Manager/Admin)
  */
 router.delete('/subscription-rules/:id', messageController.deleteSubscriptionRule.bind(messageController));
 
 /**
  * @route PATCH /api/v1/message/subscription-rules/:id/toggle
- * @desc 启用/禁用订阅规则
+ * @desc Bật/Tắt quy tắc đăng ký
  * @access Private (Manager/Admin)
  */
 router.patch('/subscription-rules/:id/toggle', messageController.toggleSubscriptionRule.bind(messageController));
 
-// 通知配置管理相关路由
+// Route quản lý cấu hình thông báo
 /**
  * @route GET /api/v1/message/notification-configs
- * @desc 获取通知配置列表
+ * @desc Lấy danh sách cấu hình thông báo
  * @access Private (Manager/Admin)
  */
 router.get('/notification-configs', messageController.getNotificationConfigs.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/notification-configs/:id
- * @desc 更新通知配置
+ * @desc Cập nhật cấu hình thông báo
  * @access Private (Manager/Admin)
  */
 router.put('/notification-configs/:id', messageController.updateNotificationConfig.bind(messageController));
 
 /**
  * @route POST /api/v1/message/notification-configs/test
- * @desc 测试通知配置
+ * @desc Kiểm thử cấu hình thông báo
  * @access Private (Manager/Admin)
  */
 router.post('/notification-configs/test', messageController.testNotification.bind(messageController));
 
-// 基础数据相关路由
+// Route dữ liệu cơ bản
 /**
  * @route GET /api/v1/message/departments-members
- * @desc 获取部门和成员数据
+ * @desc Lấy dữ liệu phòng ban và thành viên
  * @access Private (Manager/Admin)
  */
 router.get('/departments-members', messageController.getDepartmentsAndMembers.bind(messageController));
 
-// 系统消息相关路由
+// Route tin nhắn hệ thống
 /**
  * @route GET /api/v1/message/system-messages
- * @desc 获取系统消息列表
+ * @desc Lấy danh sách tin nhắn hệ thống
  * @access Private (Manager/Admin)
  */
 router.get('/system-messages', messageController.getSystemMessages.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/system-messages/:id/read
- * @desc 标记消息为已读
+ * @desc Đánh dấu tin nhắn là đã đọc
  * @access Private (Manager/Admin)
  */
 router.put('/system-messages/:id/read', messageController.markMessageAsRead.bind(messageController));
 
 /**
  * @route PUT /api/v1/message/system-messages/read-all
- * @desc 标记所有消息为已读
+ * @desc Đánh dấu tất cả tin nhắn là đã đọc
  * @access Private (Manager/Admin)
  */
 router.put('/system-messages/read-all', messageController.markAllMessagesAsRead.bind(messageController));
 
 /**
  * @route GET /api/v1/message/stats
- * @desc 获取消息统计数据
+ * @desc Lấy thống kê tin nhắn
  * @access Private (Manager/Admin)
  */
 router.get('/stats', messageController.getMessageStats.bind(messageController));

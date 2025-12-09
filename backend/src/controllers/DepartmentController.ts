@@ -20,7 +20,7 @@ export class DepartmentController {
   }
 
   /**
-   * 获取部门列表
+   * Lấy danh sách phòng ban
    */
   async getDepartments(req: Request, res: Response): Promise<void> {
     try {
@@ -28,9 +28,9 @@ export class DepartmentController {
         order: { sortOrder: 'ASC', createdAt: 'ASC' }
       });
 
-      // 计算每个部门的成员数量
+      // Tính số lượng thành viên của mỗi phòng ban
       const departmentsWithCount = await Promise.all(departments.map(async (dept: Department) => {
-        // 单独查询该部门的用户数量
+        // Truy vấn riêng số lượng người dùng của phòng ban này
         const memberCount = await this.userRepository.count({
           where: { departmentId: dept.id }
         });
@@ -55,16 +55,16 @@ export class DepartmentController {
         data: departmentsWithCount
       });
     } catch (error) {
-      console.error('获取部门列表失败:', error);
+      console.error('Lấy danh sách phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门列表失败'
+        message: 'Lấy danh sách phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 获取部门树形结构
+   * Lấy cấu trúc cây phòng ban
    */
   async getDepartmentTree(req: Request, res: Response): Promise<void> {
     try {
@@ -72,11 +72,11 @@ export class DepartmentController {
         order: { sortOrder: 'ASC', createdAt: 'ASC' }
       });
 
-      // 构建树形结构
+      // Xây dựng cấu trúc cây
       const departmentMap = new Map();
       const rootDepartments: unknown[] = [];
 
-      // 先创建所有部门节点（包含成员数量查询）
+      // Tạo tất cả các nút phòng ban trước (bao gồm truy vấn số lượng thành viên)
       for (const dept of departments) {
         const memberCount = await this.userRepository.count({
           where: { departmentId: dept.id }
@@ -98,7 +98,7 @@ export class DepartmentController {
         departmentMap.set(dept.id.toString(), deptNode);
       }
 
-      // 构建父子关系
+      // Xây dựng quan hệ cha-con
       departmentMap.forEach(dept => {
         if (dept.parentId) {
           const parent = departmentMap.get(dept.parentId);
@@ -117,16 +117,16 @@ export class DepartmentController {
         data: rootDepartments
       });
     } catch (error) {
-      console.error('获取部门树失败:', error);
+      console.error('Lấy cây phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门树失败'
+        message: 'Lấy cây phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 获取部门详情
+   * Lấy chi tiết phòng ban
    */
   async getDepartmentById(req: Request, res: Response): Promise<void> {
     try {
@@ -138,12 +138,12 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 单独查询成员数量
+      // Truy vấn riêng số lượng thành viên
       const memberCount = await this.userRepository.count({
         where: { departmentId: id }
       });
@@ -166,45 +166,45 @@ export class DepartmentController {
         data: result
       });
     } catch (error) {
-      console.error('获取部门详情失败:', error);
+      console.error('Lấy chi tiết phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门详情失败'
+        message: 'Lấy chi tiết phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 创建部门
+   * Tạo phòng ban
    */
   async createDepartment(req: Request, res: Response): Promise<void> {
     try {
       const { name, code, description, parentId, sortOrder = 0, status = 'active', level = 1 } = req.body;
 
-      console.log('[创建部门] 接收到的数据:', { name, code, description, parentId, sortOrder, status, level });
+      console.log('[Tạo phòng ban] Dữ liệu nhận được:', { name, code, description, parentId, sortOrder, status, level });
 
-      // 验证必填字段
+      // Xác thực các trường bắt buộc
       if (!name || !code) {
         res.status(400).json({
           success: false,
-          message: '部门名称和编码不能为空'
+          message: 'Tên phòng ban và mã không được để trống'
         });
         return;
       }
 
-      // 检查部门名称是否重复
+      // Kiểm tra tên phòng ban có trùng lặp không
       const existingByName = await this.departmentRepository.findOne({
         where: { name }
       });
       if (existingByName) {
         res.status(400).json({
           success: false,
-          message: '部门名称已存在'
+          message: 'Tên phòng ban đã tồn tại'
         });
         return;
       }
 
-      // 检查部门代码是否重复
+      // Kiểm tra mã phòng ban có trùng lặp không
       if (code) {
         const existingByCode = await this.departmentRepository.findOne({
           where: { code }
@@ -212,13 +212,13 @@ export class DepartmentController {
         if (existingByCode) {
           res.status(400).json({
             success: false,
-            message: '部门代码已存在'
+            message: 'Mã phòng ban đã tồn tại'
           });
           return;
         }
       }
 
-      // 如果有父部门，检查父部门是否存在
+      // Nếu có phòng ban cha, kiểm tra phòng ban cha có tồn tại không
       if (parentId) {
         const parentDept = await this.departmentRepository.findOne({
           where: { id: parentId }
@@ -226,13 +226,13 @@ export class DepartmentController {
         if (!parentDept) {
           res.status(400).json({
             success: false,
-            message: '父部门不存在'
+            message: 'Phòng ban cha không tồn tại'
           });
           return;
         }
       }
 
-      // 生成部门ID
+      // Tạo ID phòng ban
       const departmentId = `dept_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       const department = this.departmentRepository.create({
@@ -247,11 +247,11 @@ export class DepartmentController {
         memberCount: 0
       });
 
-      console.log('[创建部门] 准备保存的部门对象:', department);
+      console.log('[Tạo phòng ban] Đối tượng phòng ban chuẩn bị lưu:', department);
 
       const savedDepartment = await this.departmentRepository.save(department);
 
-      console.log('[创建部门] 保存成功:', savedDepartment);
+      console.log('[Tạo phòng ban] Lưu thành công:', savedDepartment);
 
       const result = {
         id: savedDepartment.id,
@@ -270,20 +270,20 @@ export class DepartmentController {
       res.status(201).json({
         success: true,
         data: result,
-        message: '部门创建成功'
+        message: 'Tạo phòng ban thành công'
       });
     } catch (error: any) {
-      console.error('[创建部门] 失败:', error);
-      console.error('[创建部门] 错误堆栈:', error?.stack);
+      console.error('[Tạo phòng ban] Thất bại:', error);
+      console.error('[Tạo phòng ban] Ngăn xếp lỗi:', error?.stack);
       res.status(500).json({
         success: false,
-        message: `创建部门失败: ${error?.message || '未知错误'}`
+        message: `Tạo phòng ban thất bại: ${error?.message || 'Lỗi không xác định'}`
       });
     }
   }
 
   /**
-   * 更新部门
+   * Cập nhật phòng ban
    */
   async updateDepartment(req: Request, res: Response): Promise<void> {
     try {
@@ -297,12 +297,12 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 检查部门名称是否重复（排除自己）
+      // Kiểm tra tên phòng ban có trùng lặp không (loại trừ chính nó)
       if (name && name !== department.name) {
         const existingByName = await this.departmentRepository.findOne({
           where: { name }
@@ -310,13 +310,13 @@ export class DepartmentController {
         if (existingByName && existingByName.id !== id) {
           res.status(400).json({
             success: false,
-            message: '部门名称已存在'
+            message: 'Tên phòng ban đã tồn tại'
           });
           return;
         }
       }
 
-      // 检查部门代码是否重复（排除自己）
+      // Kiểm tra mã phòng ban có trùng lặp không (loại trừ chính nó)
       if (code && code !== department.code) {
         const existingByCode = await this.departmentRepository.findOne({
           where: { code }
@@ -324,18 +324,18 @@ export class DepartmentController {
         if (existingByCode && existingByCode.id !== id) {
           res.status(400).json({
             success: false,
-            message: '部门代码已存在'
+            message: 'Mã phòng ban đã tồn tại'
           });
           return;
         }
       }
 
-      // 如果有父部门，检查父部门是否存在且不是自己
+      // Nếu có phòng ban cha, kiểm tra phòng ban cha có tồn tại không và không phải chính nó
       if (parentId) {
         if (parentId === id) {
           res.status(400).json({
             success: false,
-            message: '不能将自己设为父部门'
+            message: 'Không thể đặt chính nó làm phòng ban cha'
           });
           return;
         }
@@ -346,13 +346,13 @@ export class DepartmentController {
         if (!parentDept) {
           res.status(400).json({
             success: false,
-            message: '父部门不存在'
+            message: 'Phòng ban cha không tồn tại'
           });
           return;
         }
       }
 
-      // 更新部门信息
+      // Cập nhật thông tin phòng ban
       if (name !== undefined) department.name = name;
       if (code !== undefined) department.code = code;
       if (description !== undefined) department.description = description;
@@ -362,7 +362,7 @@ export class DepartmentController {
 
       const savedDepartment = await this.departmentRepository.save(department);
 
-      // 单独查询成员数量
+      // Truy vấn riêng số lượng thành viên
       const memberCount = await this.userRepository.count({
         where: { departmentId: id }
       });
@@ -383,19 +383,19 @@ export class DepartmentController {
       res.json({
         success: true,
         data: result,
-        message: '部门更新成功'
+        message: 'Cập nhật phòng ban thành công'
       });
     } catch (error) {
-      console.error('更新部门失败:', error);
+      console.error('Cập nhật phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新部门失败'
+        message: 'Cập nhật phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 删除部门
+   * Xóa phòng ban
    */
   async deleteDepartment(req: Request, res: Response): Promise<void> {
     try {
@@ -408,12 +408,12 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 检查是否有子部门
+      // Kiểm tra xem có phòng ban con không
       const childDepartments = await this.departmentRepository.find({
         where: { parentId: id }
       });
@@ -421,12 +421,12 @@ export class DepartmentController {
       if (childDepartments.length > 0) {
         res.status(400).json({
           success: false,
-          message: '该部门下还有子部门，无法删除'
+          message: 'Phòng ban này còn có phòng ban con, không thể xóa'
         });
         return;
       }
 
-      // 检查是否有成员
+      // Kiểm tra xem có thành viên không
       const memberCount = await this.userRepository.count({
         where: { departmentId: id }
       });
@@ -434,7 +434,7 @@ export class DepartmentController {
       if (memberCount > 0) {
         res.status(400).json({
           success: false,
-          message: '该部门下还有成员，无法删除'
+          message: 'Phòng ban này còn có thành viên, không thể xóa'
         });
         return;
       }
@@ -443,19 +443,19 @@ export class DepartmentController {
 
       res.json({
         success: true,
-        message: '部门删除成功'
+        message: 'Xóa phòng ban thành công'
       });
     } catch (error) {
-      console.error('删除部门失败:', error);
+      console.error('Xóa phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '删除部门失败'
+        message: 'Xóa phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 更新部门状态
+   * Cập nhật trạng thái phòng ban
    */
   async updateDepartmentStatus(req: Request, res: Response): Promise<void> {
     try {
@@ -465,7 +465,7 @@ export class DepartmentController {
       if (!['active', 'inactive'].includes(status)) {
         res.status(400).json({
           success: false,
-          message: '无效的状态值'
+          message: 'Giá trị trạng thái không hợp lệ'
         });
         return;
       }
@@ -477,7 +477,7 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
@@ -485,7 +485,7 @@ export class DepartmentController {
       department.status = status;
       const savedDepartment = await this.departmentRepository.save(department);
 
-      // 单独查询成员数量
+      // Truy vấn riêng số lượng thành viên
       const memberCount = await this.userRepository.count({
         where: { departmentId: id }
       });
@@ -506,19 +506,19 @@ export class DepartmentController {
       res.json({
         success: true,
         data: result,
-        message: '部门状态更新成功'
+        message: 'Cập nhật trạng thái phòng ban thành công'
       });
     } catch (error) {
-      console.error('更新部门状态失败:', error);
+      console.error('Cập nhật trạng thái phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新部门状态失败'
+        message: 'Cập nhật trạng thái phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 获取部门成员
+   * Lấy danh sách thành viên phòng ban
    */
   async getDepartmentMembers(req: Request, res: Response): Promise<void> {
     try {
@@ -546,23 +546,23 @@ export class DepartmentController {
         data: members
       });
     } catch (error) {
-      console.error('获取部门成员失败:', error);
+      console.error('Lấy danh sách thành viên phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门成员失败'
+        message: 'Lấy danh sách thành viên phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 添加部门成员
+   * Thêm thành viên vào phòng ban
    */
   async addDepartmentMember(req: Request, res: Response): Promise<void> {
     try {
       const { departmentId } = req.params;
       const { userId, role } = req.body;
 
-      // 检查部门是否存在
+      // Kiểm tra phòng ban có tồn tại không
       const department = await this.departmentRepository.findOne({
         where: { id: departmentId }
       });
@@ -570,12 +570,12 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 检查用户是否存在
+      // Kiểm tra người dùng có tồn tại không
       const user = await this.userRepository.findOne({
         where: { id: userId }
       });
@@ -583,12 +583,12 @@ export class DepartmentController {
       if (!user) {
         res.status(404).json({
           success: false,
-          message: '用户不存在'
+          message: 'Người dùng không tồn tại'
         });
         return;
       }
 
-      // 更新用户的部门
+      // Cập nhật phòng ban của người dùng
       user.departmentId = departmentId;
       if (role) {
         user.role = role;
@@ -612,25 +612,25 @@ export class DepartmentController {
       res.json({
         success: true,
         data: result,
-        message: '添加部门成员成功'
+        message: 'Thêm thành viên vào phòng ban thành công'
       });
     } catch (error) {
-      console.error('添加部门成员失败:', error);
+      console.error('Thêm thành viên vào phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '添加部门成员失败'
+        message: 'Thêm thành viên vào phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 移除部门成员
+   * Xóa thành viên khỏi phòng ban
    */
   async removeDepartmentMember(req: Request, res: Response): Promise<void> {
     try {
       const { departmentId, userId } = req.params;
 
-      // 检查用户是否存在且属于该部门
+      // Kiểm tra người dùng có tồn tại không và thuộc phòng ban này không
       const user = await this.userRepository.findOne({
         where: {
           id: userId,
@@ -641,30 +641,30 @@ export class DepartmentController {
       if (!user) {
         res.status(404).json({
           success: false,
-          message: '用户不存在或不属于该部门'
+          message: 'Người dùng không tồn tại hoặc không thuộc phòng ban này'
         });
         return;
       }
 
-      // 将用户的部门设为null
+      // Đặt phòng ban của người dùng thành null
       user.departmentId = null;
       await this.userRepository.save(user);
 
       res.json({
         success: true,
-        message: '移除部门成员成功'
+        message: 'Xóa thành viên khỏi phòng ban thành công'
       });
     } catch (error) {
-      console.error('移除部门成员失败:', error);
+      console.error('Xóa thành viên khỏi phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '移除部门成员失败'
+        message: 'Xóa thành viên khỏi phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 获取部门统计信息
+   * Lấy thống kê phòng ban
    */
   async getDepartmentStats(req: Request, res: Response): Promise<void> {
     try {
@@ -681,10 +681,10 @@ export class DepartmentController {
         activeDepartments,
         totalMembers,
         departmentsByType: {
-          '主部门': await this.departmentRepository.count({
+          'Phòng ban chính': await this.departmentRepository.count({
             where: { parentId: IsNull() }
           }),
-          '子部门': await this.departmentRepository.count({
+          'Phòng ban con': await this.departmentRepository.count({
             where: { parentId: Not(IsNull()) }
           })
         }
@@ -695,23 +695,23 @@ export class DepartmentController {
         data: stats
       });
     } catch (error) {
-      console.error('获取部门统计失败:', error);
+      console.error('Lấy thống kê phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门统计失败'
+        message: 'Lấy thống kê phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 获取部门角色列表
-   * 返回该部门下所有成员的角色信息
+   * Lấy danh sách vai trò của phòng ban
+   * Trả về thông tin vai trò của tất cả thành viên trong phòng ban này
    */
   async getDepartmentRoles(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
 
-      // 检查部门是否存在
+      // Kiểm tra phòng ban có tồn tại không
       const department = await this.departmentRepository.findOne({
         where: { id }
       });
@@ -719,24 +719,24 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 获取部门成员的角色统计
+      // Lấy thống kê vai trò của thành viên phòng ban
       const users = await this.userRepository.find({
         where: { departmentId: id }
       });
 
-      // 按角色分组统计
+      // Thống kê theo vai trò
       const roleMap = new Map<string, number>();
       users.forEach((user: User) => {
         const role = user.role || 'user';
         roleMap.set(role, (roleMap.get(role) || 0) + 1);
       });
 
-      // 构建角色列表
+      // Xây dựng danh sách vai trò
       const roles = Array.from(roleMap.entries()).map(([roleName, count], index) => ({
         id: `role_${id}_${index}`,
         name: roleName,
@@ -752,16 +752,16 @@ export class DepartmentController {
         data: roles
       });
     } catch (error) {
-      console.error('获取部门角色失败:', error);
+      console.error('Lấy danh sách vai trò phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '获取部门角色失败'
+        message: 'Lấy danh sách vai trò phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 更新部门权限
+   * Cập nhật quyền của phòng ban
    */
   async updateDepartmentPermissions(req: Request, res: Response): Promise<void> {
     try {
@@ -775,13 +775,13 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 目前权限存储在内存中，实际应该存储到数据库
-      // 这里返回成功响应
+      // Hiện tại quyền được lưu trong bộ nhớ, thực tế nên lưu vào cơ sở dữ liệu
+      // Ở đây trả về phản hồi thành công
       res.json({
         success: true,
         data: {
@@ -789,19 +789,19 @@ export class DepartmentController {
           name: department.name,
           permissions: permissions || []
         },
-        message: '部门权限更新成功'
+        message: 'Cập nhật quyền phòng ban thành công'
       });
     } catch (error) {
-      console.error('更新部门权限失败:', error);
+      console.error('Cập nhật quyền phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '更新部门权限失败'
+        message: 'Cập nhật quyền phòng ban thất bại'
       });
     }
   }
 
   /**
-   * 移动部门（更改父部门）
+   * Di chuyển phòng ban (thay đổi phòng ban cha)
    */
   async moveDepartment(req: Request, res: Response): Promise<void> {
     try {
@@ -815,21 +815,21 @@ export class DepartmentController {
       if (!department) {
         res.status(404).json({
           success: false,
-          message: '部门不存在'
+          message: 'Phòng ban không tồn tại'
         });
         return;
       }
 
-      // 不能将自己设为父部门
+      // Không thể đặt chính nó làm phòng ban cha
       if (newParentId === id) {
         res.status(400).json({
           success: false,
-          message: '不能将自己设为父部门'
+          message: 'Không thể đặt chính nó làm phòng ban cha'
         });
         return;
       }
 
-      // 如果有新父部门，检查是否存在
+      // Nếu có phòng ban cha mới, kiểm tra có tồn tại không
       if (newParentId) {
         const parentDept = await this.departmentRepository.findOne({
           where: { id: newParentId }
@@ -837,7 +837,7 @@ export class DepartmentController {
         if (!parentDept) {
           res.status(400).json({
             success: false,
-            message: '目标父部门不存在'
+            message: 'Phòng ban cha đích không tồn tại'
           });
           return;
         }
@@ -858,13 +858,13 @@ export class DepartmentController {
           parentId: savedDepartment.parentId,
           memberCount
         },
-        message: '部门移动成功'
+        message: 'Di chuyển phòng ban thành công'
       });
     } catch (error) {
-      console.error('移动部门失败:', error);
+      console.error('Di chuyển phòng ban thất bại:', error);
       res.status(500).json({
         success: false,
-        message: '移动部门失败'
+        message: 'Di chuyển phòng ban thất bại'
       });
     }
   }

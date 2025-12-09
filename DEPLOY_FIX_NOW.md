@@ -1,74 +1,74 @@
-# 🚀 登录秒退问题 - 立即部署修复
+# 🚀 Vấn Đề Đăng Nhập Thoát Ngay - Sửa Chữa Triển Khai Ngay
 
-## ✅ 已完成的修改
+## ✅ Các Thay Đổi Đã Hoàn Thành
 
-1. **完全重写 `initUser` 函数** - 直接恢复登录状态，不进行任何验证
-2. **禁用所有 401 错误处理** - 不再清除 token
-3. **移除复杂的 token 验证逻辑** - 简化为直接信任 localStorage
+1. **Viết lại hoàn toàn hàm `initUser`** - Khôi phục trực tiếp trạng thái đăng nhập，không thực hiện bất kỳ xác thực nào
+2. **Vô hiệu hóa tất cả xử lý lỗi 401** - Không còn xóa token
+3. **Loại bỏ logic xác thực token phức tạp** - Đơn giản hóa thành tin tưởng trực tiếp localStorage
 
-## 📋 部署步骤（必须按顺序执行）
+## 📋 Các Bước Triển Khai（Phải thực hiện theo thứ tự）
 
-### 步骤 1：在服务器上更新代码
+### Bước 1：Cập nhật code trên server
 
 ```bash
 cd /www/wwwroot/abc789.cn
 git pull origin main
 ```
 
-### 步骤 2：重新构建前端（关键！）
+### Bước 2：Build lại frontend（Quan trọng！）
 
 ```bash
 npm run build
 ```
 
-**⚠️ 重要：** 如果服务器上构建失败或很慢，可以在本地构建后上传：
+**⚠️ Quan trọng：** Nếu build trên server thất bại hoặc chậm，có thể build ở local rồi upload：
 
 ```bash
-# 在本地执行
+# Thực thi ở local
 npm run build
 
-# 然后把 dist 目录上传到服务器
-# 使用 FTP 或宝塔面板的文件管理上传
+# Sau đó upload thư mục dist lên server
+# Sử dụng FTP hoặc quản lý file của Bảng Điều Khiển Bảo Tháp để upload
 ```
 
-### 步骤 3：确认文件已更新
+### Bước 3：Xác nhận file đã được cập nhật
 
 ```bash
-# 检查 dist 目录的修改时间
+# Kiểm tra thời gian sửa đổi của thư mục dist
 ls -lh dist/assets/*.js | head -3
 
-# 应该显示最新的时间戳
+# Nên hiển thị timestamp mới nhất
 ```
 
-### 步骤 4：清除浏览器缓存
+### Bước 4：Xóa cache trình duyệt
 
-1. 按 `Ctrl + Shift + Delete`
-2. 选择"缓存的图片和文件"
-3. 点击"清除数据"
+1. Nhấn `Ctrl + Shift + Delete`
+2. Chọn "Ảnh và file đã cache"
+3. Click "Xóa dữ liệu"
 
-**或者使用无痕模式测试：**
+**Hoặc sử dụng chế độ ẩn danh để test：**
 - Chrome: `Ctrl + Shift + N`
 - Firefox: `Ctrl + Shift + P`
 
-### 步骤 5：测试登录
+### Bước 5：Test đăng nhập
 
-1. 访问 https://abc789.cn
-2. 输入账号密码登录
-3. 观察是否还会秒退
+1. Truy cập https://abc789.cn
+2. Nhập tài khoản mật khẩu đăng nhập
+3. Quan sát xem còn thoát ngay không
 
-## 🔍 如果还有问题
+## 🔍 Nếu Vẫn Có Vấn Đề
 
-### 检查浏览器控制台
+### Kiểm tra Console Trình Duyệt
 
-按 `F12` 打开控制台，查找以下日志：
+Nhấn `F12` mở console，tìm các log sau：
 
-- `✅ 登录状态已恢复` - 表示状态恢复成功
-- `✅ Token:` - 表示 token 已设置
-- `✅ isLoggedIn: true` - 表示登录状态正确
+- `✅ Trạng thái đăng nhập đã được khôi phục` - Biểu thị khôi phục trạng thái thành công
+- `✅ Token:` - Biểu thị token đã được thiết lập
+- `✅ isLoggedIn: true` - Biểu thị trạng thái đăng nhập đúng
 
-### 检查 localStorage
+### Kiểm tra localStorage
 
-在控制台执行：
+Thực thi trong console：
 
 ```javascript
 console.log('Token:', localStorage.getItem('auth_token'))
@@ -76,31 +76,31 @@ console.log('User:', localStorage.getItem('user'))
 console.log('isLoggedIn:', localStorage.getItem('user') !== null)
 ```
 
-### 如果仍然秒退
+### Nếu Vẫn Thoát Ngay
 
-请截图以下信息给我：
+Vui lòng chụp ảnh màn hình các thông tin sau cho tôi：
 
-1. 浏览器控制台的完整日志
-2. Network 标签中的请求列表
-3. localStorage 的内容
+1. Log đầy đủ của console trình duyệt
+2. Danh sách request trong tab Network
+3. Nội dung localStorage
 
-## 💡 修复原理
+## 💡 Nguyên Lý Sửa Chữa
 
-之前的问题是：
-- `initUser` 会调用 `validateToken()` 验证 token
-- 验证失败（401）会清除 token
-- 导致登录后立即退出
+Vấn đề trước đây là：
+- `initUser` sẽ gọi `validateToken()` để xác thực token
+- Xác thực thất bại（401）sẽ xóa token
+- Dẫn đến đăng nhập xong lập tức thoát
 
-现在的解决方案：
-- `initUser` 直接恢复状态，不验证
-- 忽略所有 401 错误
-- 登录状态永久保持，除非用户主动退出
+Giải pháp hiện tại：
+- `initUser` khôi phục trạng thái trực tiếp，không xác thực
+- Bỏ qua tất cả lỗi 401
+- Trạng thái đăng nhập được duy trì vĩnh viễn，trừ khi người dùng chủ động thoát
 
-## 📞 需要帮助？
+## 📞 Cần Giúp Đỡ？
 
-如果按照以上步骤操作后仍有问题，请提供：
-1. 浏览器控制台截图
-2. 服务器上 `git log --oneline -3` 的输出
-3. `ls -lh dist/assets/*.js | head -3` 的输出
+Nếu sau khi thực hiện các bước trên vẫn có vấn đề，vui lòng cung cấp：
+1. Ảnh chụp màn hình console trình duyệt
+2. Output của `git log --oneline -3` trên server
+3. Output của `ls -lh dist/assets/*.js | head -3`
 
-这样我可以确认代码是否正确部署。
+Như vậy tôi có thể xác nhận code đã được triển khai đúng chưa.

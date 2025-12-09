@@ -4,67 +4,67 @@ import fs from 'fs';
 
 const router = Router();
 
-// 下载Android APK
+// Tải xuống APK Android
 router.get('/download/android', (req, res) => {
   const apkPath = path.join(__dirname, '../../../public/downloads/CRM-Mobile-SDK-v2.1.3.apk');
-  
-  // 检查文件是否存在
+
+  // Kiểm tra file có tồn tại không
   if (!fs.existsSync(apkPath)) {
     return res.status(404).json({
       success: false,
-      message: 'APK文件不存在，请先构建应用'
+      message: 'File APK không tồn tại, vui lòng xây dựng ứng dụng trước'
     });
   }
 
-  // 设置下载头
+  // Thiết lập header tải xuống
   res.setHeader('Content-Disposition', 'attachment; filename="CRM-Mobile-SDK-v2.1.3.apk"');
   res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-  
-  // 发送文件
+
+  // Gửi file
   return res.sendFile(apkPath, (err) => {
     if (err) {
-      console.error('发送APK文件失败:', err);
+      console.error('Gửi file APK thất bại:', err);
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          message: '下载失败'
+          message: 'Tải xuống thất bại'
         });
       }
     }
   });
 });
 
-// 下载iOS IPA
+// Tải xuống IPA iOS
 router.get('/download/ios', (req, res) => {
   const ipaPath = path.join(__dirname, '../../../mobile-sdk/ios/build/CRM-Mobile-SDK-1.0.0.ipa');
-  
-  // 检查文件是否存在
+
+  // Kiểm tra file có tồn tại không
   if (!fs.existsSync(ipaPath)) {
     return res.status(404).json({
       success: false,
-      message: 'IPA文件不存在，iOS版本正在开发中'
+      message: 'File IPA không tồn tại, phiên bản iOS đang được phát triển'
     });
   }
 
-  // 设置下载头
+  // Thiết lập header tải xuống
   res.setHeader('Content-Disposition', 'attachment; filename="CRM-Mobile-SDK-1.0.0.ipa"');
   res.setHeader('Content-Type', 'application/octet-stream');
-  
-  // 发送文件
+
+  // Gửi file
   return res.sendFile(ipaPath, (err) => {
     if (err) {
-      console.error('发送IPA文件失败:', err);
+      console.error('Gửi file IPA thất bại:', err);
       if (!res.headersSent) {
         res.status(500).json({
           success: false,
-          message: '下载失败'
+          message: 'Tải xuống thất bại'
         });
       }
     }
   });
 });
 
-// 格式化文件大小
+// Định dạng kích thước file
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -73,22 +73,22 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-// 获取SDK信息
+// Lấy thông tin SDK
 router.get('/info', (req, res) => {
   const androidApkPath = path.join(__dirname, '../../../public/downloads/CRM-Mobile-SDK-v2.1.3.apk');
   const iosIpaPath = path.join(__dirname, '../../../mobile-sdk/ios/build/CRM-Mobile-SDK-1.0.0.ipa');
-  
+
   const androidExists = fs.existsSync(androidApkPath);
   const iosExists = fs.existsSync(iosIpaPath);
-  
+
   const androidStats = androidExists ? fs.statSync(androidApkPath) : null;
   const iosStats = iosExists ? fs.statSync(iosIpaPath) : null;
-  
+
   const info = {
     android: {
       available: androidExists,
       size: androidStats ? androidStats.size : 0,
-      fileSizeFormatted: androidStats ? formatFileSize(androidStats.size) : '未知',
+      fileSizeFormatted: androidStats ? formatFileSize(androidStats.size) : 'Không xác định',
       version: '2.1.3',
       lastModified: androidStats ? androidStats.mtime : null,
       supportedSystems: 'Android 5.0+',
@@ -98,7 +98,7 @@ router.get('/info', (req, res) => {
     ios: {
       available: iosExists,
       size: iosStats ? iosStats.size : 0,
-      fileSizeFormatted: iosStats ? formatFileSize(iosStats.size) : '待发布',
+      fileSizeFormatted: iosStats ? formatFileSize(iosStats.size) : 'Chờ phát hành',
       version: '1.0.0',
       lastModified: iosStats ? iosStats.mtime : null,
       supportedSystems: 'iOS 12.0+',

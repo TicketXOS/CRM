@@ -5,22 +5,22 @@ import { authenticateToken } from '../middleware/auth';
 const router = Router();
 const permissionController = new PermissionController();
 
-// 所有路由都需要认证
+// Tất cả các route đều cần xác thực
 router.use(authenticateToken);
 
-// 获取权限树
+// Lấy cây quyền hạn
 router.get('/tree', (req, res) => permissionController.getPermissionTree(req, res));
 
-// 获取权限列表
+// Lấy danh sách quyền hạn
 router.get('/', (req, res) => permissionController.getPermissions(req, res));
 
-// 创建权限
+// Tạo quyền hạn
 router.post('/', (req, res) => permissionController.createPermission(req, res));
 
-// 更新权限
+// Cập nhật quyền hạn
 router.put('/:id', (req, res) => permissionController.updatePermission(req, res));
 
-// 删除权限
+// Xóa quyền hạn
 router.delete('/:id', (req, res) => permissionController.deletePermission(req, res));
 
 export default router;

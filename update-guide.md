@@ -1,326 +1,326 @@
-# GitHub 代码更新指南
+# Hướng Dẫn Cập Nhật Code GitHub
 
-## 📋 目录
-- [方法一：手动更新](#方法一手动更新)
-- [方法二：使用更新脚本](#方法二使用更新脚本)
-- [方法三：宝塔计划任务](#方法三宝塔计划任务)
-- [常见问题](#常见问题)
+## 📋 Mục Lục
+- [Phương pháp 1：Cập nhật thủ công](#phương-pháp-1cập-nhật-thủ-công)
+- [Phương pháp 2：Sử dụng script cập nhật](#phương-pháp-2sử-dụng-script-cập-nhật)
+- [Phương pháp 3：Kế hoạch tác vụ Bảo Tháp](#phương-pháp-3kế-hoạch-tác-vụ-bảo-tháp)
+- [Câu hỏi thường gặp](#câu-hỏi-thường-gặp)
 
 ---
 
-## 方法一：手动更新
+## Phương Pháp 1：Cập Nhật Thủ Công
 
-### 适用场景
-- 第一次更新
-- 需要查看详细更新过程
-- 出现问题需要手动排查
+### Tình Huống Áp Dụng
+- Lần đầu cập nhật
+- Cần xem quá trình cập nhật chi tiết
+- Gặp vấn đề cần kiểm tra thủ công
 
-### 操作步骤
+### Các Bước Thao Tác
 
-#### 1. 打开宝塔终端
-在宝塔面板右上角点击 **"终端"** 按钮
+#### 1. Mở terminal Bảo Tháp
+Ở góc trên bên phải bảng điều khiển Bảo Tháp click nút **"Terminal"**
 
-#### 2. 进入项目目录
+#### 2. Vào thư mục dự án
 ```bash
 cd /www/wwwroot/CRM
 ```
 
-#### 3. 查看当前版本
+#### 3. Xem phiên bản hiện tại
 ```bash
 git log --oneline -1
 ```
 
-#### 4. 拉取最新代码
+#### 4. Pull code mới nhất
 ```bash
 git pull origin main
 ```
 
-#### 5. 查看更新内容
+#### 5. Xem nội dung cập nhật
 ```bash
 git log --oneline -5
 ```
 
-#### 6. 更新依赖
+#### 6. Cập nhật dependencies
 ```bash
-# 更新前端依赖
+# Cập nhật dependencies frontend
 npm install
 
-# 更新后端依赖
+# Cập nhật dependencies backend
 cd backend
 npm install
 cd ..
 ```
 
-#### 7. 重新构建前端
+#### 7. Build lại frontend
 ```bash
 npm run build
 ```
 
-#### 8. 重启后端服务
+#### 8. Khởi động lại dịch vụ backend
 ```bash
 pm2 restart crm-backend
 ```
 
-#### 9. 验证更新
+#### 9. Xác minh cập nhật
 ```bash
-# 查看服务状态
+# Xem trạng thái dịch vụ
 pm2 list
 
-# 查看日志
+# Xem log
 pm2 logs crm-backend --lines 20
 ```
 
 ---
 
-## 方法二：使用更新脚本
+## Phương Pháp 2：Sử Dụng Script Cập Nhật
 
-### 适用场景
-- 日常更新
-- 快速更新
-- 自动化更新
+### Tình Huống Áp Dụng
+- Cập nhật hàng ngày
+- Cập nhật nhanh
+- Cập nhật tự động
 
-### 首次设置
+### Thiết Lập Lần Đầu
 
-#### 1. 上传更新脚本
-将 `update.sh` 文件上传到 `/www/wwwroot/CRM` 目录
+#### 1. Upload script cập nhật
+Upload file `update.sh` lên thư mục `/www/wwwroot/CRM`
 
-#### 2. 给脚本执行权限
+#### 2. Cấp quyền thực thi cho script
 ```bash
 cd /www/wwwroot/CRM
 chmod +x update.sh
 ```
 
-### 使用方法
+### Cách Sử Dụng
 
-#### 每次更新只需执行：
+#### Mỗi lần cập nhật chỉ cần thực thi：
 ```bash
 cd /www/wwwroot/CRM
 ./update.sh
 ```
 
-### 脚本功能
-- ✅ 自动备份配置文件
-- ✅ 拉取最新代码
-- ✅ 恢复配置文件
-- ✅ 更新依赖
-- ✅ 构建前端
-- ✅ 重启后端
-- ✅ 显示更新日志
+### Chức Năng Script
+- ✅ Tự động backup file cấu hình
+- ✅ Pull code mới nhất
+- ✅ Khôi phục file cấu hình
+- ✅ Cập nhật dependencies
+- ✅ Build frontend
+- ✅ Khởi động lại backend
+- ✅ Hiển thị log cập nhật
 
 ---
 
-## 方法三：宝塔计划任务
+## Phương Pháp 3：Kế Hoạch Tác Vụ Bảo Tháp
 
-### 适用场景
-- 定期自动更新
-- 无需手动操作
+### Tình Huống Áp Dụng
+- Cập nhật tự động định kỳ
+- Không cần thao tác thủ công
 
-### 设置步骤
+### Các Bước Thiết Lập
 
-#### 1. 进入计划任务
-在宝塔面板，点击左侧 **"计划任务"**
+#### 1. Vào kế hoạch tác vụ
+Trong bảng điều khiển Bảo Tháp，click bên trái **"Kế hoạch tác vụ"**
 
-#### 2. 添加任务
-- **任务类型**：Shell 脚本
-- **任务名称**：CRM 代码更新
-- **执行周期**：根据需求选择（如：每天凌晨 2 点）
-- **脚本内容**：
+#### 2. Thêm tác vụ
+- **Loại tác vụ**：Shell script
+- **Tên tác vụ**：Cập nhật code CRM
+- **Chu kỳ thực thi**：Chọn theo nhu cầu（ví dụ：2 giờ sáng mỗi ngày）
+- **Nội dung script**：
 ```bash
 #!/bin/bash
 cd /www/wwwroot/CRM
 ./update.sh >> /www/wwwroot/CRM/update.log 2>&1
 ```
 
-#### 3. 保存并测试
-点击 **"执行"** 按钮测试任务是否正常
+#### 3. Lưu và test
+Click nút **"Thực thi"** để test xem tác vụ có bình thường không
 
 ---
 
-## 🔍 更新前检查
+## 🔍 Kiểm Tra Trước Khi Cập Nhật
 
-### 1. 查看远程更新内容
+### 1. Xem nội dung cập nhật từ xa
 ```bash
 cd /www/wwwroot/CRM
 git fetch origin
 git log HEAD..origin/main --oneline
 ```
 
-### 2. 查看本地修改
+### 2. Xem sửa đổi local
 ```bash
 git status
 ```
 
-### 3. 备份重要数据
+### 3. Backup dữ liệu quan trọng
 ```bash
-# 备份数据库
-mysqldump -u 用户名 -p 数据库名 > backup_$(date +%Y%m%d).sql
+# Backup database
+mysqldump -u tên_người_dùng -p tên_database > backup_$(date +%Y%m%d).sql
 
-# 备份配置文件
+# Backup file cấu hình
 cp backend/.env backend/.env.backup
 ```
 
 ---
 
-## 🔄 更新后验证
+## 🔄 Xác Minh Sau Khi Cập Nhật
 
-### 1. 检查服务状态
+### 1. Kiểm tra trạng thái dịch vụ
 ```bash
 pm2 list
 ```
-应该看到 `crm-backend` 状态为 `online`
+Nên thấy trạng thái `crm-backend` là `online`
 
-### 2. 查看日志
+### 2. Xem log
 ```bash
 pm2 logs crm-backend --lines 50
 ```
-检查是否有错误信息
+Kiểm tra xem có thông tin lỗi không
 
-### 3. 访问网站
-在浏览器访问您的网站，测试功能是否正常
+### 3. Truy cập website
+Truy cập website của bạn trong trình duyệt，test xem chức năng có bình thường không
 
-### 4. 测试关键功能
-- ✅ 登录功能
-- ✅ 数据查询
-- ✅ 数据添加
-- ✅ 数据修改
+### 4. Test chức năng quan trọng
+- ✅ Chức năng đăng nhập
+- ✅ Truy vấn dữ liệu
+- ✅ Thêm dữ liệu
+- ✅ Sửa đổi dữ liệu
 
 ---
 
-## ⚠️ 常见问题
+## ⚠️ Câu Hỏi Thường Gặp
 
-### 问题 1：代码冲突
+### Vấn Đề 1：Xung Đột Code
 
-**现象**：
+**Hiện tượng**：
 ```
 error: Your local changes to the following files would be overwritten by merge
 ```
 
-**解决方案**：
+**Giải pháp**：
 ```bash
-# 方案 A：保存本地修改
+# Phương án A：Lưu sửa đổi local
 git stash
 git pull origin main
 git stash pop
 
-# 方案 B：放弃本地修改
+# Phương án B：Bỏ sửa đổi local
 git reset --hard
 git pull origin main
 
-# 方案 C：查看冲突文件
+# Phương án C：Xem file xung đột
 git status
-# 手动处理冲突文件
+# Xử lý thủ công file xung đột
 ```
 
 ---
 
-### 问题 2：依赖安装失败
+### Vấn Đề 2：Cài Đặt Dependencies Thất Bại
 
-**现象**：
+**Hiện tượng**：
 ```
 npm ERR! code ELIFECYCLE
 ```
 
-**解决方案**：
+**Giải pháp**：
 ```bash
-# 清理缓存
+# Xóa cache
 npm cache clean --force
 
-# 删除 node_modules
+# Xóa node_modules
 rm -rf node_modules
 rm -rf backend/node_modules
 
-# 重新安装
+# Cài đặt lại
 npm install
 cd backend && npm install
 ```
 
 ---
 
-### 问题 3：构建失败
+### Vấn Đề 3：Build Thất Bại
 
-**现象**：
+**Hiện tượng**：
 ```
 Build failed with errors
 ```
 
-**解决方案**：
+**Giải pháp**：
 ```bash
-# 查看详细错误
+# Xem lỗi chi tiết
 npm run build
 
-# 检查 Node.js 版本
+# Kiểm tra phiên bản Node.js
 node -v
-# 应该是 16.x 或更高
+# Nên là 16.x hoặc cao hơn
 
-# 检查磁盘空间
+# Kiểm tra dung lượng ổ đĩa
 df -h
 ```
 
 ---
 
-### 问题 4：PM2 重启失败
+### Vấn Đề 4：PM2 Khởi Động Lại Thất Bại
 
-**现象**：
+**Hiện tượng**：
 ```
 [PM2] Process not found
 ```
 
-**解决方案**：
+**Giải pháp**：
 ```bash
-# 查看所有进程
+# Xem tất cả process
 pm2 list
 
-# 删除旧进程
+# Xóa process cũ
 pm2 delete crm-backend
 
-# 重新启动
+# Khởi động lại
 cd /www/wwwroot/CRM/backend
 pm2 start npm --name "crm-backend" -- start
 
-# 保存配置
+# Lưu cấu hình
 pm2 save
 ```
 
 ---
 
-### 问题 5：更新后页面空白
+### Vấn Đề 5：Sau Khi Cập Nhật Trang Trắng
 
-**可能原因**：
-- 前端构建失败
-- Nginx 配置错误
-- 缓存问题
+**Nguyên nhân có thể**：
+- Build frontend thất bại
+- Cấu hình Nginx sai
+- Vấn đề cache
 
-**解决方案**：
+**Giải pháp**：
 ```bash
-# 1. 检查构建文件
+# 1. Kiểm tra file build
 ls -la /www/wwwroot/CRM/dist
 
-# 2. 重新构建
+# 2. Build lại
 cd /www/wwwroot/CRM
 npm run build
 
-# 3. 清除浏览器缓存
-# 按 Ctrl + Shift + Delete
+# 3. Xóa cache trình duyệt
+# Nhấn Ctrl + Shift + Delete
 
-# 4. 重启 Nginx
+# 4. Khởi động lại Nginx
 systemctl restart nginx
 ```
 
 ---
 
-## 🔙 回滚到上一版本
+## 🔙 Rollback Về Phiên Bản Trước
 
-### 如果更新后出现问题，可以回滚：
+### Nếu sau khi cập nhật có vấn đề，có thể rollback：
 
 ```bash
-# 1. 查看提交历史
+# 1. Xem lịch sử commit
 cd /www/wwwroot/CRM
 git log --oneline -10
 
-# 2. 回滚到指定版本
-git reset --hard 提交ID
+# 2. Rollback về phiên bản chỉ định
+git reset --hard CommitID
 
-# 3. 重新构建和重启
+# 3. Build lại và khởi động lại
 npm install
 npm run build
 cd backend && npm install
@@ -329,133 +329,133 @@ pm2 restart crm-backend
 
 ---
 
-## 📊 更新日志查看
+## 📊 Xem Log Cập Nhật
 
-### 查看最近的更新
+### Xem cập nhật gần đây
 ```bash
 cd /www/wwwroot/CRM
 git log --oneline -10
 ```
 
-### 查看详细更新内容
+### Xem nội dung cập nhật chi tiết
 ```bash
 git log -p -2
 ```
 
-### 查看某个文件的修改历史
+### Xem lịch sử sửa đổi của một file
 ```bash
-git log --follow -- 文件路径
+git log --follow -- đường_dẫn_file
 ```
 
 ---
 
-## 🔐 安全建议
+## 🔐 Khuyến Nghị Bảo Mật
 
-### 1. 更新前备份
-- 备份数据库
-- 备份配置文件
-- 备份重要数据
+### 1. Backup trước khi cập nhật
+- Backup database
+- Backup file cấu hình
+- Backup dữ liệu quan trọng
 
-### 2. 在测试环境先测试
-- 如果有测试环境，先在测试环境更新
-- 确认无问题后再更新生产环境
+### 2. Test ở môi trường test trước
+- Nếu có môi trường test，cập nhật ở môi trường test trước
+- Xác nhận không có vấn đề rồi mới cập nhật môi trường production
 
-### 3. 选择合适的更新时间
-- 避免业务高峰期
-- 建议在凌晨或业务低谷期更新
+### 3. Chọn thời gian cập nhật phù hợp
+- Tránh giờ cao điểm nghiệp vụ
+- Khuyến nghị cập nhật vào lúc sáng sớm hoặc giờ thấp điểm nghiệp vụ
 
-### 4. 通知用户
-- 提前通知用户系统维护时间
-- 更新完成后通知用户
-
----
-
-## 📝 更新检查清单
-
-更新前：
-- [ ] 查看更新内容
-- [ ] 备份数据库
-- [ ] 备份配置文件
-- [ ] 通知用户（如需要）
-
-更新中：
-- [ ] 拉取最新代码
-- [ ] 更新依赖
-- [ ] 构建前端
-- [ ] 重启后端
-
-更新后：
-- [ ] 检查服务状态
-- [ ] 查看日志
-- [ ] 测试关键功能
-- [ ] 监控系统运行
+### 4. Thông báo người dùng
+- Thông báo trước cho người dùng thời gian bảo trì hệ thống
+- Thông báo cho người dùng sau khi cập nhật xong
 
 ---
 
-## 🎯 快速命令参考
+## 📝 Danh Sách Kiểm Tra Cập Nhật
+
+Trước khi cập nhật：
+- [ ] Xem nội dung cập nhật
+- [ ] Backup database
+- [ ] Backup file cấu hình
+- [ ] Thông báo người dùng（nếu cần）
+
+Trong khi cập nhật：
+- [ ] Pull code mới nhất
+- [ ] Cập nhật dependencies
+- [ ] Build frontend
+- [ ] Khởi động lại backend
+
+Sau khi cập nhật：
+- [ ] Kiểm tra trạng thái dịch vụ
+- [ ] Xem log
+- [ ] Test chức năng quan trọng
+- [ ] Giám sát vận hành hệ thống
+
+---
+
+## 🎯 Tham Khảo Lệnh Nhanh
 
 ```bash
-# 更新代码
+# Cập nhật code
 cd /www/wwwroot/CRM && git pull origin main
 
-# 一键更新（使用脚本）
+# Cập nhật một lần（sử dụng script）
 cd /www/wwwroot/CRM && ./update.sh
 
-# 查看服务状态
+# Xem trạng thái dịch vụ
 pm2 list
 
-# 查看日志
+# Xem log
 pm2 logs crm-backend
 
-# 重启服务
+# Khởi động lại dịch vụ
 pm2 restart crm-backend
 
-# 查看更新历史
+# Xem lịch sử cập nhật
 git log --oneline -10
 
-# 回滚版本
-git reset --hard 提交ID
+# Rollback phiên bản
+git reset --hard CommitID
 ```
 
 ---
 
-## 💡 最佳实践
+## 💡 Thực Hành Tốt Nhất
 
-### 1. 定期更新
-- 建议每周检查一次更新
-- 重要更新及时应用
+### 1. Cập nhật định kỳ
+- Khuyến nghị kiểm tra cập nhật mỗi tuần một lần
+- Cập nhật quan trọng áp dụng kịp thời
 
-### 2. 保持配置文件独立
-- 不要修改 `.env.example`
-- 只修改 `.env` 文件
-- `.env` 文件不会被 Git 覆盖
+### 2. Giữ file cấu hình độc lập
+- Không sửa `.env.example`
+- Chỉ sửa file `.env`
+- File `.env` sẽ không bị Git ghi đè
 
-### 3. 使用版本标签
+### 3. Sử dụng version tag
 ```bash
-# 查看所有版本标签
+# Xem tất cả version tag
 git tag
 
-# 切换到指定版本
+# Chuyển sang phiên bản chỉ định
 git checkout v1.0.0
 ```
 
-### 4. 监控更新
-- 关注 GitHub 仓库的 Release 页面
-- 订阅更新通知
+### 4. Giám sát cập nhật
+- Theo dõi trang Release của GitHub repository
+- Đăng ký thông báo cập nhật
 
 ---
 
-## 📞 需要帮助？
+## 📞 Cần Giúp Đỡ？
 
-如果更新过程中遇到问题：
+Nếu gặp vấn đề trong quá trình cập nhật：
 
-1. 查看错误日志
-2. 参考常见问题部分
-3. 在 GitHub 提交 Issue
-4. 联系技术支持
+1. Xem log lỗi
+2. Tham khảo phần câu hỏi thường gặp
+3. Submit Issue trên GitHub
+4. Liên hệ hỗ trợ kỹ thuật
 
 ---
 
-**版本**：v1.0  
-**更新日期**：2024-11-23  
-**适用于**：CRM 系统 v1.8.3+
+**Phiên bản**：v1.0  
+**Ngày cập nhật**：2024-11-23  
+**Áp dụng cho**：Hệ thống CRM v1.8.3+

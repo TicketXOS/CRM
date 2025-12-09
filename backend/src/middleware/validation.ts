@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { ValidationError } from './errorHandler';
 
 /**
- * 请求验证中间件
+ * Middleware xác thực yêu cầu
  */
 export const validate = (schema: {
   body?: Joi.ObjectSchema;
@@ -13,7 +13,7 @@ export const validate = (schema: {
   return (req: Request, res: Response, next: NextFunction) => {
     const errors: any = {};
 
-    // 验证请求体
+    // Xác thực thân yêu cầu
     if (schema.body) {
       const { error, value } = schema.body.validate(req.body, {
         abortEarly: false,
@@ -32,7 +32,7 @@ export const validate = (schema: {
       }
     }
 
-    // 验证查询参数
+    // Xác thực tham số truy vấn
     if (schema.query) {
       const { error, value } = schema.query.validate(req.query, {
         abortEarly: false,
@@ -51,7 +51,7 @@ export const validate = (schema: {
       }
     }
 
-    // 验证路径参数
+    // Xác thực tham số đường dẫn
     if (schema.params) {
       const { error, value } = schema.params.validate(req.params, {
         abortEarly: false,
@@ -70,113 +70,113 @@ export const validate = (schema: {
       }
     }
 
-    // 如果有验证错误，抛出异常
+    // Nếu có lỗi xác thực, ném ngoại lệ
     if (Object.keys(errors).length > 0) {
-      throw new ValidationError('请求数据验证失败', errors);
+      throw new ValidationError('Xác thực dữ liệu yêu cầu thất bại', errors);
     }
 
     next();
   };
 };
 
-// 常用验证规则
+// Các quy tắc xác thực thường dùng
 export const commonValidations = {
-  // ID验证
+  // Xác thực ID
   id: Joi.number().integer().positive().required().messages({
-    'number.base': 'ID必须是数字',
-    'number.integer': 'ID必须是整数',
-    'number.positive': 'ID必须是正数',
-    'any.required': 'ID是必需的'
+    'number.base': 'ID phải là số',
+    'number.integer': 'ID phải là số nguyên',
+    'number.positive': 'ID phải là số dương',
+    'any.required': 'ID là bắt buộc'
   }),
 
-  // 可选ID验证
+  // Xác thực ID tùy chọn
   optionalId: Joi.number().integer().positive().optional().messages({
-    'number.base': 'ID必须是数字',
-    'number.integer': 'ID必须是整数',
-    'number.positive': 'ID必须是正数'
+    'number.base': 'ID phải là số',
+    'number.integer': 'ID phải là số nguyên',
+    'number.positive': 'ID phải là số dương'
   }),
 
-  // 分页验证
+  // Xác thực phân trang
   pagination: {
     page: Joi.number().integer().min(1).default(1).messages({
-      'number.base': '页码必须是数字',
-      'number.integer': '页码必须是整数',
-      'number.min': '页码必须大于0'
+      'number.base': 'Số trang phải là số',
+      'number.integer': 'Số trang phải là số nguyên',
+      'number.min': 'Số trang phải lớn hơn 0'
     }),
     limit: Joi.number().integer().min(1).max(100).default(20).messages({
-      'number.base': '每页数量必须是数字',
-      'number.integer': '每页数量必须是整数',
-      'number.min': '每页数量必须大于0',
-      'number.max': '每页数量不能超过100'
+      'number.base': 'Số lượng mỗi trang phải là số',
+      'number.integer': 'Số lượng mỗi trang phải là số nguyên',
+      'number.min': 'Số lượng mỗi trang phải lớn hơn 0',
+      'number.max': 'Số lượng mỗi trang không được vượt quá 100'
     })
   },
 
-  // 用户名验证
+  // Xác thực tên người dùng
   username: Joi.string().alphanum().min(3).max(30).required().messages({
-    'string.base': '用户名必须是字符串',
-    'string.alphanum': '用户名只能包含字母和数字',
-    'string.min': '用户名至少3个字符',
-    'string.max': '用户名最多30个字符',
-    'any.required': '用户名是必需的'
+    'string.base': 'Tên người dùng phải là chuỗi',
+    'string.alphanum': 'Tên người dùng chỉ được chứa chữ cái và số',
+    'string.min': 'Tên người dùng tối thiểu 3 ký tự',
+    'string.max': 'Tên người dùng tối đa 30 ký tự',
+    'any.required': 'Tên người dùng là bắt buộc'
   }),
 
-  // 密码验证
+  // Xác thực mật khẩu
   password: Joi.string().min(6).max(128).required().messages({
-    'string.base': '密码必须是字符串',
-    'string.min': '密码至少6个字符',
-    'string.max': '密码最多128个字符',
-    'any.required': '密码是必需的'
+    'string.base': 'Mật khẩu phải là chuỗi',
+    'string.min': 'Mật khẩu tối thiểu 6 ký tự',
+    'string.max': 'Mật khẩu tối đa 128 ký tự',
+    'any.required': 'Mật khẩu là bắt buộc'
   }),
 
-  // 邮箱验证
+  // Xác thực email
   email: Joi.string().email().max(100).required().messages({
-    'string.base': '邮箱必须是字符串',
-    'string.email': '邮箱格式不正确',
-    'string.max': '邮箱最多100个字符',
-    'any.required': '邮箱是必需的'
+    'string.base': 'Email phải là chuỗi',
+    'string.email': 'Định dạng email không đúng',
+    'string.max': 'Email tối đa 100 ký tự',
+    'any.required': 'Email là bắt buộc'
   }),
 
-  // 可选邮箱验证
+  // Xác thực email tùy chọn
   optionalEmail: Joi.string().email().max(100).optional().allow('').messages({
-    'string.base': '邮箱必须是字符串',
-    'string.email': '邮箱格式不正确',
-    'string.max': '邮箱最多100个字符'
+    'string.base': 'Email phải là chuỗi',
+    'string.email': 'Định dạng email không đúng',
+    'string.max': 'Email tối đa 100 ký tự'
   }),
 
-  // 手机号验证
+  // Xác thực số điện thoại
   phone: Joi.string().pattern(/^1[3-9]\d{9}$/).messages({
-    'string.base': '手机号必须是字符串',
-    'string.pattern.base': '手机号格式不正确'
+    'string.base': 'Số điện thoại phải là chuỗi',
+    'string.pattern.base': 'Định dạng số điện thoại không đúng'
   }),
 
-  // 状态验证
+  // Xác thực trạng thái
   status: (values: string[]) => Joi.string().valid(...values).messages({
-    'any.only': `状态必须是以下值之一: ${values.join(', ')}`
+    'any.only': `Trạng thái phải là một trong các giá trị sau: ${values.join(', ')}`
   }),
 
-  // 日期验证
+  // Xác thực ngày tháng
   date: Joi.date().iso().messages({
-    'date.base': '日期格式不正确',
-    'date.format': '日期必须是ISO格式'
+    'date.base': 'Định dạng ngày tháng không đúng',
+    'date.format': 'Ngày tháng phải ở định dạng ISO'
   }),
 
-  // 可选日期验证
+  // Xác thực ngày tháng tùy chọn
   optionalDate: Joi.date().iso().optional().allow(null).messages({
-    'date.base': '日期格式不正确',
-    'date.format': '日期必须是ISO格式'
+    'date.base': 'Định dạng ngày tháng không đúng',
+    'date.format': 'Ngày tháng phải ở định dạng ISO'
   }),
 
-  // 金额验证
+  // Xác thực số tiền
   amount: Joi.number().precision(2).min(0).messages({
-    'number.base': '金额必须是数字',
-    'number.precision': '金额最多保留2位小数',
-    'number.min': '金额不能为负数'
+    'number.base': 'Số tiền phải là số',
+    'number.precision': 'Số tiền tối đa 2 chữ số thập phân',
+    'number.min': 'Số tiền không được âm'
   }),
 
-  // 数量验证
+  // Xác thực số lượng
   quantity: Joi.number().integer().min(1).messages({
-    'number.base': '数量必须是数字',
-    'number.integer': '数量必须是整数',
-    'number.min': '数量必须大于0'
+    'number.base': 'Số lượng phải là số',
+    'number.integer': 'Số lượng phải là số nguyên',
+    'number.min': 'Số lượng phải lớn hơn 0'
   })
 };

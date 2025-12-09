@@ -9,7 +9,7 @@ router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/performance/shares
- * @desc 获取业绩分享列表
+ * @desc Lấy danh sách chia sẻ thành tích
  */
 router.get('/shares', async (req: Request, res: Response) => {
   try {
@@ -66,15 +66,15 @@ router.get('/shares', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取业绩分享列表失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩分享列表失败' });
+    console.error('Lấy danh sách chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy danh sách chia sẻ thành tích thất bại' });
   }
 });
 
 
 /**
  * @route GET /api/v1/performance/shares/:id
- * @desc 获取单个业绩分享详情
+ * @desc Lấy chi tiết một chia sẻ thành tích
  */
 router.get('/shares/:id', async (req: Request, res: Response) => {
   try {
@@ -97,14 +97,14 @@ router.get('/shares/:id', async (req: Request, res: Response) => {
       data: { ...share, shareMembers: members }
     });
   } catch (error) {
-    console.error('获取业绩分享详情失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩分享详情失败' });
+    console.error('Lấy chi tiết chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy chi tiết chia sẻ thành tích thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/performance/shares
- * @desc 创建业绩分享
+ * @desc Tạo chia sẻ thành tích
  */
 router.post('/shares', async (req: Request, res: Response) => {
   try {
@@ -112,20 +112,20 @@ router.post('/shares', async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
 
     if (!orderId || !orderNumber || !orderAmount || !shareMembers || shareMembers.length === 0) {
-      return res.status(400).json({ success: false, message: '缺少必填字段' });
+      return res.status(400).json({ success: false, message: 'Thiếu các trường bắt buộc' });
     }
 
-    // 验证分成比例总和
+    // Xác thực tổng tỷ lệ chia sẻ
     const totalPercentage = shareMembers.reduce((sum: number, m: any) => sum + m.percentage, 0);
     if (totalPercentage !== 100) {
-      return res.status(400).json({ success: false, message: '分成比例总和必须为100%' });
+      return res.status(400).json({ success: false, message: 'Tổng tỷ lệ chia sẻ phải bằng 100%' });
     }
 
     const shareId = uuidv4();
     const shareNumber = `SHARE${Date.now()}`;
     const totalShareAmount = orderAmount;
 
-    // 插入分享记录
+    // Chèn bản ghi chia sẻ
     await AppDataSource.query(
       `INSERT INTO performance_shares
        (id, share_number, order_id, order_number, order_amount, total_share_amount, share_count,
@@ -136,7 +136,7 @@ router.post('/shares', async (req: Request, res: Response) => {
        currentUser?.userId, currentUser?.realName || currentUser?.username]
     );
 
-    // 插入成员记录
+    // Chèn bản ghi thành viên
     for (const member of shareMembers) {
       const memberId = uuidv4();
       const shareAmount = (orderAmount * member.percentage) / 100;
@@ -151,18 +151,18 @@ router.post('/shares', async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: '业绩分享创建成功',
+      message: 'Tạo chia sẻ thành tích thành công',
       data: { id: shareId, shareNumber }
     });
   } catch (error) {
-    console.error('创建业绩分享失败:', error);
-    res.status(500).json({ success: false, message: '创建业绩分享失败' });
+    console.error('Tạo chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Tạo chia sẻ thành tích thất bại' });
   }
 });
 
 /**
  * @route DELETE /api/v1/performance/shares/:id
- * @desc 取消业绩分享
+ * @desc Hủy chia sẻ thành tích
  */
 router.delete('/shares/:id', async (req: Request, res: Response) => {
   try {
@@ -174,15 +174,15 @@ router.delete('/shares/:id', async (req: Request, res: Response) => {
     );
 
     if (!share) {
-      return res.status(404).json({ success: false, message: '业绩分享记录不存在' });
+      return res.status(404).json({ success: false, message: 'Bản ghi chia sẻ thành tích không tồn tại' });
     }
 
     if (share.created_by !== currentUser?.userId) {
-      return res.status(403).json({ success: false, message: '无权限取消此分享记录' });
+      return res.status(403).json({ success: false, message: 'Không có quyền hủy bản ghi chia sẻ này' });
     }
 
     if (share.status !== 'active') {
-      return res.status(400).json({ success: false, message: '只能取消活跃状态的分享记录' });
+      return res.status(400).json({ success: false, message: 'Chỉ có thể hủy bản ghi chia sẻ ở trạng thái hoạt động' });
     }
 
     await AppDataSource.query(
@@ -190,30 +190,30 @@ router.delete('/shares/:id', async (req: Request, res: Response) => {
       [id]
     );
 
-    res.json({ success: true, message: '业绩分享已取消' });
+    res.json({ success: true, message: 'Chia sẻ thành tích đã được hủy' });
   } catch (error) {
-    console.error('取消业绩分享失败:', error);
-    res.status(500).json({ success: false, message: '取消业绩分享失败' });
+    console.error('Hủy chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Hủy chia sẻ thành tích thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/performance/shares/:id/confirm
- * @desc 确认业绩分享
+ * @desc Xác nhận chia sẻ thành tích
  */
 router.post('/shares/:id/confirm', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const currentUser = (req as any).user;
 
-    // 更新成员状态
+    // Cập nhật trạng thái thành viên
     await AppDataSource.query(
       `UPDATE performance_share_members SET status = 'confirmed', confirm_time = NOW()
        WHERE share_id = ? AND user_id = ?`,
       [id, currentUser?.userId]
     );
 
-    // 检查是否所有成员都已确认
+    // Kiểm tra xem tất cả thành viên đã xác nhận chưa
     const [pendingCount] = await AppDataSource.query(
       `SELECT COUNT(*) as count FROM performance_share_members WHERE share_id = ? AND status != 'confirmed'`,
       [id]
@@ -226,16 +226,16 @@ router.post('/shares/:id/confirm', async (req: Request, res: Response) => {
       );
     }
 
-    res.json({ success: true, message: '业绩分享确认成功' });
+    res.json({ success: true, message: 'Xác nhận chia sẻ thành tích thành công' });
   } catch (error) {
-    console.error('确认业绩分享失败:', error);
-    res.status(500).json({ success: false, message: '确认业绩分享失败' });
+    console.error('Xác nhận chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Xác nhận chia sẻ thành tích thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/stats
- * @desc 获取业绩分享统计数据
+ * @desc Lấy dữ liệu thống kê chia sẻ thành tích
  */
 router.get('/stats', async (req: Request, res: Response) => {
   try {
@@ -253,7 +253,7 @@ router.get('/stats', async (req: Request, res: Response) => {
       `SELECT COUNT(*) as count FROM performance_shares WHERE status = 'completed'`
     );
 
-    // 用户相关统计
+    // Thống kê liên quan đến người dùng
     const [userResult] = await AppDataSource.query(
       `SELECT COUNT(DISTINCT ps.id) as count, SUM(psm.share_amount) as amount
        FROM performance_shares ps
@@ -276,22 +276,22 @@ router.get('/stats', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取业绩分享统计失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩分享统计失败' });
+    console.error('Lấy thống kê chia sẻ thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy thống kê chia sẻ thành tích thất bại' });
   }
 });
 
 
 /**
  * @route GET /api/v1/performance/personal
- * @desc 获取个人业绩数据
+ * @desc Lấy dữ liệu thành tích cá nhân
  */
 router.get('/personal', async (req: Request, res: Response) => {
   try {
     const currentUser = (req as any).user;
     const userId = (req.query.userId as string) || currentUser?.userId;
 
-    // 从订单表统计个人业绩
+    // Thống kê thành tích cá nhân từ bảng đơn hàng
     const [orderStats] = await AppDataSource.query(
       `SELECT
          COUNT(*) as totalOrders,
@@ -304,7 +304,7 @@ router.get('/personal', async (req: Request, res: Response) => {
       [userId]
     );
 
-    // 新增客户数
+    // Số khách hàng mới
     const [customerStats] = await AppDataSource.query(
       `SELECT COUNT(*) as newCustomers FROM customers WHERE sales_person_id = ?`,
       [userId]
@@ -324,21 +324,21 @@ router.get('/personal', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取个人业绩失败:', error);
-    res.status(500).json({ success: false, message: '获取个人业绩失败' });
+    console.error('Lấy thành tích cá nhân thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy thành tích cá nhân thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/team
- * @desc 获取团队业绩数据
+ * @desc Lấy dữ liệu thành tích nhóm
  */
 router.get('/team', async (req: Request, res: Response) => {
   try {
     const currentUser = (req as any).user;
     const departmentId = (req.query.departmentId as string) || currentUser?.departmentId;
 
-    // 获取部门成员业绩
+    // Lấy thành tích thành viên phòng ban
     const members = await AppDataSource.query(
       `SELECT u.id as userId, u.real_name as userName, u.department_name as department,
               COUNT(o.id) as totalOrders,
@@ -363,18 +363,18 @@ router.get('/team', async (req: Request, res: Response) => {
 
     res.json({ success: true, data: teamPerformance });
   } catch (error) {
-    console.error('获取团队业绩失败:', error);
-    res.status(500).json({ success: false, message: '获取团队业绩失败' });
+    console.error('Lấy thành tích nhóm thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy thành tích nhóm thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis
- * @desc 获取业绩分析数据
+ * @desc Lấy dữ liệu phân tích thành tích
  */
 router.get('/analysis', async (req: Request, res: Response) => {
   try {
-    // 获取最近7天趋势
+    // Lấy xu hướng 7 ngày gần đây
     const trendData = await AppDataSource.query(
       `SELECT DATE(created_at) as date,
               COUNT(*) as orders,
@@ -385,12 +385,12 @@ router.get('/analysis', async (req: Request, res: Response) => {
        ORDER BY date`
     );
 
-    // 订单状态分布
+    // Phân bố trạng thái đơn hàng
     const statusDistribution = await AppDataSource.query(
       `SELECT status, COUNT(*) as count FROM orders GROUP BY status`
     );
 
-    // 汇总数据
+    // Dữ liệu tổng hợp
     const [summary] = await AppDataSource.query(
       `SELECT COUNT(*) as totalOrders,
               SUM(total_amount) as totalAmount,
@@ -411,14 +411,14 @@ router.get('/analysis', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取业绩分析失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩分析失败' });
+    console.error('Lấy phân tích thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy phân tích thành tích thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis/personal
- * @desc 获取个人业绩分析数据
+ * @desc Lấy dữ liệu phân tích thành tích cá nhân
  */
 router.get('/analysis/personal', async (req: Request, res: Response) => {
   try {
@@ -463,14 +463,14 @@ router.get('/analysis/personal', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取个人业绩分析失败:', error);
-    res.status(500).json({ success: false, message: '获取个人业绩分析失败' });
+    console.error('Lấy phân tích thành tích cá nhân thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy phân tích thành tích cá nhân thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis/department
- * @desc 获取部门业绩分析数据
+ * @desc Lấy dữ liệu phân tích thành tích phòng ban
  */
 router.get('/analysis/department', async (req: Request, res: Response) => {
   try {
@@ -509,14 +509,14 @@ router.get('/analysis/department', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取部门业绩分析失败:', error);
-    res.status(500).json({ success: false, message: '获取部门业绩分析失败' });
+    console.error('Lấy phân tích thành tích phòng ban thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy phân tích thành tích phòng ban thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis/company
- * @desc 获取公司业绩分析数据
+ * @desc Lấy dữ liệu phân tích thành tích công ty
  */
 router.get('/analysis/company', async (_req: Request, res: Response) => {
   try {
@@ -535,7 +535,7 @@ router.get('/analysis/company', async (_req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        name: '公司总体',
+        name: 'Tổng thể công ty',
         orderCount: stats?.orderCount || 0,
         orderAmount: stats?.orderAmount || 0,
         shipCount: stats?.shipCount || 0,
@@ -549,14 +549,14 @@ router.get('/analysis/company', async (_req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取公司业绩分析失败:', error);
-    res.status(500).json({ success: false, message: '获取公司业绩分析失败' });
+    console.error('Lấy phân tích thành tích công ty thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy phân tích thành tích công ty thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis/metrics
- * @desc 获取业绩统计指标
+ * @desc Lấy chỉ số thống kê thành tích
  */
 router.get('/analysis/metrics', async (req: Request, res: Response) => {
   try {
@@ -598,14 +598,14 @@ router.get('/analysis/metrics', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取业绩统计指标失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩统计指标失败' });
+    console.error('Lấy chỉ số thống kê thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy chỉ số thống kê thành tích thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/performance/analysis/trend
- * @desc 获取业绩趋势数据
+ * @desc Lấy dữ liệu xu hướng thành tích
  */
 router.get('/analysis/trend', async (req: Request, res: Response) => {
   try {
@@ -625,8 +625,8 @@ router.get('/analysis/trend', async (req: Request, res: Response) => {
 
     res.json({ success: true, data: trendData });
   } catch (error) {
-    console.error('获取业绩趋势失败:', error);
-    res.status(500).json({ success: false, message: '获取业绩趋势失败' });
+    console.error('Lấy xu hướng thành tích thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy xu hướng thành tích thất bại' });
   }
 });
 

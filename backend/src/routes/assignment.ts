@@ -9,12 +9,12 @@ const router = Router();
 
 router.use(authenticateToken);
 
-// 注意：customer_assignments 表需要先在数据库中创建
-// 这里暂时使用原生SQL查询，因为没有对应的实体
+// Lưu ý: Bảng customer_assignments cần được tạo trước trong cơ sở dữ liệu
+// Ở đây tạm thời sử dụng truy vấn SQL gốc vì không có entity tương ứng
 
 /**
  * @route GET /api/v1/assignment/history
- * @desc 获取分配历史
+ * @desc Lấy lịch sử phân bổ
  */
 router.get('/history', async (req: Request, res: Response) => {
   try {
@@ -39,7 +39,7 @@ router.get('/history', async (req: Request, res: Response) => {
 
     const list = await AppDataSource.query(sql, params);
 
-    // 获取总数
+    // Lấy tổng số
     let countSql = `SELECT COUNT(*) as total FROM customer_assignments WHERE 1=1`;
     const countParams: any[] = [];
     if (customerId) {
@@ -64,10 +64,10 @@ router.get('/history', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取分配历史失败:', error);
+    console.error('Lấy lịch sử phân bổ thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取分配历史失败'
+      message: 'Lấy lịch sử phân bổ thất bại'
     });
   }
 });
@@ -75,7 +75,7 @@ router.get('/history', async (req: Request, res: Response) => {
 
 /**
  * @route POST /api/v1/assignment/assign
- * @desc 分配客户
+ * @desc Phân bổ khách hàng
  */
 router.post('/assign', async (req: Request, res: Response) => {
   try {
@@ -83,27 +83,27 @@ router.post('/assign', async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
 
     if (!customerId || !toUserId) {
-      return res.status(400).json({ success: false, message: '参数不完整' });
+      return res.status(400).json({ success: false, message: 'Tham số không đầy đủ' });
     }
 
-    // 获取客户信息
+    // Lấy thông tin khách hàng
     const customerRepository = AppDataSource.getRepository(Customer);
     const customer = await customerRepository.findOne({ where: { id: customerId } });
     if (!customer) {
-      return res.status(404).json({ success: false, message: '客户不存在' });
+      return res.status(404).json({ success: false, message: 'Khách hàng không tồn tại' });
     }
 
-    // 获取目标用户信息
+    // Lấy thông tin người dùng đích
     const userRepository = AppDataSource.getRepository(User);
     const toUser = await userRepository.findOne({ where: { id: toUserId } });
     if (!toUser) {
-      return res.status(404).json({ success: false, message: '目标用户不存在' });
+      return res.status(404).json({ success: false, message: 'Người dùng đích không tồn tại' });
     }
 
     const assignmentId = uuidv4();
     const now = new Date();
 
-    // 插入分配记录
+    // Chèn bản ghi phân bổ
     await AppDataSource.query(
       `INSERT INTO customer_assignments
        (id, customer_id, customer_name, from_user_id, from_user_name, to_user_id, to_user_name,
@@ -125,28 +125,28 @@ router.post('/assign', async (req: Request, res: Response) => {
       ]
     );
 
-    // 更新客户的销售员
+    // Cập nhật nhân viên bán hàng của khách hàng
     customer.salesPersonId = toUserId;
     customer.salesPersonName = toUser.realName || toUser.username;
     await customerRepository.save(customer);
 
     res.json({
       success: true,
-      message: '分配成功',
+      message: 'Phân bổ thành công',
       data: { id: assignmentId }
     });
   } catch (error) {
-    console.error('分配客户失败:', error);
+    console.error('Phân bổ khách hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '分配客户失败'
+      message: 'Phân bổ khách hàng thất bại'
     });
   }
 });
 
 /**
  * @route POST /api/v1/assignment/batch-assign
- * @desc 批量分配客户
+ * @desc Phân bổ khách hàng hàng loạt
  */
 router.post('/batch-assign', async (req: Request, res: Response) => {
   try {
@@ -154,13 +154,13 @@ router.post('/batch-assign', async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
 
     if (!customerIds || customerIds.length === 0 || !toUserId) {
-      return res.status(400).json({ success: false, message: '参数不完整' });
+      return res.status(400).json({ success: false, message: 'Tham số không đầy đủ' });
     }
 
     const userRepository = AppDataSource.getRepository(User);
     const toUser = await userRepository.findOne({ where: { id: toUserId } });
     if (!toUser) {
-      return res.status(404).json({ success: false, message: '目标用户不存在' });
+      return res.status(404).json({ success: false, message: 'Người dùng đích không tồn tại' });
     }
 
     const customerRepository = AppDataSource.getRepository(Customer);
@@ -192,24 +192,24 @@ router.post('/batch-assign', async (req: Request, res: Response) => {
           successCount++;
         }
       } catch (e) {
-        console.error('分配单个客户失败:', e);
+        console.error('Phân bổ một khách hàng thất bại:', e);
       }
     }
 
     res.json({
       success: true,
-      message: '批量分配完成',
+      message: 'Phân bổ hàng loạt hoàn tất',
       data: { successCount, failCount: customerIds.length - successCount }
     });
   } catch (error) {
-    console.error('批量分配失败:', error);
-    res.status(500).json({ success: false, message: '批量分配失败' });
+    console.error('Phân bổ hàng loạt thất bại:', error);
+    res.status(500).json({ success: false, message: 'Phân bổ hàng loạt thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/assignment/stats
- * @desc 获取分配统计
+ * @desc Lấy thống kê phân bổ
  */
 router.get('/stats', async (req: Request, res: Response) => {
   try {
@@ -248,8 +248,8 @@ router.get('/stats', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取分配统计失败:', error);
-    res.status(500).json({ success: false, message: '获取分配统计失败' });
+    console.error('Lấy thống kê phân bổ thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy thống kê phân bổ thất bại' });
   }
 });
 

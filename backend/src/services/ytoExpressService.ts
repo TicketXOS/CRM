@@ -2,31 +2,31 @@ import crypto from 'crypto'
 import axios from 'axios'
 
 /**
- * 圆通快递服务
+ * Dịch vụ YTO Express
  */
 export class YTOExpressService {
   /**
-   * 生成MD5签名
+   * Tạo chữ ký MD5
    */
   private generateSign(params: Record<string, any>, appKey: string): string {
-    // 1. 排序参数
+    // 1. Sắp xếp tham số
     const sortedKeys = Object.keys(params).sort()
 
-    // 2. 拼接字符串: appKey + key1value1key2value2... + appKey
+    // 2. Nối chuỗi: appKey + key1value1key2value2... + appKey
     let signStr = appKey
     sortedKeys.forEach(key => {
-      if (key !== 'sign') { // 排除sign字段
+      if (key !== 'sign') { // Loại trừ trường sign
         signStr += key + params[key]
       }
     })
     signStr += appKey
 
-    // 3. MD5加密并转大写
+    // 3. Mã hóa MD5 và chuyển thành chữ hoa
     return crypto.createHash('md5').update(signStr).digest('hex').toUpperCase()
   }
 
   /**
-   * 测试连接
+   * Kiểm tra kết nối
    */
   async testConnection(userId: string, appKey: string, apiUrl: string): Promise<{
     success: boolean
@@ -34,26 +34,26 @@ export class YTOExpressService {
     data?: any
   }> {
     try {
-      // 构建测试请求参数
+      // Xây dựng tham số yêu cầu kiểm tra
       const params = {
         user_id: userId,
         format: 'JSON',
         method: 'yto.marketing.trace.query',
         timestamp: Date.now().toString(),
         v: '1.0',
-        waybill_no: 'YT1234567890' // 测试单号
+        waybill_no: 'YT1234567890' // Mã vận đơn kiểm tra
       }
 
-      // 生成签名
+      // Tạo chữ ký
       const sign = this.generateSign(params, appKey)
       const requestParams = {
         ...params,
         sign
       }
 
-      console.log('圆通API测试请求参数:', requestParams)
+      console.log('Tham số yêu cầu kiểm tra API YTO:', requestParams)
 
-      // 发送请求
+      // Gửi yêu cầu
       const response = await axios.post(apiUrl, null, {
         params: requestParams,
         headers: {
@@ -62,49 +62,49 @@ export class YTOExpressService {
         timeout: 10000
       })
 
-      console.log('圆通API测试响应:', response.data)
+      console.log('Phản hồi kiểm tra API YTO:', response.data)
 
-      // 检查响应
+      // Kiểm tra phản hồi
       if (response.data) {
-        // 圆通API成功响应
+        // Phản hồi thành công API YTO
         if (response.data.success === true || response.data.success === 'true') {
           return {
             success: true,
-            message: '连接成功',
+            message: 'Kết nối thành công',
             data: response.data
           }
         }
 
-        // 圆通API返回错误
+        // API YTO trả về lỗi
         return {
           success: false,
-          message: response.data.reason || response.data.message || '连接失败',
+          message: response.data.reason || response.data.message || 'Kết nối thất bại',
           data: response.data
         }
       }
 
       return {
         success: false,
-        message: '响应数据为空'
+        message: 'Dữ liệu phản hồi trống'
       }
     } catch (error: any) {
-      console.error('圆通API测试连接失败:', error)
+      console.error('Kiểm tra kết nối API YTO thất bại:', error)
 
-      // 解析错误信息
-      let errorMessage = '连接失败'
+      // Phân tích thông tin lỗi
+      let errorMessage = 'Kết nối thất bại'
 
       if (error.response) {
-        // 服务器返回错误响应
-        errorMessage = `服务器错误: ${error.response.status}`
+        // Máy chủ trả về phản hồi lỗi
+        errorMessage = `Lỗi máy chủ: ${error.response.status}`
         if (error.response.data) {
           errorMessage += ` - ${error.response.data.reason || error.response.data.message || ''}`
         }
       } else if (error.request) {
-        // 请求已发送但没有收到响应
-        errorMessage = '网络错误: 无法连接到圆通服务器'
+        // Yêu cầu đã được gửi nhưng không nhận được phản hồi
+        errorMessage = 'Lỗi mạng: Không thể kết nối đến máy chủ YTO'
       } else {
-        // 请求配置错误
-        errorMessage = error.message || '未知错误'
+        // Lỗi cấu hình yêu cầu
+        errorMessage = error.message || 'Lỗi không xác định'
       }
 
       return {
@@ -115,7 +115,7 @@ export class YTOExpressService {
   }
 
   /**
-   * 查询物流轨迹
+   * Truy vấn lịch sử logistics
    */
   async queryTracking(
     userId: string,
@@ -128,7 +128,7 @@ export class YTOExpressService {
     data?: any
   }> {
     try {
-      // 构建查询请求参数
+      // Xây dựng tham số yêu cầu truy vấn
       const params = {
         user_id: userId,
         format: 'JSON',
@@ -138,16 +138,16 @@ export class YTOExpressService {
         waybill_no: waybillNo
       }
 
-      // 生成签名
+      // Tạo chữ ký
       const sign = this.generateSign(params, appKey)
       const requestParams = {
         ...params,
         sign
       }
 
-      console.log('圆通物流查询请求参数:', requestParams)
+      console.log('Tham số yêu cầu truy vấn logistics YTO:', requestParams)
 
-      // 发送请求
+      // Gửi yêu cầu
       const response = await axios.post(apiUrl, null, {
         params: requestParams,
         headers: {
@@ -156,12 +156,12 @@ export class YTOExpressService {
         timeout: 10000
       })
 
-      console.log('圆通物流查询响应:', response.data)
+      console.log('Phản hồi truy vấn logistics YTO:', response.data)
 
-      // 检查响应
+      // Kiểm tra phản hồi
       if (response.data) {
         if (response.data.success === true || response.data.success === 'true') {
-          // 转换为统一格式
+          // Chuyển đổi sang định dạng thống nhất
           const traces = response.data.traces || []
           const formattedTraces = traces.map((trace: any) => ({
             time: trace.scan_date || trace.time,
@@ -173,7 +173,7 @@ export class YTOExpressService {
 
           return {
             success: true,
-            message: '查询成功',
+            message: 'Truy vấn thành công',
             data: {
               waybillNo: waybillNo,
               traces: formattedTraces,
@@ -184,29 +184,29 @@ export class YTOExpressService {
 
         return {
           success: false,
-          message: response.data.reason || response.data.message || '查询失败',
+          message: response.data.reason || response.data.message || 'Truy vấn thất bại',
           data: response.data
         }
       }
 
       return {
         success: false,
-        message: '响应数据为空'
+        message: 'Dữ liệu phản hồi trống'
       }
     } catch (error: any) {
-      console.error('圆通物流查询失败:', error)
+      console.error('Truy vấn logistics YTO thất bại:', error)
 
-      let errorMessage = '查询失败'
+      let errorMessage = 'Truy vấn thất bại'
 
       if (error.response) {
-        errorMessage = `服务器错误: ${error.response.status}`
+        errorMessage = `Lỗi máy chủ: ${error.response.status}`
         if (error.response.data) {
           errorMessage += ` - ${error.response.data.reason || error.response.data.message || ''}`
         }
       } else if (error.request) {
-        errorMessage = '网络错误: 无法连接到圆通服务器'
+        errorMessage = 'Lỗi mạng: Không thể kết nối đến máy chủ YTO'
       } else {
-        errorMessage = error.message || '未知错误'
+        errorMessage = error.message || 'Lỗi không xác định'
       }
 
       return {
@@ -217,5 +217,5 @@ export class YTOExpressService {
   }
 }
 
-// 导出单例
+// Xuất singleton
 export const ytoExpressService = new YTOExpressService()

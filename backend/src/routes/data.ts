@@ -11,7 +11,7 @@ router.use(authenticateToken);
 
 /**
  * @route GET /api/v1/data/list
- * @desc 获取数据列表（客户数据）
+ * @desc Lấy danh sách dữ liệu (dữ liệu khách hàng)
  */
 router.get('/list', async (req: Request, res: Response) => {
   try {
@@ -21,14 +21,14 @@ router.get('/list', async (req: Request, res: Response) => {
 
     const queryBuilder = customerRepository.createQueryBuilder('customer');
 
-    // 数据权限过滤
+    // Lọc quyền dữ liệu
     const role = currentUser?.role || '';
     const allowAllRoles = ['super_admin', 'superadmin', 'admin'];
     if (!allowAllRoles.includes(role)) {
       if (role === 'manager' || role === 'department_manager') {
-        // 经理看本部门的
+        // Quản lý xem phòng ban của mình
       } else {
-        // 销售员只看自己的
+        // Nhân viên bán hàng chỉ xem của mình
         queryBuilder.andWhere('customer.salesPersonId = :userId', {
           userId: currentUser?.userId
         });
@@ -61,22 +61,22 @@ router.get('/list', async (req: Request, res: Response) => {
       data: { list, total, page: Number(page), pageSize: Number(pageSize) }
     });
   } catch (error) {
-    console.error('获取数据列表失败:', error);
-    res.status(500).json({ success: false, message: '获取数据列表失败' });
+    console.error('Lấy danh sách dữ liệu thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy danh sách dữ liệu thất bại' });
   }
 });
 
 
 /**
  * @route POST /api/v1/data/batch-assign
- * @desc 批量分配数据
+ * @desc Phân bổ hàng loạt dữ liệu
  */
 router.post('/batch-assign', async (req: Request, res: Response) => {
   try {
     const { dataIds, assigneeId } = req.body;
 
     if (!dataIds || dataIds.length === 0 || !assigneeId) {
-      return res.status(400).json({ success: false, message: '参数不完整' });
+      return res.status(400).json({ success: false, message: 'Tham số không đầy đủ' });
     }
 
     const customerRepository = AppDataSource.getRepository(Customer);
@@ -84,7 +84,7 @@ router.post('/batch-assign', async (req: Request, res: Response) => {
 
     const assignee = await userRepository.findOne({ where: { id: assigneeId } });
     if (!assignee) {
-      return res.status(404).json({ success: false, message: '分配人不存在' });
+      return res.status(404).json({ success: false, message: 'Người được phân bổ không tồn tại' });
     }
 
     let successCount = 0;
@@ -98,31 +98,31 @@ router.post('/batch-assign', async (req: Request, res: Response) => {
           successCount++;
         }
       } catch (e) {
-        console.error('分配单条数据失败:', e);
+        console.error('Phân bổ một dữ liệu thất bại:', e);
       }
     }
 
     res.json({
       success: true,
-      message: '分配成功',
+      message: 'Phân bổ thành công',
       data: { successCount, failCount: dataIds.length - successCount }
     });
   } catch (error) {
-    console.error('批量分配失败:', error);
-    res.status(500).json({ success: false, message: '批量分配失败' });
+    console.error('Phân bổ hàng loạt thất bại:', error);
+    res.status(500).json({ success: false, message: 'Phân bổ hàng loạt thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/data/batch-archive
- * @desc 批量归档数据
+ * @desc Lưu trữ hàng loạt dữ liệu
  */
 router.post('/batch-archive', async (req: Request, res: Response) => {
   try {
     const { dataIds } = req.body;
 
     if (!dataIds || dataIds.length === 0) {
-      return res.status(400).json({ success: false, message: '参数不完整' });
+      return res.status(400).json({ success: false, message: 'Tham số không đầy đủ' });
     }
 
     const customerRepository = AppDataSource.getRepository(Customer);
@@ -137,31 +137,31 @@ router.post('/batch-archive', async (req: Request, res: Response) => {
           successCount++;
         }
       } catch (e) {
-        console.error('归档单条数据失败:', e);
+        console.error('Lưu trữ một dữ liệu thất bại:', e);
       }
     }
 
     res.json({
       success: true,
-      message: '归档成功',
+      message: 'Lưu trữ thành công',
       data: { successCount, failCount: dataIds.length - successCount }
     });
   } catch (error) {
-    console.error('批量归档失败:', error);
-    res.status(500).json({ success: false, message: '批量归档失败' });
+    console.error('Lưu trữ hàng loạt thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lưu trữ hàng loạt thất bại' });
   }
 });
 
 /**
  * @route POST /api/v1/data/recover
- * @desc 恢复数据
+ * @desc Khôi phục dữ liệu
  */
 router.post('/recover', async (req: Request, res: Response) => {
   try {
     const { dataIds } = req.body;
 
     if (!dataIds || dataIds.length === 0) {
-      return res.status(400).json({ success: false, message: '参数不完整' });
+      return res.status(400).json({ success: false, message: 'Tham số không đầy đủ' });
     }
 
     const customerRepository = AppDataSource.getRepository(Customer);
@@ -176,24 +176,24 @@ router.post('/recover', async (req: Request, res: Response) => {
           successCount++;
         }
       } catch (e) {
-        console.error('恢复单条数据失败:', e);
+        console.error('Khôi phục một dữ liệu thất bại:', e);
       }
     }
 
     res.json({
       success: true,
-      message: '恢复成功',
+      message: 'Khôi phục thành công',
       data: { successCount, failCount: dataIds.length - successCount }
     });
   } catch (error) {
-    console.error('恢复数据失败:', error);
-    res.status(500).json({ success: false, message: '恢复数据失败' });
+    console.error('Khôi phục dữ liệu thất bại:', error);
+    res.status(500).json({ success: false, message: 'Khôi phục dữ liệu thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/data/assignee-options
- * @desc 获取分配人选项
+ * @desc Lấy tùy chọn người được phân bổ
  */
 router.get('/assignee-options', async (req: Request, res: Response) => {
   try {
@@ -212,15 +212,15 @@ router.get('/assignee-options', async (req: Request, res: Response) => {
 
     res.json({ success: true, data: options });
   } catch (error) {
-    console.error('获取分配人选项失败:', error);
-    res.status(500).json({ success: false, message: '获取分配人选项失败' });
+    console.error('Lấy tùy chọn người được phân bổ thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy tùy chọn người được phân bổ thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/data/search
- * @desc 搜索客户（资料管理-客户查询）
- * 支持：客户姓名、手机号、客户编码、订单号、物流单号
+ * @desc Tìm kiếm khách hàng (Quản lý tài liệu - Tìm kiếm khách hàng)
+ * Hỗ trợ: Tên khách hàng, số điện thoại, mã khách hàng, số đơn hàng, số đơn vận chuyển
  */
 router.get('/search', async (req: Request, res: Response) => {
   try {
@@ -231,9 +231,9 @@ router.get('/search', async (req: Request, res: Response) => {
       return res.json({ success: true, data: null });
     }
 
-    console.log('🔍 [客户搜索] 关键词:', keyword);
+    console.log('🔍 [Tìm kiếm khách hàng] Từ khóa:', keyword);
 
-    // 1. 直接搜索客户信息（客户编码、手机号、姓名）
+    // 1. Tìm kiếm trực tiếp thông tin khách hàng (mã khách hàng, số điện thoại, tên)
     let customer = await customerRepository
       .createQueryBuilder('customer')
       .where('customer.customerCode = :keyword', { keyword })
@@ -241,9 +241,9 @@ router.get('/search', async (req: Request, res: Response) => {
       .orWhere('customer.name = :keyword', { keyword })
       .getOne();
 
-    // 2. 如果没找到，通过订单号搜索
+    // 2. Nếu không tìm thấy, tìm kiếm qua số đơn hàng
     if (!customer) {
-      console.log('🔍 [客户搜索] 尝试通过订单号查找');
+      console.log('🔍 [Tìm kiếm khách hàng] Thử tìm qua số đơn hàng');
       const orderResult = await AppDataSource.query(
         `SELECT c.* FROM customers c
          JOIN orders o ON c.id = o.customer_id
@@ -252,19 +252,19 @@ router.get('/search', async (req: Request, res: Response) => {
         [keyword]
       );
       if (orderResult && orderResult.length > 0) {
-        // 通过ID重新查询获取完整的Customer实体
+        // Truy vấn lại qua ID để lấy entity Customer đầy đủ
         customer = await customerRepository.findOne({
           where: { id: orderResult[0].id }
         }) || null;
         if (customer) {
-          console.log('✅ [客户搜索] 通过订单号找到客户:', customer.name);
+          console.log('✅ [Tìm kiếm khách hàng] Tìm thấy khách hàng qua số đơn hàng:', customer.name);
         }
       }
     }
 
-    // 3. 如果还没找到，通过物流单号搜索
+    // 3. Nếu vẫn chưa tìm thấy, tìm kiếm qua số đơn vận chuyển
     if (!customer) {
-      console.log('🔍 [客户搜索] 尝试通过物流单号查找');
+      console.log('🔍 [Tìm kiếm khách hàng] Thử tìm qua số đơn vận chuyển');
       const logisticsResult = await AppDataSource.query(
         `SELECT c.* FROM customers c
          JOIN orders o ON c.id = o.customer_id
@@ -274,22 +274,22 @@ router.get('/search', async (req: Request, res: Response) => {
         [keyword]
       );
       if (logisticsResult && logisticsResult.length > 0) {
-        // 通过ID重新查询获取完整的Customer实体
+        // Truy vấn lại qua ID để lấy entity Customer đầy đủ
         customer = await customerRepository.findOne({
           where: { id: logisticsResult[0].id }
         }) || null;
         if (customer) {
-          console.log('✅ [客户搜索] 通过物流单号找到客户:', customer.name);
+          console.log('✅ [Tìm kiếm khách hàng] Tìm thấy khách hàng qua số đơn vận chuyển:', customer.name);
         }
       }
     }
 
     if (!customer) {
-      console.log('❌ [客户搜索] 未找到匹配的客户');
-      return res.json({ success: true, data: null, message: '未找到匹配的客户' });
+      console.log('❌ [Tìm kiếm khách hàng] Không tìm thấy khách hàng phù hợp');
+      return res.json({ success: true, data: null, message: 'Không tìm thấy khách hàng phù hợp' });
     }
 
-    // 获取客户的销售员归属信息
+    // Lấy thông tin người bán hàng thuộc về khách hàng
     if (customer.salesPersonId) {
       const salesPersonResult = await AppDataSource.query(
         `SELECT id, username, real_name, department_name, position FROM users WHERE id = ?`,
@@ -304,7 +304,7 @@ router.get('/search', async (req: Request, res: Response) => {
           department: salesPerson.department_name,
           position: salesPerson.position
         };
-        console.log('✅ [客户搜索] 获取到销售员信息:', salesPerson.real_name || salesPerson.username);
+        console.log('✅ [Tìm kiếm khách hàng] Lấy được thông tin người bán hàng:', salesPerson.real_name || salesPerson.username);
       }
     }
 
@@ -313,14 +313,14 @@ router.get('/search', async (req: Request, res: Response) => {
       data: customer
     });
   } catch (error) {
-    console.error('❌ [客户搜索] 失败:', error);
-    res.status(500).json({ success: false, message: '搜索客户失败' });
+    console.error('❌ [Tìm kiếm khách hàng] Thất bại:', error);
+    res.status(500).json({ success: false, message: 'Tìm kiếm khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/data/search-customer
- * @desc 搜索客户（模糊搜索，返回列表）
+ * @desc Tìm kiếm khách hàng (tìm kiếm mờ, trả về danh sách)
  */
 router.get('/search-customer', async (req: Request, res: Response) => {
   try {
@@ -348,14 +348,14 @@ router.get('/search-customer', async (req: Request, res: Response) => {
       data: { list, total, page: Number(page), pageSize: Number(pageSize) }
     });
   } catch (error) {
-    console.error('搜索客户失败:', error);
-    res.status(500).json({ success: false, message: '搜索客户失败' });
+    console.error('Tìm kiếm khách hàng thất bại:', error);
+    res.status(500).json({ success: false, message: 'Tìm kiếm khách hàng thất bại' });
   }
 });
 
 /**
  * @route GET /api/v1/data/statistics
- * @desc 获取数据统计
+ * @desc Lấy thống kê dữ liệu
  */
 router.get('/statistics', async (req: Request, res: Response) => {
   try {
@@ -380,8 +380,8 @@ router.get('/statistics', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('获取数据统计失败:', error);
-    res.status(500).json({ success: false, message: '获取数据统计失败' });
+    console.error('Lấy thống kê dữ liệu thất bại:', error);
+    res.status(500).json({ success: false, message: 'Lấy thống kê dữ liệu thất bại' });
   }
 });
 

@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * CRM系统数据库连接测试脚本
- * 用于验证数据库配置和连接状态
+ * Script kiểm tra kết nối cơ sở dữ liệu hệ thống CRM
+ * Dùng để xác minh cấu hình cơ sở dữ liệu và trạng thái kết nối
  */
 
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-// 加载环境变量
+// Tải biến môi trường
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-// 颜色输出
+// Màu sắc đầu ra
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -41,7 +41,7 @@ interface DatabaseConfig {
 }
 
 /**
- * 获取数据库配置
+ * Lấy cấu hình cơ sở dữ liệu
  */
 function getDatabaseConfig(): DatabaseConfig {
   const config = {
@@ -58,7 +58,7 @@ function getDatabaseConfig(): DatabaseConfig {
 }
 
 /**
- * 创建数据源
+ * Tạo nguồn dữ liệu
  */
 function createDataSource(config: DatabaseConfig): DataSource {
   return new DataSource({
@@ -78,24 +78,24 @@ function createDataSource(config: DatabaseConfig): DataSource {
 }
 
 /**
- * 测试数据库连接
+ * Kiểm tra kết nối cơ sở dữ liệu
  */
 async function testConnection(dataSource: DataSource): Promise<boolean> {
   try {
     await dataSource.initialize();
-    log.success('数据库连接成功');
-    
-    // 测试查询
+    log.success('Kết nối cơ sở dữ liệu thành công');
+
+    // Kiểm tra truy vấn
     const result = await dataSource.query('SELECT 1 as test');
     if (result && result[0] && result[0].test === 1) {
-      log.success('数据库查询测试通过');
+      log.success('Kiểm tra truy vấn cơ sở dữ liệu đã vượt qua');
       return true;
     } else {
-      log.error('数据库查询测试失败');
+      log.error('Kiểm tra truy vấn cơ sở dữ liệu thất bại');
       return false;
     }
   } catch (error) {
-    log.error(`数据库连接失败: ${error instanceof Error ? error.message : String(error)}`);
+    log.error(`Kết nối cơ sở dữ liệu thất bại: ${error instanceof Error ? error.message : String(error)}`);
     return false;
   } finally {
     if (dataSource.isInitialized) {
@@ -105,128 +105,128 @@ async function testConnection(dataSource: DataSource): Promise<boolean> {
 }
 
 /**
- * 检查数据库版本
+ * Kiểm tra phiên bản cơ sở dữ liệu
  */
 async function checkDatabaseVersion(dataSource: DataSource): Promise<void> {
   try {
     const result = await dataSource.query('SELECT VERSION() as version');
     const version = result[0]?.version;
     if (version) {
-      log.info(`MySQL版本: ${version}`);
-      
-      // 检查版本兼容性
+      log.info(`Phiên bản MySQL: ${version}`);
+
+      // Kiểm tra tương thích phiên bản
       const majorVersion = parseInt(version.split('.')[0]);
       if (majorVersion >= 8) {
-        log.success('MySQL版本兼容 (8.0+)');
+        log.success('Phiên bản MySQL tương thích (8.0+)');
       } else if (majorVersion >= 5) {
-        log.warning('MySQL版本较旧，建议升级到8.0+');
+        log.warning('Phiên bản MySQL cũ, nên nâng cấp lên 8.0+');
       } else {
-        log.error('MySQL版本过旧，可能存在兼容性问题');
+        log.error('Phiên bản MySQL quá cũ, có thể có vấn đề tương thích');
       }
     }
   } catch (error) {
-    log.error(`获取数据库版本失败: ${error instanceof Error ? error.message : String(error)}`);
+    log.error(`Lấy phiên bản cơ sở dữ liệu thất bại: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * 检查数据库表
+ * Kiểm tra bảng cơ sở dữ liệu
  */
 async function checkTables(dataSource: DataSource): Promise<void> {
   try {
     const tables = await dataSource.query('SHOW TABLES');
-    log.info(`数据库表数量: ${tables.length}`);
-    
+    log.info(`Số lượng bảng cơ sở dữ liệu: ${tables.length}`);
+
     if (tables.length === 0) {
-      log.warning('数据库中没有表，请运行数据库初始化脚本');
+      log.warning('Không có bảng trong cơ sở dữ liệu, vui lòng chạy script khởi tạo cơ sở dữ liệu');
       return;
     }
 
-    // 检查关键表
+    // Kiểm tra các bảng quan trọng
     const tableNames = tables.map((table: any) => Object.values(table)[0]);
     const requiredTables = ['users', 'departments', 'customers', 'products', 'orders'];
-    
-    log.info('检查关键表:');
+
+    log.info('Kiểm tra các bảng quan trọng:');
     for (const tableName of requiredTables) {
       if (tableNames.includes(tableName)) {
         log.success(`✓ ${tableName}`);
       } else {
-        log.error(`✗ ${tableName} (缺失)`);
+        log.error(`✗ ${tableName} (thiếu)`);
       }
     }
 
-    // 检查用户表数据
+    // Kiểm tra dữ liệu bảng người dùng
     try {
       const userCount = await dataSource.query('SELECT COUNT(*) as count FROM users');
       const count = userCount[0]?.count || 0;
-      log.info(`用户表记录数: ${count}`);
-      
+      log.info(`Số bản ghi bảng người dùng: ${count}`);
+
       if (count === 0) {
-        log.warning('用户表为空，请确保已导入初始数据');
+        log.warning('Bảng người dùng trống, vui lòng đảm bảo đã nhập dữ liệu ban đầu');
       }
     } catch (error) {
-      log.error('无法查询用户表');
+      log.error('Không thể truy vấn bảng người dùng');
     }
 
   } catch (error) {
-    log.error(`检查数据库表失败: ${error instanceof Error ? error.message : String(error)}`);
+    log.error(`Kiểm tra bảng cơ sở dữ liệu thất bại: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * 主函数
+ * Hàm chính
  */
 async function main(): Promise<void> {
   log.title('==========================================');
-  log.title('    CRM系统数据库连接测试');
+  log.title('    Kiểm tra kết nối cơ sở dữ liệu hệ thống CRM');
   log.title('==========================================');
   console.log();
 
-  // 检查环境变量
-  log.info('检查环境配置...');
+  // Kiểm tra biến môi trường
+  log.info('Kiểm tra cấu hình môi trường...');
   const config = getDatabaseConfig();
-  
-  log.info('数据库配置:');
-  console.log(`  主机: ${config.host}`);
-  console.log(`  端口: ${config.port}`);
-  console.log(`  用户: ${config.username}`);
-  console.log(`  数据库: ${config.database}`);
-  console.log(`  字符集: ${config.charset}`);
-  console.log(`  时区: ${config.timezone}`);
+
+  log.info('Cấu hình cơ sở dữ liệu:');
+  console.log(`  Máy chủ: ${config.host}`);
+  console.log(`  Cổng: ${config.port}`);
+  console.log(`  Người dùng: ${config.username}`);
+  console.log(`  Cơ sở dữ liệu: ${config.database}`);
+  console.log(`  Bộ ký tự: ${config.charset}`);
+  console.log(`  Múi giờ: ${config.timezone}`);
   console.log();
 
-  // 创建数据源
+  // Tạo nguồn dữ liệu
   const dataSource = createDataSource(config);
 
   try {
-    // 测试连接
-    log.info('测试数据库连接...');
+    // Kiểm tra kết nối
+    log.info('Kiểm tra kết nối cơ sở dữ liệu...');
     const connected = await testConnection(dataSource);
-    
+
     if (!connected) {
-      log.error('数据库连接失败，请检查配置');
+      log.error('Kết nối cơ sở dữ liệu thất bại, vui lòng kiểm tra cấu hình');
       process.exit(1);
     }
 
-    // 重新初始化用于后续测试
+    // Khởi tạo lại để kiểm tra tiếp theo
     await dataSource.initialize();
 
-    // 检查数据库版本
-    log.info('检查数据库版本...');
+    // Kiểm tra phiên bản cơ sở dữ liệu
+    log.info('Kiểm tra phiên bản cơ sở dữ liệu...');
     await checkDatabaseVersion(dataSource);
     console.log();
 
-    // 检查数据库表
-    log.info('检查数据库表结构...');
+    // Kiểm tra bảng cơ sở dữ liệu
+    log.info('Kiểm tra cấu trúc bảng cơ sở dữ liệu...');
     await checkTables(dataSource);
     console.log();
 
     log.title('==========================================');
-    log.success('数据库测试完成！');
+    log.success('Kiểm tra cơ sở dữ liệu hoàn tất!');
     log.title('==========================================');
 
   } catch (error) {
-    log.error(`测试过程中发生错误: ${error instanceof Error ? error.message : String(error)}`);
+    log.error(`Đã xảy ra lỗi trong quá trình kiểm tra: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
   } finally {
     if (dataSource.isInitialized) {
@@ -235,10 +235,10 @@ async function main(): Promise<void> {
   }
 }
 
-// 运行测试
+// Chạy kiểm tra
 if (require.main === module) {
   main().catch((error) => {
-    console.error('测试脚本执行失败:', error);
+    console.error('Thực thi script kiểm tra thất bại:', error);
     process.exit(1);
   });
 }

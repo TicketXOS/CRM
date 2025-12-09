@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 
-// 自定义错误类
+// Lớp lỗi tùy chỉnh
 export class AppError extends Error {
   public statusCode: number;
   public code: string;
@@ -17,14 +17,14 @@ export class AppError extends Error {
   }
 }
 
-// 业务错误类
+// Lớp lỗi nghiệp vụ
 export class BusinessError extends AppError {
   constructor(message: string, code: string = 'BUSINESS_ERROR') {
     super(message, 400, code);
   }
 }
 
-// 验证错误类
+// Lớp lỗi xác thực
 export class ValidationError extends AppError {
   public details: any;
 
@@ -34,29 +34,29 @@ export class ValidationError extends AppError {
   }
 }
 
-// 未找到错误类
+// Lớp lỗi không tìm thấy
 export class NotFoundError extends AppError {
-  constructor(resource: string = '资源') {
-    super(`${resource}不存在`, 404, 'NOT_FOUND');
+  constructor(resource: string = 'Tài nguyên') {
+    super(`${resource} không tồn tại`, 404, 'NOT_FOUND');
   }
 }
 
-// 权限错误类
+// Lớp lỗi quyền truy cập
 export class ForbiddenError extends AppError {
-  constructor(message: string = '权限不足') {
+  constructor(message: string = 'Quyền không đủ') {
     super(message, 403, 'FORBIDDEN');
   }
 }
 
-// 未认证错误类
+// Lớp lỗi chưa xác thực
 export class UnauthorizedError extends AppError {
-  constructor(message: string = '未认证') {
+  constructor(message: string = 'Chưa xác thực') {
     super(message, 401, 'UNAUTHORIZED');
   }
 }
 
 /**
- * 全局错误处理中间件
+ * Middleware xử lý lỗi toàn cục
  */
 export const errorHandler = (
   error: Error,
@@ -66,50 +66,50 @@ export const errorHandler = (
 ) => {
   let statusCode = 500;
   let code = 'INTERNAL_ERROR';
-  let message = '服务器内部错误';
+  let message = 'Lỗi máy chủ nội bộ';
   let details: any = undefined;
 
-  // 处理自定义错误
+  // Xử lý lỗi tùy chỉnh
   if (error instanceof AppError) {
     statusCode = error.statusCode;
     code = error.code;
     message = error.message;
-    
+
     if (error instanceof ValidationError) {
       details = error.details;
     }
   }
-  // 处理数据库错误
+  // Xử lý lỗi cơ sở dữ liệu
   else if (error.name === 'QueryFailedError') {
     statusCode = 400;
     code = 'DATABASE_ERROR';
-    
-    // MySQL错误处理
+
+    // Xử lý lỗi MySQL
     const dbError = error as any;
     if (dbError.code === 'ER_DUP_ENTRY') {
-      message = '数据重复，请检查唯一字段';
+      message = 'Dữ liệu trùng lặp, vui lòng kiểm tra trường duy nhất';
       code = 'DUPLICATE_ENTRY';
     } else if (dbError.code === 'ER_NO_REFERENCED_ROW_2') {
-      message = '关联数据不存在';
+      message = 'Dữ liệu liên quan không tồn tại';
       code = 'FOREIGN_KEY_ERROR';
     } else {
-      message = '数据库操作失败';
+      message = 'Thao tác cơ sở dữ liệu thất bại';
     }
   }
-  // 处理JSON解析错误
+  // Xử lý lỗi phân tích JSON
   else if (error instanceof SyntaxError && 'body' in error) {
     statusCode = 400;
     code = 'INVALID_JSON';
-    message = 'JSON格式错误';
+    message = 'Định dạng JSON không đúng';
   }
-  // 处理其他已知错误
+  // Xử lý các lỗi đã biết khác
   else if (error.name === 'ValidationError') {
     statusCode = 400;
     code = 'VALIDATION_ERROR';
-    message = '数据验证失败';
+    message = 'Xác thực dữ liệu thất bại';
   }
 
-  // 记录错误日志
+  // Ghi log lỗi
   const logData = {
     error: {
       name: error.name,
@@ -130,7 +130,7 @@ export const errorHandler = (
   };
 
   if (statusCode >= 500) {
-    logger.error('服务器错误:', {
+    logger.error('Lỗi máy chủ:', {
       error: {
         name: error.name,
         message: error.message,
@@ -140,7 +140,7 @@ export const errorHandler = (
       user: logData.user
     });
   } else {
-    logger.warn('客户端错误:', {
+    logger.warn('Lỗi phía khách hàng:', {
       error: {
         name: error.name,
         message: error.message,
@@ -157,7 +157,7 @@ export const errorHandler = (
     });
   }
 
-  // 构建响应
+  // Xây dựng phản hồi
   const response: any = {
     success: false,
     message,
@@ -166,7 +166,7 @@ export const errorHandler = (
     path: req.path
   };
 
-  // 开发环境返回详细错误信息
+  // Môi trường phát triển trả về thông tin lỗi chi tiết
   if (process.env.NODE_ENV === 'development') {
     response.error = {
       name: error.name,
@@ -175,7 +175,7 @@ export const errorHandler = (
     };
   }
 
-  // 添加验证错误详情
+  // Thêm chi tiết lỗi xác thực
   if (details) {
     response.details = details;
   }
@@ -184,15 +184,15 @@ export const errorHandler = (
 };
 
 /**
- * 404错误处理中间件
+ * Middleware xử lý lỗi 404
  */
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
-  const error = new NotFoundError('API端点');
+  const error = new NotFoundError('Điểm cuối API');
   next(error);
 };
 
 /**
- * 异步错误捕获装饰器
+ * Decorator bắt lỗi bất đồng bộ
  */
 export const catchAsync = (fn: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {

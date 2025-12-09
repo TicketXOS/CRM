@@ -4,30 +4,30 @@ import { Role } from '../entities/Role';
 import { Permission } from '../entities/Permission';
 import { logger } from '../config/logger';
 
-// 完整的权限数据定义
+// Định nghĩa dữ liệu quyền hạn đầy đủ
 const defaultPermissions = [
-  // 数据看板
+  // Bảng điều khiển dữ liệu
   {
-    name: '数据看板',
+    name: 'Bảng điều khiển dữ liệu',
     code: 'dashboard',
-    description: '数据看板模块',
+    description: 'Mô-đun bảng điều khiển dữ liệu',
     module: 'dashboard',
     type: 'menu',
     path: '/dashboard',
     icon: 'DataAnalysis',
     sort: 1,
     children: [
-      { name: '查看个人数据', code: 'dashboard:personal', type: 'button', sort: 1 },
-      { name: '查看部门数据', code: 'dashboard:department', type: 'button', sort: 2 },
-      { name: '查看全部数据', code: 'dashboard:all', type: 'button', sort: 3 }
+      { name: 'Xem dữ liệu cá nhân', code: 'dashboard:personal', type: 'button', sort: 1 },
+      { name: 'Xem dữ liệu phòng ban', code: 'dashboard:department', type: 'button', sort: 2 },
+      { name: 'Xem tất cả dữ liệu', code: 'dashboard:all', type: 'button', sort: 3 }
     ]
   },
-  
-  // 客户管理
+
+  // Quản lý khách hàng
   {
-    name: '客户管理',
+    name: 'Quản lý khách hàng',
     code: 'customer',
-    description: '客户管理模块',
+    description: 'Mô-đun quản lý khách hàng',
     module: 'customer',
     type: 'menu',
     path: '/customer',
@@ -35,33 +35,33 @@ const defaultPermissions = [
     sort: 2,
     children: [
       {
-        name: '客户列表',
+        name: 'Danh sách khách hàng',
         code: 'customer:list',
-        description: '客户列表页面',
+        description: 'Trang danh sách khách hàng',
         module: 'customer',
         type: 'menu',
         path: '/customer/list',
         icon: 'List',
         sort: 1,
         children: [
-          { name: '查看个人客户', code: 'customer:view:personal', type: 'button', sort: 1 },
-          { name: '查看部门客户', code: 'customer:view:department', type: 'button', sort: 2 },
-          { name: '查看全部客户', code: 'customer:view:all', type: 'button', sort: 3 },
-          { name: '新增客户', code: 'customer:add', type: 'button', sort: 4 },
-          { name: '编辑客户', code: 'customer:edit', type: 'button', sort: 5 },
-          { name: '删除客户', code: 'customer:delete', type: 'button', sort: 6 },
-          { name: '导入客户', code: 'customer:import', type: 'button', sort: 7 },
-          { name: '导出客户', code: 'customer:export', type: 'button', sort: 8 }
+          { name: 'Xem khách hàng cá nhân', code: 'customer:view:personal', type: 'button', sort: 1 },
+          { name: 'Xem khách hàng phòng ban', code: 'customer:view:department', type: 'button', sort: 2 },
+          { name: 'Xem tất cả khách hàng', code: 'customer:view:all', type: 'button', sort: 3 },
+          { name: 'Thêm khách hàng', code: 'customer:add', type: 'button', sort: 4 },
+          { name: 'Chỉnh sửa khách hàng', code: 'customer:edit', type: 'button', sort: 5 },
+          { name: 'Xóa khách hàng', code: 'customer:delete', type: 'button', sort: 6 },
+          { name: 'Nhập khách hàng', code: 'customer:import', type: 'button', sort: 7 },
+          { name: 'Xuất khách hàng', code: 'customer:export', type: 'button', sort: 8 }
         ]
       }
     ]
   },
 
-  // 订单管理
+  // Quản lý đơn hàng
   {
-    name: '订单管理',
+    name: 'Quản lý đơn hàng',
     code: 'order',
-    description: '订单管理模块',
+    description: 'Mô-đun quản lý đơn hàng',
     module: 'order',
     type: 'menu',
     path: '/order',
@@ -69,32 +69,32 @@ const defaultPermissions = [
     sort: 3,
     children: [
       {
-        name: '订单列表',
+        name: 'Danh sách đơn hàng',
         code: 'order:list',
-        description: '订单列表页面',
+        description: 'Trang danh sách đơn hàng',
         module: 'order',
         type: 'menu',
         path: '/order/list',
         icon: 'List',
         sort: 1,
         children: [
-          { name: '查看个人订单', code: 'order:view:personal', type: 'button', sort: 1 },
-          { name: '查看部门订单', code: 'order:view:department', type: 'button', sort: 2 },
-          { name: '查看全部订单', code: 'order:view:all', type: 'button', sort: 3 },
-          { name: '新增订单', code: 'order:add', type: 'button', sort: 4 },
-          { name: '编辑订单', code: 'order:edit', type: 'button', sort: 5 },
-          { name: '删除订单', code: 'order:delete', type: 'button', sort: 6 },
-          { name: '订单审核', code: 'order:audit', type: 'button', sort: 7 }
+          { name: 'Xem đơn hàng cá nhân', code: 'order:view:personal', type: 'button', sort: 1 },
+          { name: 'Xem đơn hàng phòng ban', code: 'order:view:department', type: 'button', sort: 2 },
+          { name: 'Xem tất cả đơn hàng', code: 'order:view:all', type: 'button', sort: 3 },
+          { name: 'Thêm đơn hàng', code: 'order:add', type: 'button', sort: 4 },
+          { name: 'Chỉnh sửa đơn hàng', code: 'order:edit', type: 'button', sort: 5 },
+          { name: 'Xóa đơn hàng', code: 'order:delete', type: 'button', sort: 6 },
+          { name: 'Duyệt đơn hàng', code: 'order:audit', type: 'button', sort: 7 }
         ]
       }
     ]
   },
 
-  // 服务管理
+  // Quản lý dịch vụ
   {
-    name: '服务管理',
+    name: 'Quản lý dịch vụ',
     code: 'service',
-    description: '服务管理模块',
+    description: 'Mô-đun quản lý dịch vụ',
     module: 'service',
     type: 'menu',
     path: '/service',
@@ -102,28 +102,28 @@ const defaultPermissions = [
     sort: 4,
     children: [
       {
-        name: '通话管理',
+        name: 'Quản lý cuộc gọi',
         code: 'service:call',
-        description: '通话管理页面',
+        description: 'Trang quản lý cuộc gọi',
         module: 'service',
         type: 'menu',
         path: '/service/call',
         icon: 'Phone',
         sort: 1,
         children: [
-          { name: '查看通话记录', code: 'service:call:view', type: 'button', sort: 1 },
-          { name: '新增通话记录', code: 'service:call:add', type: 'button', sort: 2 },
-          { name: '编辑通话记录', code: 'service:call:edit', type: 'button', sort: 3 }
+          { name: 'Xem lịch sử cuộc gọi', code: 'service:call:view', type: 'button', sort: 1 },
+          { name: 'Thêm lịch sử cuộc gọi', code: 'service:call:add', type: 'button', sort: 2 },
+          { name: 'Chỉnh sửa lịch sử cuộc gọi', code: 'service:call:edit', type: 'button', sort: 3 }
         ]
       }
     ]
   },
 
-  // 业绩统计
+  // Thống kê hiệu suất
   {
-    name: '业绩统计',
+    name: 'Thống kê hiệu suất',
     code: 'performance',
-    description: '业绩统计模块',
+    description: 'Mô-đun thống kê hiệu suất',
     module: 'performance',
     type: 'menu',
     path: '/performance',
@@ -131,67 +131,67 @@ const defaultPermissions = [
     sort: 5,
     children: [
       {
-        name: '个人业绩',
+        name: 'Hiệu suất cá nhân',
         code: 'performance:personal',
-        description: '个人业绩页面',
+        description: 'Trang hiệu suất cá nhân',
         module: 'performance',
         type: 'menu',
         path: '/performance/personal',
         icon: 'User',
         sort: 1,
         children: [
-          { name: '查看个人业绩', code: 'performance:personal:view', type: 'button', sort: 1 }
+          { name: 'Xem hiệu suất cá nhân', code: 'performance:personal:view', type: 'button', sort: 1 }
         ]
       },
       {
-        name: '团队业绩',
+        name: 'Hiệu suất nhóm',
         code: 'performance:team',
-        description: '团队业绩页面',
+        description: 'Trang hiệu suất nhóm',
         module: 'performance',
         type: 'menu',
         path: '/performance/team',
         icon: 'UserGroup',
         sort: 2,
         children: [
-          { name: '查看团队业绩', code: 'performance:team:view', type: 'button', sort: 1 }
+          { name: 'Xem hiệu suất nhóm', code: 'performance:team:view', type: 'button', sort: 1 }
         ]
       },
       {
-        name: '业绩分析',
+        name: 'Phân tích hiệu suất',
         code: 'performance:analysis',
-        description: '业绩分析页面',
+        description: 'Trang phân tích hiệu suất',
         module: 'performance',
         type: 'menu',
         path: '/performance/analysis',
         icon: 'DataAnalysis',
         sort: 3,
         children: [
-          { name: '查看部门业绩分析', code: 'performance:analysis:department', type: 'button', sort: 1 },
-          { name: '查看全部业绩分析', code: 'performance:analysis:all', type: 'button', sort: 2 }
+          { name: 'Xem phân tích hiệu suất phòng ban', code: 'performance:analysis:department', type: 'button', sort: 1 },
+          { name: 'Xem phân tích hiệu suất toàn bộ', code: 'performance:analysis:all', type: 'button', sort: 2 }
         ]
       },
       {
-        name: '业绩分享',
+        name: 'Chia sẻ hiệu suất',
         code: 'performance:share',
-        description: '业绩分享页面',
+        description: 'Trang chia sẻ hiệu suất',
         module: 'performance',
         type: 'menu',
         path: '/performance/share',
         icon: 'Share',
         sort: 4,
         children: [
-          { name: '查看业绩分享', code: 'performance:share:view', type: 'button', sort: 1 },
-          { name: '创建业绩分享', code: 'performance:share:create', type: 'button', sort: 2 }
+          { name: 'Xem chia sẻ hiệu suất', code: 'performance:share:view', type: 'button', sort: 1 },
+          { name: 'Tạo chia sẻ hiệu suất', code: 'performance:share:create', type: 'button', sort: 2 }
         ]
       }
     ]
   },
 
-  // 物流管理
+  // Quản lý logistics
   {
-    name: '物流管理',
+    name: 'Quản lý logistics',
     code: 'logistics',
-    description: '物流管理模块',
+    description: 'Mô-đun quản lý logistics',
     module: 'logistics',
     type: 'menu',
     path: '/logistics',
@@ -199,41 +199,41 @@ const defaultPermissions = [
     sort: 6,
     children: [
       {
-        name: '物流列表',
+        name: 'Danh sách logistics',
         code: 'logistics:list',
-        description: '物流列表页面',
+        description: 'Trang danh sách logistics',
         module: 'logistics',
         type: 'menu',
         path: '/logistics/list',
         icon: 'List',
         sort: 1,
         children: [
-          { name: '查看物流信息', code: 'logistics:view', type: 'button', sort: 1 },
-          { name: '新增物流', code: 'logistics:add', type: 'button', sort: 2 },
-          { name: '编辑物流', code: 'logistics:edit', type: 'button', sort: 3 }
+          { name: 'Xem thông tin logistics', code: 'logistics:view', type: 'button', sort: 1 },
+          { name: 'Thêm logistics', code: 'logistics:add', type: 'button', sort: 2 },
+          { name: 'Chỉnh sửa logistics', code: 'logistics:edit', type: 'button', sort: 3 }
         ]
       },
       {
-        name: '物流跟踪',
+        name: 'Theo dõi logistics',
         code: 'logistics:tracking',
-        description: '物流跟踪页面',
+        description: 'Trang theo dõi logistics',
         module: 'logistics',
         type: 'menu',
         path: '/logistics/tracking',
         icon: 'Location',
         sort: 2,
         children: [
-          { name: '查看物流跟踪', code: 'logistics:tracking:view', type: 'button', sort: 1 }
+          { name: 'Xem theo dõi logistics', code: 'logistics:tracking:view', type: 'button', sort: 1 }
         ]
       }
     ]
   },
 
-  // 售后管理
+  // Quản lý hậu mãi
   {
-    name: '售后管理',
+    name: 'Quản lý hậu mãi',
     code: 'aftersale',
-    description: '售后管理模块',
+    description: 'Mô-đun quản lý hậu mãi',
     module: 'aftersale',
     type: 'menu',
     path: '/aftersale',
@@ -241,44 +241,44 @@ const defaultPermissions = [
     sort: 7,
     children: [
       {
-        name: '售后订单',
+        name: 'Đơn hàng hậu mãi',
         code: 'aftersale:order',
-        description: '售后订单页面',
+        description: 'Trang đơn hàng hậu mãi',
         module: 'aftersale',
         type: 'menu',
         path: '/aftersale/order',
         icon: 'Document',
         sort: 1,
         children: [
-          { name: '查看个人售后', code: 'aftersale:view:personal', type: 'button', sort: 1 },
-          { name: '查看部门售后', code: 'aftersale:view:department', type: 'button', sort: 2 },
-          { name: '查看全部售后', code: 'aftersale:view:all', type: 'button', sort: 3 },
-          { name: '新建售后', code: 'aftersale:add', type: 'button', sort: 4 },
-          { name: '编辑售后', code: 'aftersale:edit', type: 'button', sort: 5 }
+          { name: 'Xem hậu mãi cá nhân', code: 'aftersale:view:personal', type: 'button', sort: 1 },
+          { name: 'Xem hậu mãi phòng ban', code: 'aftersale:view:department', type: 'button', sort: 2 },
+          { name: 'Xem tất cả hậu mãi', code: 'aftersale:view:all', type: 'button', sort: 3 },
+          { name: 'Tạo hậu mãi mới', code: 'aftersale:add', type: 'button', sort: 4 },
+          { name: 'Chỉnh sửa hậu mãi', code: 'aftersale:edit', type: 'button', sort: 5 }
         ]
       },
       {
-        name: '售后数据',
+        name: 'Dữ liệu hậu mãi',
         code: 'aftersale:data',
-        description: '售后数据页面',
+        description: 'Trang dữ liệu hậu mãi',
         module: 'aftersale',
         type: 'menu',
         path: '/aftersale/data',
         icon: 'DataAnalysis',
         sort: 2,
         children: [
-          { name: '查看部门售后数据', code: 'aftersale:data:department', type: 'button', sort: 1 },
-          { name: '查看全部售后数据', code: 'aftersale:data:all', type: 'button', sort: 2 }
+          { name: 'Xem dữ liệu hậu mãi phòng ban', code: 'aftersale:data:department', type: 'button', sort: 1 },
+          { name: 'Xem dữ liệu hậu mãi toàn bộ', code: 'aftersale:data:all', type: 'button', sort: 2 }
         ]
       }
     ]
   },
 
-  // 资料管理
+  // Quản lý tài liệu
   {
-    name: '资料管理',
+    name: 'Quản lý tài liệu',
     code: 'data',
-    description: '资料管理模块',
+    description: 'Mô-đun quản lý tài liệu',
     module: 'data',
     type: 'menu',
     path: '/data',
@@ -286,26 +286,26 @@ const defaultPermissions = [
     sort: 8,
     children: [
       {
-        name: '客户查询',
+        name: 'Tìm kiếm khách hàng',
         code: 'data:customer',
-        description: '客户查询页面',
+        description: 'Trang tìm kiếm khách hàng',
         module: 'data',
         type: 'menu',
         path: '/data/customer',
         icon: 'Search',
         sort: 1,
         children: [
-          { name: '查询客户资料', code: 'data:customer:search', type: 'button', sort: 1 }
+          { name: 'Tìm kiếm thông tin khách hàng', code: 'data:customer:search', type: 'button', sort: 1 }
         ]
       }
     ]
   },
 
-  // 系统管理
+  // Quản lý hệ thống
   {
-    name: '系统管理',
+    name: 'Quản lý hệ thống',
     code: 'system',
-    description: '系统管理模块',
+    description: 'Mô-đun quản lý hệ thống',
     module: 'system',
     type: 'menu',
     path: '/system',
@@ -313,220 +313,220 @@ const defaultPermissions = [
     sort: 9,
     children: [
       {
-        name: '用户管理',
+        name: 'Quản lý người dùng',
         code: 'system:user',
-        description: '用户管理页面',
+        description: 'Trang quản lý người dùng',
         module: 'system',
         type: 'menu',
         path: '/system/user',
         icon: 'User',
         sort: 1,
         children: [
-          { name: '查看用户', code: 'system:user:view', type: 'button', sort: 1 },
-          { name: '新增用户', code: 'system:user:add', type: 'button', sort: 2 },
-          { name: '编辑用户', code: 'system:user:edit', type: 'button', sort: 3 },
-          { name: '删除用户', code: 'system:user:delete', type: 'button', sort: 4 },
-          { name: '重置密码', code: 'system:user:reset-password', type: 'button', sort: 5 }
+          { name: 'Xem người dùng', code: 'system:user:view', type: 'button', sort: 1 },
+          { name: 'Thêm người dùng', code: 'system:user:add', type: 'button', sort: 2 },
+          { name: 'Chỉnh sửa người dùng', code: 'system:user:edit', type: 'button', sort: 3 },
+          { name: 'Xóa người dùng', code: 'system:user:delete', type: 'button', sort: 4 },
+          { name: 'Đặt lại mật khẩu', code: 'system:user:reset-password', type: 'button', sort: 5 }
         ]
       },
       {
-        name: '角色管理',
+        name: 'Quản lý vai trò',
         code: 'system:role',
-        description: '角色管理页面',
+        description: 'Trang quản lý vai trò',
         module: 'system',
         type: 'menu',
         path: '/system/role',
         icon: 'UserFilled',
         sort: 2,
         children: [
-          { name: '查看角色', code: 'system:role:view', type: 'button', sort: 1 },
-          { name: '新增角色', code: 'system:role:add', type: 'button', sort: 2 },
-          { name: '编辑角色', code: 'system:role:edit', type: 'button', sort: 3 },
-          { name: '删除角色', code: 'system:role:delete', type: 'button', sort: 4 },
-          { name: '分配权限', code: 'system:role:assign-permission', type: 'button', sort: 5 }
+          { name: 'Xem vai trò', code: 'system:role:view', type: 'button', sort: 1 },
+          { name: 'Thêm vai trò', code: 'system:role:add', type: 'button', sort: 2 },
+          { name: 'Chỉnh sửa vai trò', code: 'system:role:edit', type: 'button', sort: 3 },
+          { name: 'Xóa vai trò', code: 'system:role:delete', type: 'button', sort: 4 },
+          { name: 'Phân quyền', code: 'system:role:assign-permission', type: 'button', sort: 5 }
         ]
       },
       {
-        name: '部门管理',
+        name: 'Quản lý phòng ban',
         code: 'system:department',
-        description: '部门管理页面',
+        description: 'Trang quản lý phòng ban',
         module: 'system',
         type: 'menu',
         path: '/system/department',
         icon: 'OfficeBuilding',
         sort: 3,
         children: [
-          { name: '查看部门', code: 'system:department:view', type: 'button', sort: 1 },
-          { name: '新增部门', code: 'system:department:add', type: 'button', sort: 2 },
-          { name: '编辑部门', code: 'system:department:edit', type: 'button', sort: 3 },
-          { name: '删除部门', code: 'system:department:delete', type: 'button', sort: 4 }
+          { name: 'Xem phòng ban', code: 'system:department:view', type: 'button', sort: 1 },
+          { name: 'Thêm phòng ban', code: 'system:department:add', type: 'button', sort: 2 },
+          { name: 'Chỉnh sửa phòng ban', code: 'system:department:edit', type: 'button', sort: 3 },
+          { name: 'Xóa phòng ban', code: 'system:department:delete', type: 'button', sort: 4 }
         ]
       },
       {
-        name: '超管面板',
+        name: 'Bảng điều khiển siêu quản trị viên',
         code: 'system:admin',
-        description: '超级管理员专用面板',
+        description: 'Bảng điều khiển dành riêng cho siêu quản trị viên',
         module: 'system',
         type: 'menu',
         path: '/system/admin',
         icon: 'Crown',
         sort: 4,
         children: [
-          { name: '系统配置', code: 'system:admin:config', type: 'button', sort: 1 },
-          { name: '数据备份', code: 'system:admin:backup', type: 'button', sort: 2 },
-          { name: '系统监控', code: 'system:admin:monitor', type: 'button', sort: 3 }
+          { name: 'Cấu hình hệ thống', code: 'system:admin:config', type: 'button', sort: 1 },
+          { name: 'Sao lưu dữ liệu', code: 'system:admin:backup', type: 'button', sort: 2 },
+          { name: 'Giám sát hệ thống', code: 'system:admin:monitor', type: 'button', sort: 3 }
         ]
       }
     ]
   }
 ];
 
-// 根据需求定义的角色权限配置
+// Cấu hình quyền hạn vai trò được định nghĩa theo yêu cầu
 const defaultRoles = [
-  // 一、超级管理员 - 拥有全部权限，没有设限
+  // Một: Siêu quản trị viên - Có tất cả quyền hạn, không giới hạn
   {
-    name: '超级管理员',
+    name: 'Siêu quản trị viên',
     code: 'super_admin',
-    description: '系统超级管理员，拥有所有权限',
+    description: 'Siêu quản trị viên hệ thống, có tất cả quyền hạn',
     level: 1,
     color: '#ff4d4f',
     status: 'active',
-    permissions: [] // 将在创建后分配所有权限
+    permissions: [] // Sẽ được phân bổ tất cả quyền hạn sau khi tạo
   },
 
-  // 二、部门经理 - 查看本部门数据权限
+  // Hai: Quản lý phòng ban - Quyền xem dữ liệu phòng ban
   {
-    name: '部门经理',
+    name: 'Quản lý phòng ban',
     code: 'manager',
-    description: '部门经理，负责部门业务管理和团队管理，拥有查看本部门数据权限',
+    description: 'Quản lý phòng ban, chịu trách nhiệm quản lý nghiệp vụ phòng ban và quản lý nhóm, có quyền xem dữ liệu phòng ban',
     level: 3,
     color: '#fa8c16',
     status: 'active',
     permissions: [
-      // 0. 数据看板（本部门的）
+      // 0. Bảng điều khiển dữ liệu (phòng ban)
       'dashboard', 'dashboard:personal', 'dashboard:department',
-      
-      // 1. 客户管理和子菜单：客户列表（可查看本部门的），新增客户
+
+      // 1. Quản lý khách hàng và menu con: Danh sách khách hàng (có thể xem phòng ban), thêm khách hàng
       'customer', 'customer:list', 'customer:view:personal', 'customer:view:department', 'customer:add',
-      
-      // 2. 订单管理和子菜单：订单列表，新增订单，订单审核（如果有独立审核员就不会赋予该权限）
+
+      // 2. Quản lý đơn hàng và menu con: Danh sách đơn hàng, thêm đơn hàng, duyệt đơn hàng (nếu có người duyệt độc lập thì sẽ không cấp quyền này)
       'order', 'order:list', 'order:view:personal', 'order:view:department', 'order:add', 'order:audit',
-      
-      // 3. 服务管理和子菜单：通话管理
+
+      // 3. Quản lý dịch vụ và menu con: Quản lý cuộc gọi
       'service', 'service:call', 'service:call:view', 'service:call:add', 'service:call:edit',
-      
-      // 4. 业绩统计和子菜单：个人业绩，团队业绩，业绩分析（本部门数据分析），业绩分享
+
+      // 4. Thống kê hiệu suất và menu con: Hiệu suất cá nhân, hiệu suất nhóm, phân tích hiệu suất (phân tích dữ liệu phòng ban), chia sẻ hiệu suất
       'performance', 'performance:personal', 'performance:personal:view',
       'performance:team', 'performance:team:view',
       'performance:analysis', 'performance:analysis:department',
       'performance:share', 'performance:share:view', 'performance:share:create',
-      
-      // 5. 物流管理和子菜单：物流列表，物流跟踪
+
+      // 5. Quản lý logistics và menu con: Danh sách logistics, theo dõi logistics
       'logistics', 'logistics:list', 'logistics:view', 'logistics:add', 'logistics:edit',
       'logistics:tracking', 'logistics:tracking:view',
-      
-      // 6. 售后管理和子菜单：售后订单，新建售后，售后数据（本部门售后数据）
+
+      // 6. Quản lý hậu mãi và menu con: Đơn hàng hậu mãi, tạo hậu mãi mới, dữ liệu hậu mãi (dữ liệu hậu mãi phòng ban)
       'aftersale', 'aftersale:order', 'aftersale:view:personal', 'aftersale:view:department', 'aftersale:add', 'aftersale:edit',
       'aftersale:data', 'aftersale:data:department',
-      
-      // 7. 资料管理和子菜单：客户查询
+
+      // 7. Quản lý tài liệu và menu con: Tìm kiếm khách hàng
       'data', 'data:customer', 'data:customer:search'
     ]
   },
 
-  // 三、销售员 - 个人数据权限
+  // Ba: Nhân viên bán hàng - Quyền dữ liệu cá nhân
   {
-    name: '销售员',
+    name: 'Nhân viên bán hàng',
     code: 'sales',
-    description: '销售人员，负责客户和订单管理，仅限个人数据',
+    description: 'Nhân viên bán hàng, chịu trách nhiệm quản lý khách hàng và đơn hàng, chỉ giới hạn dữ liệu cá nhân',
     level: 4,
     color: '#52c41a',
     status: 'active',
     permissions: [
-      // 0. 数据看板（仅限个人数据）
+      // 0. Bảng điều khiển dữ liệu (chỉ dữ liệu cá nhân)
       'dashboard', 'dashboard:personal',
-      
-      // 1. 客户管理和子菜单：客户列表（可查看本人的），新增客户
+
+      // 1. Quản lý khách hàng và menu con: Danh sách khách hàng (có thể xem của mình), thêm khách hàng
       'customer', 'customer:list', 'customer:view:personal', 'customer:add',
-      
-      // 2. 订单管理和子菜单：订单列表，新增订单
+
+      // 2. Quản lý đơn hàng và menu con: Danh sách đơn hàng, thêm đơn hàng
       'order', 'order:list', 'order:view:personal', 'order:add',
-      
-      // 3. 服务管理和子菜单：通话管理
+
+      // 3. Quản lý dịch vụ và menu con: Quản lý cuộc gọi
       'service', 'service:call', 'service:call:view', 'service:call:add', 'service:call:edit',
-      
-      // 4. 业绩统计和子菜单：个人业绩，团队业绩
+
+      // 4. Thống kê hiệu suất và menu con: Hiệu suất cá nhân, hiệu suất nhóm
       'performance', 'performance:personal', 'performance:personal:view',
       'performance:team', 'performance:team:view',
-      
-      // 5. 物流管理和子菜单：物流列表，物流跟踪
+
+      // 5. Quản lý logistics và menu con: Danh sách logistics, theo dõi logistics
       'logistics', 'logistics:list', 'logistics:view', 'logistics:tracking', 'logistics:tracking:view',
-      
-      // 6. 售后管理和子菜单：售后订单（本人的），新建售后
+
+      // 6. Quản lý hậu mãi và menu con: Đơn hàng hậu mãi (của mình), tạo hậu mãi mới
       'aftersale', 'aftersale:order', 'aftersale:view:personal', 'aftersale:add',
-      
-      // 7. 资料管理和子菜单：客户查询
+
+      // 7. Quản lý tài liệu và menu con: Tìm kiếm khách hàng
       'data', 'data:customer', 'data:customer:search'
     ]
   },
 
-  // 四、客服 - 仅限超级管理员配置的权限
+  // Bốn: Nhân viên dịch vụ khách hàng - Chỉ giới hạn quyền hạn do siêu quản trị viên cấu hình
   {
-    name: '客服',
+    name: 'Nhân viên dịch vụ khách hàng',
     code: 'service',
-    description: '客服人员，仅限超级管理员配置的权限，其他隐藏',
+    description: 'Nhân viên dịch vụ khách hàng, chỉ giới hạn quyền hạn do siêu quản trị viên cấu hình, các quyền khác bị ẩn',
     level: 5,
     color: '#722ed1',
     status: 'active',
     permissions: [
-      // 基础权限，具体权限由超级管理员配置
+      // Quyền cơ bản, quyền cụ thể do siêu quản trị viên cấu hình
       'customer', 'customer:list', 'customer:view:personal',
       'service', 'service:call', 'service:call:view', 'service:call:add'
     ]
   },
 
-  // 五、管理员 - 拥有大部分权限，除了敏感信息和超管特权
+  // Năm: Quản trị viên - Có hầu hết quyền hạn, trừ thông tin nhạy cảm và đặc quyền siêu quản trị viên
   {
-    name: '管理员',
+    name: 'Quản trị viên',
     code: 'admin',
-    description: '系统管理员，拥有大部分权限，除了敏感信息和超管特权',
+    description: 'Quản trị viên hệ thống, có hầu hết quyền hạn, trừ thông tin nhạy cảm và đặc quyền siêu quản trị viên',
     level: 2,
     color: '#1890ff',
     status: 'active',
     permissions: [
-      // 数据看板（全部数据）
+      // Bảng điều khiển dữ liệu (tất cả dữ liệu)
       'dashboard', 'dashboard:personal', 'dashboard:department', 'dashboard:all',
-      
-      // 客户管理（除了删除客户）
+
+      // Quản lý khách hàng (trừ xóa khách hàng)
       'customer', 'customer:list', 'customer:view:personal', 'customer:view:department', 'customer:view:all',
       'customer:add', 'customer:edit', 'customer:import', 'customer:export',
-      
-      // 订单管理
+
+      // Quản lý đơn hàng
       'order', 'order:list', 'order:view:personal', 'order:view:department', 'order:view:all',
       'order:add', 'order:edit', 'order:audit',
-      
-      // 服务管理
+
+      // Quản lý dịch vụ
       'service', 'service:call', 'service:call:view', 'service:call:add', 'service:call:edit',
-      
-      // 业绩统计
+
+      // Thống kê hiệu suất
       'performance', 'performance:personal', 'performance:personal:view',
       'performance:team', 'performance:team:view',
       'performance:analysis', 'performance:analysis:department', 'performance:analysis:all',
       'performance:share', 'performance:share:view', 'performance:share:create',
-      
-      // 物流管理
+
+      // Quản lý logistics
       'logistics', 'logistics:list', 'logistics:view', 'logistics:add', 'logistics:edit',
       'logistics:tracking', 'logistics:tracking:view',
-      
-      // 售后管理
+
+      // Quản lý hậu mãi
       'aftersale', 'aftersale:order', 'aftersale:view:personal', 'aftersale:view:department', 'aftersale:view:all',
       'aftersale:add', 'aftersale:edit',
       'aftersale:data', 'aftersale:data:department', 'aftersale:data:all',
-      
-      // 资料管理
+
+      // Quản lý tài liệu
       'data', 'data:customer', 'data:customer:search',
-      
-      // 系统管理（除了删除用户、删除部门、超管面板）
+
+      // Quản lý hệ thống (trừ xóa người dùng, xóa phòng ban, bảng điều khiển siêu quản trị viên)
       'system', 'system:user', 'system:user:view', 'system:user:add', 'system:user:edit', 'system:user:reset-password',
       'system:role', 'system:role:view', 'system:role:add', 'system:role:edit', 'system:role:assign-permission',
       'system:department', 'system:department:view', 'system:department:add', 'system:department:edit'
@@ -534,19 +534,19 @@ const defaultRoles = [
   }
 ];
 
-// 创建权限的递归函数
+// Hàm đệ quy tạo quyền hạn
 async function createPermissions(permissions: any[], parent: Permission | null = null): Promise<Permission[]> {
   const permissionRepository = AppDataSource?.getTreeRepository(Permission);
   if (!permissionRepository) {
-    throw new Error('数据库连接未初始化');
+    throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
   }
-  
+
   const createdPermissions: Permission[] = [];
 
   for (const permData of permissions) {
-    // 检查权限是否已存在
+    // Kiểm tra xem quyền hạn đã tồn tại chưa
     let permission = await permissionRepository.findOne({ where: { code: permData.code } });
-    
+
     if (!permission) {
       const permissionData: any = {
         name: permData.name,
@@ -558,21 +558,21 @@ async function createPermissions(permissions: any[], parent: Permission | null =
         icon: permData.icon,
         sort: permData.sort
       };
-      
+
       if (parent) {
         permissionData.parent = parent;
       }
-      
+
       const newPermission = permissionRepository.create(permissionData);
       const savedPermission = await permissionRepository.save(newPermission);
       permission = Array.isArray(savedPermission) ? savedPermission[0] : savedPermission;
-      logger.info(`创建权限: ${permission.name} (${permission.code})`);
+      logger.info(`Tạo quyền hạn: ${permission.name} (${permission.code})`);
     }
 
     if (permission) {
       createdPermissions.push(permission);
 
-      // 递归创建子权限
+      // Đệ quy tạo quyền hạn con
       if (permData.children && permData.children.length > 0) {
         const childPermissions = await createPermissions(permData.children, permission);
         createdPermissions.push(...childPermissions);
@@ -585,25 +585,25 @@ async function createPermissions(permissions: any[], parent: Permission | null =
 
 async function initNewRolesAndPermissions() {
   try {
-    logger.info('开始初始化新的角色和权限配置...');
+    logger.info('Bắt đầu khởi tạo cấu hình vai trò và quyền hạn mới...');
 
-    // 创建权限
-    logger.info('创建默认权限...');
+    // Tạo quyền hạn
+    logger.info('Tạo quyền hạn mặc định...');
     const allPermissions = await createPermissions(defaultPermissions);
-    logger.info(`成功创建 ${allPermissions.length} 个权限`);
+    logger.info(`Đã tạo thành công ${allPermissions.length} quyền hạn`);
 
-    // 创建角色
-    logger.info('创建默认角色...');
+    // Tạo vai trò
+    logger.info('Tạo vai trò mặc định...');
     const roleRepository = AppDataSource?.getRepository(Role);
     const permissionRepository = AppDataSource?.getTreeRepository(Permission);
-    
+
     if (!roleRepository || !permissionRepository) {
-      throw new Error('数据库连接未初始化');
+      throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
     }
 
     for (const roleData of defaultRoles) {
-      // 检查角色是否已存在
-      let role = await roleRepository.findOne({ 
+      // Kiểm tra xem vai trò đã tồn tại chưa
+      let role = await roleRepository.findOne({
         where: { code: roleData.code },
         relations: ['permissions']
       });
@@ -620,21 +620,21 @@ async function initNewRolesAndPermissions() {
         const savedRole = await roleRepository.save(role);
         if (savedRole) {
           role = savedRole;
-          logger.info(`创建角色: ${role.name} (${role.code})`);
+          logger.info(`Tạo vai trò: ${role.name} (${role.code})`);
         }
       } else {
-        // 更新现有角色的描述和权限
+        // Cập nhật mô tả và quyền hạn của vai trò hiện có
         role.description = roleData.description;
         await roleRepository.save(role);
-        logger.info(`更新角色: ${role.name} (${role.code})`);
+        logger.info(`Cập nhật vai trò: ${role.name} (${role.code})`);
       }
 
-      // 分配权限
+      // Phân bổ quyền hạn
       if (roleData.code === 'super_admin') {
-        // 超级管理员拥有所有权限
+        // Siêu quản trị viên có tất cả quyền hạn
         role.permissions = allPermissions;
       } else {
-        // 其他角色根据配置分配权限
+        // Các vai trò khác phân bổ quyền hạn theo cấu hình
         const rolePermissions: Permission[] = [];
         for (const permCode of roleData.permissions) {
           const permission = await permissionRepository.findOne({ where: { code: permCode } });
@@ -646,12 +646,12 @@ async function initNewRolesAndPermissions() {
       }
 
       await roleRepository.save(role);
-      logger.info(`为角色 ${role.name} 分配了 ${role.permissions.length} 个权限`);
+      logger.info(`Đã phân bổ ${role.permissions.length} quyền hạn cho vai trò ${role.name}`);
     }
 
-    logger.info('✅ 新的角色和权限配置初始化完成');
+    logger.info('✅ Khởi tạo cấu hình vai trò và quyền hạn mới hoàn tất');
   } catch (error) {
-    logger.error('❌ 角色和权限配置初始化失败:', error);
+    logger.error('❌ Khởi tạo cấu hình vai trò và quyền hạn thất bại:', error);
     throw error;
   }
 }

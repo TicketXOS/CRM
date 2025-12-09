@@ -6,22 +6,22 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
-// 获取售后服务仓库
+// Lấy repository dịch vụ sau bán hàng
 const getServiceRepository = () => {
   const dataSource = getDataSource();
   if (!dataSource) {
-    throw new Error('数据库连接未初始化');
+    throw new Error('Kết nối cơ sở dữ liệu chưa được khởi tạo');
   }
   return dataSource.getRepository(AfterSalesService);
 };
 
 /**
- * 获取售后服务列表
+ * Lấy danh sách dịch vụ sau bán hàng
  * GET /api/v1/services
- * 支持数据权限过滤：
- * - 超管/管理员/客服：查看所有
- * - 经理：查看本部门的
- * - 销售员：查看自己创建的
+ * Hỗ trợ lọc quyền dữ liệu:
+ * - Siêu quản trị viên/Quản trị viên/Dịch vụ khách hàng: Xem tất cả
+ * - Quản lý: Xem phòng ban của mình
+ * - Nhân viên bán hàng: Xem những gì mình tạo
  */
 router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -31,44 +31,44 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 
     const queryBuilder = serviceRepository.createQueryBuilder('service');
 
-    // 数据权限过滤
+    // Lọc quyền dữ liệu
     const role = currentUser?.role || '';
     const allowAllRoles = ['super_admin', 'superadmin', 'admin', 'service', 'customer_service'];
 
     if (!allowAllRoles.includes(role)) {
       if (role === 'manager' || role === 'department_manager') {
-        // 经理看本部门的
+        // Quản lý xem phòng ban của mình
         if (currentUser?.departmentId) {
           queryBuilder.andWhere('service.departmentId = :departmentId', {
             departmentId: currentUser.departmentId
           });
         }
       } else {
-        // 销售员只看自己创建的
+        // Nhân viên bán hàng chỉ xem những gì mình tạo
         queryBuilder.andWhere('service.createdById = :userId', {
           userId: currentUser?.userId
         });
       }
     }
 
-    // 状态筛选
+    // Lọc trạng thái
     if (status) {
       queryBuilder.andWhere('service.status = :status', { status });
     }
 
-    // 服务类型筛选
+    // Lọc loại dịch vụ
     if (serviceType) {
       queryBuilder.andWhere('service.serviceType = :serviceType', { serviceType });
     }
 
-    // 订单号搜索
+    // Tìm kiếm số đơn hàng
     if (orderNumber) {
       queryBuilder.andWhere('service.orderNumber LIKE :orderNumber', {
         orderNumber: `%${orderNumber}%`
       });
     }
 
-    // 关键词搜索
+    // Tìm kiếm từ khóa
     if (search) {
       queryBuilder.andWhere(
         '(service.serviceNumber LIKE :search OR service.customerName LIKE :search OR service.orderNumber LIKE :search)',
@@ -76,16 +76,16 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       );
     }
 
-    // 分页
+    // Phân trang
     const offset = (Number(page) - 1) * Number(limit);
     queryBuilder.skip(offset).take(Number(limit));
 
-    // 排序
+    // Sắp xếp
     queryBuilder.orderBy('service.createdAt', 'DESC');
 
     const [services, total] = await queryBuilder.getManyAndCount();
 
-    // 格式化返回数据
+    // Định dạng dữ liệu trả về
     const formattedServices = services.map(service => ({
       id: service.id,
       serviceNumber: service.serviceNumber,
@@ -130,17 +130,17 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('[Services] 获取售后服务列表失败:', error);
+    console.error('[Services] Lấy danh sách dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取售后服务列表失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy danh sách dịch vụ sau bán hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 获取售后服务详情
+ * Lấy chi tiết dịch vụ sau bán hàng
  * GET /api/v1/services/:id
  */
 router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
@@ -193,17 +193,17 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('[Services] 获取售后服务详情失败:', error);
+    console.error('[Services] Lấy chi tiết dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取售后服务详情失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy chi tiết dịch vụ sau bán hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 创建售后服务
+ * Tạo dịch vụ sau bán hàng
  * POST /api/v1/services
  */
 router.post('/', authenticateToken, async (req: Request, res: Response) => {
@@ -212,7 +212,7 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
     const currentUser = (req as any).user;
     const data = req.body;
 
-    // 生成ID和服务单号
+    // Tạo ID và số đơn dịch vụ
     const timestamp = Date.now();
     const serviceId = `SH${timestamp}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
     const serviceNumber = `SH${timestamp}`;
@@ -249,11 +249,11 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
 
     const savedService = await serviceRepository.save(service);
 
-    console.log('[Services] 创建售后服务成功:', savedService.serviceNumber);
+    console.log('[Services] Tạo dịch vụ sau bán hàng thành công:', savedService.serviceNumber);
 
     res.status(201).json({
       success: true,
-      message: '创建售后服务成功',
+      message: 'Tạo dịch vụ sau bán hàng thành công',
       data: {
         id: savedService.id,
         serviceNumber: savedService.serviceNumber,
@@ -262,17 +262,17 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('[Services] 创建售后服务失败:', error);
+    console.error('[Services] Tạo dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '创建售后服务失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Tạo dịch vụ sau bán hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 更新售后服务
+ * Cập nhật dịch vụ sau bán hàng
  * PUT /api/v1/services/:id
  */
 router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
@@ -286,11 +286,11 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: '售后服务不存在'
+        message: 'Dịch vụ sau bán hàng không tồn tại'
       });
     }
 
-    // 更新字段
+    // Cập nhật trường
     if (data.serviceType !== undefined) service.serviceType = data.serviceType;
     if (data.status !== undefined) service.status = data.status;
     if (data.priority !== undefined) service.priority = data.priority;
@@ -301,18 +301,18 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
     if (data.remark !== undefined) service.remark = data.remark;
     if (data.expectedTime !== undefined) service.expectedTime = data.expectedTime ? new Date(data.expectedTime) : null;
 
-    // 如果状态变为已解决，记录解决时间
+    // Nếu trạng thái chuyển thành đã giải quyết, ghi lại thời gian giải quyết
     if (data.status === 'resolved' && !service.resolvedTime) {
       service.resolvedTime = new Date();
     }
 
     const updatedService = await serviceRepository.save(service);
 
-    console.log('[Services] 更新售后服务成功:', updatedService.serviceNumber);
+    console.log('[Services] Cập nhật dịch vụ sau bán hàng thành công:', updatedService.serviceNumber);
 
     res.json({
       success: true,
-      message: '更新售后服务成功',
+      message: 'Cập nhật dịch vụ sau bán hàng thành công',
       data: {
         id: updatedService.id,
         serviceNumber: updatedService.serviceNumber,
@@ -321,17 +321,17 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('[Services] 更新售后服务失败:', error);
+    console.error('[Services] Cập nhật dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '更新售后服务失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật dịch vụ sau bán hàng thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 更新售后服务状态
+ * Cập nhật trạng thái dịch vụ sau bán hàng
  * PATCH /api/v1/services/:id/status
  */
 router.patch('/:id/status', authenticateToken, async (req: Request, res: Response) => {
@@ -343,7 +343,7 @@ router.patch('/:id/status', authenticateToken, async (req: Request, res: Respons
     if (!['pending', 'processing', 'resolved', 'closed'].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: '无效的状态值'
+        message: 'Giá trị trạng thái không hợp lệ'
       });
     }
 
@@ -352,14 +352,14 @@ router.patch('/:id/status', authenticateToken, async (req: Request, res: Respons
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: '售后服务不存在'
+        message: 'Dịch vụ sau bán hàng không tồn tại'
       });
     }
 
     service.status = status;
     if (remark) service.remark = remark;
 
-    // 如果状态变为已解决，记录解决时间
+    // Nếu trạng thái chuyển thành đã giải quyết, ghi lại thời gian giải quyết
     if (status === 'resolved' && !service.resolvedTime) {
       service.resolvedTime = new Date();
     }
@@ -368,24 +368,24 @@ router.patch('/:id/status', authenticateToken, async (req: Request, res: Respons
 
     res.json({
       success: true,
-      message: '状态更新成功',
+      message: 'Cập nhật trạng thái thành công',
       data: {
         id: updatedService.id,
         status: updatedService.status
       }
     });
   } catch (error) {
-    console.error('[Services] 更新售后服务状态失败:', error);
+    console.error('[Services] Cập nhật trạng thái dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '更新状态失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Cập nhật trạng thái thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 分配处理人
+ * Phân bổ người xử lý
  * PATCH /api/v1/services/:id/assign
  */
 router.patch('/:id/assign', authenticateToken, async (req: Request, res: Response) => {
@@ -399,7 +399,7 @@ router.patch('/:id/assign', authenticateToken, async (req: Request, res: Respons
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: '售后服务不存在'
+        message: 'Dịch vụ sau bán hàng không tồn tại'
       });
     }
 
@@ -407,7 +407,7 @@ router.patch('/:id/assign', authenticateToken, async (req: Request, res: Respons
     service.assignedToId = assignedToId;
     if (remark) service.remark = remark;
 
-    // 分配后自动变为处理中
+    // Sau khi phân bổ tự động chuyển thành đang xử lý
     if (service.status === 'pending') {
       service.status = 'processing';
     }
@@ -416,7 +416,7 @@ router.patch('/:id/assign', authenticateToken, async (req: Request, res: Respons
 
     res.json({
       success: true,
-      message: '分配成功',
+      message: 'Phân bổ thành công',
       data: {
         id: updatedService.id,
         assignedTo: updatedService.assignedTo,
@@ -424,17 +424,17 @@ router.patch('/:id/assign', authenticateToken, async (req: Request, res: Respons
       }
     });
   } catch (error) {
-    console.error('[Services] 分配处理人失败:', error);
+    console.error('[Services] Phân bổ người xử lý thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '分配失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Phân bổ thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 设置优先级
+ * Thiết lập mức độ ưu tiên
  * PATCH /api/v1/services/:id/priority
  */
 router.patch('/:id/priority', authenticateToken, async (req: Request, res: Response) => {
@@ -446,7 +446,7 @@ router.patch('/:id/priority', authenticateToken, async (req: Request, res: Respo
     if (!['low', 'normal', 'high', 'urgent'].includes(priority)) {
       return res.status(400).json({
         success: false,
-        message: '无效的优先级值'
+        message: 'Giá trị mức độ ưu tiên không hợp lệ'
       });
     }
 
@@ -455,7 +455,7 @@ router.patch('/:id/priority', authenticateToken, async (req: Request, res: Respo
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: '售后服务不存在'
+        message: 'Dịch vụ sau bán hàng không tồn tại'
       });
     }
 
@@ -466,24 +466,24 @@ router.patch('/:id/priority', authenticateToken, async (req: Request, res: Respo
 
     res.json({
       success: true,
-      message: '优先级设置成功',
+      message: 'Thiết lập mức độ ưu tiên thành công',
       data: {
         id: updatedService.id,
         priority: updatedService.priority
       }
     });
   } catch (error) {
-    console.error('[Services] 设置优先级失败:', error);
+    console.error('[Services] Thiết lập mức độ ưu tiên thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '设置优先级失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Thiết lập mức độ ưu tiên thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 删除售后服务
+ * Xóa dịch vụ sau bán hàng
  * DELETE /api/v1/services/:id
  */
 router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
@@ -496,30 +496,30 @@ router.delete('/:id', authenticateToken, async (req: Request, res: Response) => 
     if (!service) {
       return res.status(404).json({
         success: false,
-        message: '售后服务不存在'
+        message: 'Dịch vụ sau bán hàng không tồn tại'
       });
     }
 
     await serviceRepository.remove(service);
 
-    console.log('[Services] 删除售后服务成功:', service.serviceNumber);
+    console.log('[Services] Xóa dịch vụ sau bán hàng thành công:', service.serviceNumber);
 
     res.json({
       success: true,
-      message: '删除成功'
+      message: 'Xóa thành công'
     });
   } catch (error) {
-    console.error('[Services] 删除售后服务失败:', error);
+    console.error('[Services] Xóa dịch vụ sau bán hàng thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '删除失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Xóa thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });
 
 /**
- * 获取售后服务统计
+ * Lấy thống kê dịch vụ sau bán hàng
  * GET /api/v1/services/statistics
  */
 router.get('/stats/summary', authenticateToken, async (req: Request, res: Response) => {
@@ -529,7 +529,7 @@ router.get('/stats/summary', authenticateToken, async (req: Request, res: Respon
 
     const queryBuilder = serviceRepository.createQueryBuilder('service');
 
-    // 数据权限过滤
+    // Lọc quyền dữ liệu
     const role = currentUser?.role || '';
     const allowAllRoles = ['super_admin', 'superadmin', 'admin', 'service', 'customer_service'];
 
@@ -576,11 +576,11 @@ router.get('/stats/summary', authenticateToken, async (req: Request, res: Respon
       }
     });
   } catch (error) {
-    console.error('[Services] 获取统计失败:', error);
+    console.error('[Services] Lấy thống kê thất bại:', error);
     res.status(500).json({
       success: false,
-      message: '获取统计失败',
-      error: error instanceof Error ? error.message : '未知错误'
+      message: 'Lấy thống kê thất bại',
+      error: error instanceof Error ? error.message : 'Lỗi không xác định'
     });
   }
 });

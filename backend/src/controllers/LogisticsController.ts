@@ -22,7 +22,7 @@ export class LogisticsController {
     return AppDataSource!.getRepository(Order);
   }
 
-  // 获取物流列表
+  // Lấy danh sách logistics
   async getLogisticsList(req: Request, res: Response) {
     try {
       const {
@@ -41,7 +41,7 @@ export class LogisticsController {
         .leftJoinAndSelect('logistics.order', 'order')
         .leftJoinAndSelect('order.customer', 'customer');
 
-      // 搜索条件
+      // Điều kiện tìm kiếm
       if (trackingNo) {
         queryBuilder.andWhere('logistics.trackingNo LIKE :trackingNo', {
           trackingNo: `%${trackingNo}%`
@@ -67,18 +67,18 @@ export class LogisticsController {
         });
       }
 
-      // 分页
+      // Phân trang
       const skip = (Number(page) - 1) * Number(pageSize);
       queryBuilder.skip(skip).take(Number(pageSize));
 
-      // 排序
+      // Sắp xếp
       queryBuilder.orderBy('logistics.updatedAt', 'DESC');
 
       const [list, total] = await queryBuilder.getManyAndCount();
 
       res.json({
         code: 200,
-        message: '获取成功',
+        message: 'Lấy thành công',
         data: {
           list,
           total,
@@ -87,16 +87,16 @@ export class LogisticsController {
         }
       });
     } catch (error) {
-      console.error('获取物流列表失败:', error);
+      console.error('Lấy danh sách logistics thất bại:', error);
       res.status(500).json({
         code: 500,
-        message: '获取物流列表失败',
+        message: 'Lấy danh sách logistics thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 创建物流跟踪
+  // Tạo theo dõi logistics
   async createLogisticsTracking(req: Request, res: Response) {
     try {
       const {
@@ -106,16 +106,16 @@ export class LogisticsController {
         companyName
       } = req.body;
 
-      // 检查订单是否存在
+      // Kiểm tra đơn hàng có tồn tại không
       const order = await this.orderRepository.findOne({ where: { id: orderId } });
       if (!order) {
         return res.status(404).json({
           code: 404,
-          message: '订单不存在'
+          message: 'Đơn hàng không tồn tại'
         });
       }
 
-      // 检查是否已存在相同的物流跟踪
+      // Kiểm tra xem đã tồn tại theo dõi logistics tương tự chưa
       const existingTracking = await this.logisticsTrackingRepository.findOne({
         where: { orderId, trackingNo }
       });
@@ -123,11 +123,11 @@ export class LogisticsController {
       if (existingTracking) {
         return res.status(400).json({
           code: 400,
-          message: '该订单的物流跟踪已存在'
+          message: 'Theo dõi logistics của đơn hàng này đã tồn tại'
         });
       }
 
-      // 创建物流跟踪
+      // Tạo theo dõi logistics
       const logisticsTracking = this.logisticsTrackingRepository.create({
         orderId,
         trackingNo,
@@ -135,30 +135,30 @@ export class LogisticsController {
         companyName,
         status: LogisticsStatus.PENDING,
         autoSyncEnabled: true,
-        nextSyncTime: new Date(Date.now() + 5 * 60 * 1000) // 5分钟后同步
+        nextSyncTime: new Date(Date.now() + 5 * 60 * 1000) // Đồng bộ sau 5 phút
       });
 
       const savedTracking = await this.logisticsTrackingRepository.save(logisticsTracking);
 
-      // 立即查询一次物流信息
+      // Truy vấn thông tin logistics ngay lập tức
       await this.queryLogisticsInfo(savedTracking.id);
 
       return res.json({
         code: 200,
-        message: '创建成功',
+        message: 'Tạo thành công',
         data: savedTracking
       });
     } catch (error) {
-      console.error('创建物流跟踪失败:', error);
+      console.error('Tạo theo dõi logistics thất bại:', error);
       return res.status(500).json({
         code: 500,
-        message: '创建物流跟踪失败',
+        message: 'Tạo theo dõi logistics thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 查询物流轨迹
+  // Truy vấn lịch sử logistics
   async getLogisticsTrace(req: Request, res: Response) {
     try {
       const { trackingNo, companyCode } = req.query;
@@ -166,32 +166,32 @@ export class LogisticsController {
       if (!trackingNo) {
         return res.status(400).json({
           code: 400,
-          message: '物流单号不能为空'
+          message: 'Số đơn logistics không được để trống'
         });
       }
 
-      // 查找物流跟踪记录
+      // Tìm bản ghi theo dõi logistics
       const tracking = await this.logisticsTrackingRepository.findOne({
         where: { trackingNo: trackingNo as string },
         relations: ['traces', 'order', 'order.customer']
       });
 
       if (!tracking) {
-        // 如果没有记录，尝试直接查询API
+        // Nếu không có bản ghi, thử truy vấn API trực tiếp
         const apiResult = await this.expressAPIService.queryExpress(trackingNo as string, companyCode as string || 'auto');
         return res.json({
           code: 200,
-          message: '查询成功',
+          message: 'Truy vấn thành công',
           data: apiResult
         });
       }
 
-      // 如果记录存在但需要更新，则查询最新信息
+      // Nếu bản ghi tồn tại nhưng cần cập nhật, truy vấn thông tin mới nhất
       const now = new Date();
       if (!tracking.nextSyncTime || now >= tracking.nextSyncTime) {
         await this.queryLogisticsInfo(tracking.id);
 
-        // 重新获取更新后的数据
+        // Lấy lại dữ liệu đã cập nhật
         const updatedTracking = await this.logisticsTrackingRepository.findOne({
           where: { id: tracking.id },
           relations: ['traces', 'order', 'order.customer']
@@ -199,27 +199,27 @@ export class LogisticsController {
 
         return res.json({
           code: 200,
-          message: '查询成功',
+          message: 'Truy vấn thành công',
           data: updatedTracking
         });
       }
 
       return res.json({
         code: 200,
-        message: '查询成功',
+        message: 'Truy vấn thành công',
         data: tracking
       });
     } catch (error) {
-      console.error('查询物流轨迹失败:', error);
+      console.error('Truy vấn lịch sử logistics thất bại:', error);
       return res.status(500).json({
         code: 500,
-        message: '查询物流轨迹失败',
+        message: 'Truy vấn lịch sử logistics thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 批量同步物流状态
+  // Đồng bộ trạng thái logistics hàng loạt
   async batchSyncLogistics(req: Request, res: Response) {
     try {
       const { trackingNumbers } = req.body;
@@ -227,7 +227,7 @@ export class LogisticsController {
       if (!Array.isArray(trackingNumbers) || trackingNumbers.length === 0) {
         return res.status(400).json({
           code: 400,
-          message: '请提供有效的运单号列表'
+          message: 'Vui lòng cung cấp danh sách số đơn vận chuyển hợp lệ'
         });
       }
 
@@ -246,20 +246,20 @@ export class LogisticsController {
 
       return res.json({
         code: 200,
-        message: '批量同步完成',
+        message: 'Đồng bộ hàng loạt hoàn tất',
         data: results
       });
     } catch (error) {
-      console.error('批量同步物流状态失败:', error);
+      console.error('Đồng bộ trạng thái logistics hàng loạt thất bại:', error);
       return res.status(500).json({
         code: 500,
-        message: '批量同步物流状态失败',
+        message: 'Đồng bộ trạng thái logistics hàng loạt thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 更新物流状态
+  // Cập nhật trạng thái logistics
   async updateLogisticsStatus(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -272,11 +272,11 @@ export class LogisticsController {
       if (!tracking) {
         return res.status(404).json({
           code: 404,
-          message: '物流跟踪记录不存在'
+          message: 'Bản ghi theo dõi logistics không tồn tại'
         });
       }
 
-      // 更新状态
+      // Cập nhật trạng thái
       tracking.status = status;
       tracking.updatedAt = new Date();
 
@@ -284,20 +284,20 @@ export class LogisticsController {
 
       return res.json({
         code: 200,
-        message: '物流状态更新成功',
+        message: 'Cập nhật trạng thái logistics thành công',
         data: tracking
       });
     } catch (error) {
-      console.error('更新物流状态失败:', error);
+      console.error('Cập nhật trạng thái logistics thất bại:', error);
       return res.status(500).json({
         code: 500,
-        message: '更新物流状态失败',
+        message: 'Cập nhật trạng thái logistics thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 查询物流信息（内部方法）
+  // Truy vấn thông tin logistics (phương thức nội bộ)
   private async queryLogisticsInfo(trackingId: number) {
     try {
       const tracking = await this.logisticsTrackingRepository.findOne({
@@ -305,29 +305,29 @@ export class LogisticsController {
       });
 
       if (!tracking) {
-        throw new Error('物流跟踪记录不存在');
+        throw new Error('Bản ghi theo dõi logistics không tồn tại');
       }
 
-      // 调用快递API
+      // Gọi API vận chuyển
       const apiResult = await this.expressAPIService.queryExpress(tracking.trackingNo, tracking.companyCode);
 
-      // 更新物流跟踪状态
+      // Cập nhật trạng thái theo dõi logistics
       await this.logisticsTrackingRepository.update(trackingId, {
         status: this.mapApiStatusToLogisticsStatus(apiResult.status),
         currentLocation: apiResult.currentLocation,
         statusDescription: apiResult.statusDescription,
         lastUpdateTime: new Date(),
-        nextSyncTime: new Date(Date.now() + 5 * 60 * 1000), // 5分钟后再次同步
+        nextSyncTime: new Date(Date.now() + 5 * 60 * 1000), // Đồng bộ lại sau 5 phút
         syncFailureCount: 0,
         lastSyncError: apiResult.success ? undefined : apiResult.error
       });
 
-      // 保存轨迹记录
+      // Lưu bản ghi lịch sử
       if (apiResult.traces && apiResult.traces.length > 0) {
-        // 删除旧的轨迹记录
+        // Xóa bản ghi lịch sử cũ
         await this.logisticsTraceRepository.delete({ logisticsTrackingId: trackingId });
 
-        // 插入新的轨迹记录
+        // Chèn bản ghi lịch sử mới
         const traces = apiResult.traces.map(trace => ({
           logisticsTrackingId: trackingId,
           traceTime: new Date(trace.time),
@@ -344,17 +344,17 @@ export class LogisticsController {
 
       return apiResult;
     } catch (error) {
-      // 更新同步失败信息
+      // Cập nhật thông tin đồng bộ thất bại
       await this.logisticsTrackingRepository.update(trackingId, {
         syncFailureCount: () => 'syncFailureCount + 1',
         lastSyncError: error instanceof Error ? error.message : String(error),
-        nextSyncTime: new Date(Date.now() + 30 * 60 * 1000) // 失败后30分钟再试
+        nextSyncTime: new Date(Date.now() + 30 * 60 * 1000) // Thử lại sau 30 phút khi thất bại
       });
       throw error;
     }
   }
 
-  // 获取支持的快递公司列表
+  // Lấy danh sách công ty vận chuyển được hỗ trợ
   async getSupportedCompanies(req: Request, res: Response) {
     try {
       const companies = this.expressAPIService.getSupportedCompanies();
@@ -362,23 +362,23 @@ export class LogisticsController {
 
       res.json({
         code: 200,
-        message: '获取成功',
+        message: 'Lấy thành công',
         data: {
           companies,
           configStatus
         }
       });
     } catch (error) {
-      console.error('获取支持的快递公司失败:', error);
+      console.error('Lấy danh sách công ty vận chuyển được hỗ trợ thất bại:', error);
       res.status(500).json({
         code: 500,
-        message: '获取支持的快递公司失败',
+        message: 'Lấy danh sách công ty vận chuyển được hỗ trợ thất bại',
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 
-  // 映射API状态到内部状态
+  // Ánh xạ trạng thái API sang trạng thái nội bộ
   private mapApiStatusToLogisticsStatus(apiStatus: string): LogisticsStatus {
     const statusMap: Record<string, LogisticsStatus> = {
       'pending': LogisticsStatus.PENDING,
